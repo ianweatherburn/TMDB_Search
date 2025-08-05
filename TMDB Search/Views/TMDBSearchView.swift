@@ -25,6 +25,12 @@ struct TMDBSearchView: View {
                                 await appModel.performSearch()
                             }
                         }
+                        .onChange(of: appModel.searchText) {
+                            if appModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                appModel.searchResults = []
+                                appModel.errorMessage = nil
+                            }
+                        }
                     
                     Button(action: {
                         appModel.selectedMediaType = .tv
@@ -74,14 +80,38 @@ struct TMDBSearchView: View {
                     .padding(.horizontal)
                 }
                 
-                // Results List
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 12) {
-                        ForEach(appModel.searchResults) { item in
-                            MediaItemRow(item: item)
+                ZStack {
+                    // Results List
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 12) {
+                            ForEach(appModel.searchResults) { item in
+                                MediaItemRow(item: item)
+                            }
                         }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
+                    
+                    if appModel.searchResults.isEmpty && !appModel.isLoading && appModel.errorMessage == nil {
+                        VStack(spacing: 8) {
+                            Image("tmdb")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 256, height: 256)
+                                .opacity(0.6)
+                            Group {
+                                Text("Search The Movie Database (TMDB) for a show (by default) or a movie.")
+                                Text("Left-Click on a search result to copy the Plex folder name with the TMDB-ID.")
+                                Text("Right-click on a search result to just copy the TMDB-ID.")
+                                Text("Click the media poster to display and download various posters.")
+                                Text("Click the backdrop icon to display and download various backgrounds.")
+                                Text("Start typing to search for TV shows or movies.")
+                            }
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    }
                 }
                 
                 Spacer()

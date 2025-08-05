@@ -16,79 +16,125 @@ struct MediaItemRow: View {
     @State private var showingBackdropDialog = false
     
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Poster Thumbnail
-            AsyncImage(image: posterImage) {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 80, height: 120)
-                    .overlay {
-                        if posterImage == nil {
-                            ProgressView()
-                                .scaleEffect(0.6)
+        RightClickableView {
+            HStack(alignment: .top, spacing: 12) {
+                // Poster Thumbnail
+                AsyncImage(image: posterImage) {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 80, height: 120)
+                        .overlay {
+                            if posterImage == nil {
+                                ProgressView()
+                                    .scaleEffect(0.6)
+                            }
                         }
-                    }
-            }
-            .onTapGesture {
-                showingPosterDialog = true
-            }
-            .task {
-                posterImage = await appModel.loadPosterImage(for: item)
-            }
-            
-            // Content
-            VStack(alignment: .leading, spacing: 8) {
-                Text(item.formattedTitle)
-                    .font(.headline)
-                    .lineLimit(2)
+                }
+                .onTapGesture {
+                    showingPosterDialog = true
+                }
+                .task {
+                    posterImage = await appModel.loadPosterImage(for: item)
+                }
                 
-                Text(item.overview)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .lineLimit(4)
+                // Content
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(item.formattedTitle)
+                        .font(.headline)
+                        .lineLimit(2)
+                    
+                    Text(item.overview)
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .lineLimit(4)
+                    
+                    Spacer()
+                }
                 
                 Spacer()
+                
+                // Backdrop Button
+                Button(action: {
+                    showingBackdropDialog = true
+                }) {
+                    Image(systemName: "photo.artframe")
+                        .font(.title2)
+                }
+                .buttonStyle(.bordered)
+                .help("Load backdrops")
             }
-            
-            Spacer()
-            
-            // Backdrop Button
-            Button(action: {
-                showingBackdropDialog = true
-            }) {
-                Image(systemName: "photo.artframe")
-                    .font(.title2)
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
+            .cornerRadius(8)
+            .onTapGesture {
+                // Copy Plex formatted name with title and tmdb-id to clipboard
+                let pasteboard = NSPasteboard.general
+                pasteboard.clearContents()
+                //            pasteboard.setString(String(item.id), forType: .string)
+                pasteboard.setString("\(item.plexTitle)", forType: .string)
+                NSSound.beep()
             }
-            .buttonStyle(.bordered)
-            .help("Load backdrops")
-        }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(8)
-        .onTapGesture {
-            // Copy TMDB ID to clipboard
+            .sheet(isPresented: $showingPosterDialog) {
+                ImageGalleryView(
+                    itemId: item.id,
+                    mediaType: appModel.selectedMediaType,
+                    imageType: .poster,
+                    title: "Posters - \(item.displayTitle)"
+                )
+                .environment(appModel)
+            }
+            .sheet(isPresented: $showingBackdropDialog) {
+                ImageGalleryView(
+                    itemId: item.id,
+                    mediaType: appModel.selectedMediaType,
+                    imageType: .backdrop,
+                    title: "Backdrops - \(item.displayTitle)"
+                )
+                .environment(appModel)
+            }
+        } onRightClick: {
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()
             pasteboard.setString(String(item.id), forType: .string)
             NSSound.beep()
         }
-        .sheet(isPresented: $showingPosterDialog) {
-            ImageGalleryView(
-                itemId: item.id,
-                mediaType: appModel.selectedMediaType,
-                imageType: .poster,
-                title: "Posters - \(item.displayTitle)"
-            )
-            .environment(appModel)
+    }
+}
+
+struct RightClickableView<Content: View>: NSViewRepresentable {
+    let content: Content
+    let onRightClick: () -> Void
+
+    init(@ViewBuilder content: () -> Content, onRightClick: @escaping () -> Void) {
+        self.content = content()
+        self.onRightClick = onRightClick
+    }
+
+    func makeNSView(context: Context) -> NSHostingView<Content> {
+        let hostingView = NSHostingView(rootView: content)
+        let rightClick = NSClickGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleRightClick(_:)))
+        rightClick.buttonMask = 0x2 // Right mouse button
+        hostingView.addGestureRecognizer(rightClick)
+        return hostingView
+    }
+
+    func updateNSView(_ nsView: NSHostingView<Content>, context: Context) {
+        nsView.rootView = content
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onRightClick: onRightClick)
+    }
+
+    class Coordinator: NSObject {
+        let onRightClick: () -> Void
+
+        init(onRightClick: @escaping () -> Void) {
+            self.onRightClick = onRightClick
         }
-        .sheet(isPresented: $showingBackdropDialog) {
-            ImageGalleryView(
-                itemId: item.id,
-                mediaType: appModel.selectedMediaType,
-                imageType: .backdrop,
-                title: "Backdrops - \(item.displayTitle)"
-            )
-            .environment(appModel)
+
+        @objc func handleRightClick(_ sender: NSClickGestureRecognizer) {
+            onRightClick()
         }
     }
 }
