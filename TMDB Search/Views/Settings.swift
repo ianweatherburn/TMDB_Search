@@ -37,6 +37,7 @@ struct SettingsView: View {
                     tempDownloadPath = appModel.downloadPath
                     closeSettingsWindow()
                 }
+                .keyboardShortcut(.cancelAction)
                 
                 Button("Save") {
                     appModel.apiKey = tempApiKey
@@ -45,6 +46,7 @@ struct SettingsView: View {
                     closeSettingsWindow()
                 }
                 .buttonStyle(.borderedProminent)
+                .keyboardShortcut(.defaultAction)
             }
         }
         .padding()
