@@ -3,7 +3,6 @@
 //  TMDB Search
 //
 //  Created by Ian Weatherburn on 2025/08/05.
-//
 
 import SwiftUI
 
