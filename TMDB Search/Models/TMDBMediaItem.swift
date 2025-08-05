@@ -5,7 +5,7 @@
 //  Created by Ian Weatherburn on 2025/08/05.
 //
 
-struct TMDBMediaItem: Codable, Identifiable {
+struct TMDBMediaItem: Codable, Identifiable, Equatable {
     let id: Int
     let title: String?
     let name: String? // TV shows use 'name' instead of 'title'

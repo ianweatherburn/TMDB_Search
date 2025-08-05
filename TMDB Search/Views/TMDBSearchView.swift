@@ -122,6 +122,7 @@ struct TMDBSearchView: View {
         .onAppear {
             isSearchFieldFocused = true
         }
+        .animation(.easeInOut(duration: 0.75), value: appModel.searchResults)
     }
 }
 

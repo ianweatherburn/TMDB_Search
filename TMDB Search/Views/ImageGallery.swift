@@ -36,7 +36,7 @@ struct ImageGalleryView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView {
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 16) {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: imageType == .poster ? 5 : 3), spacing: imageType == .poster ? 4 : 5) {
                             ForEach(images) { image in
                                 ImageGridItem(
                                     image: image,
@@ -90,9 +90,10 @@ struct ImageGalleryView: View {
     }
     
     private func downloadImage(_ image: TMDBImage) async {
+        // TODO: Create a folder in the downloads folder named "Media-Item (Year) {tmdb-id}" and save as either the poster.jpg or the backdrop.jpg
         let filename = "\(itemId)_\(imageType == .poster ? "poster" : "backdrop")_\(image.filePath.replacingOccurrences(of: "/", with: ""))"
         let success = await appModel.downloadImage(path: image.filePath, filename: filename)
-        
+            
         if success {
             await MainActor.run {
                 NSSound.beep() // Success sound

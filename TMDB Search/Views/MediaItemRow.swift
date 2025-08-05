@@ -22,7 +22,7 @@ struct MediaItemRow: View {
                 AsyncImage(image: posterImage) {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.3))
-                        .frame(width: 80, height: 120)
+                        .frame(width: 100, height: 140)
                         .overlay {
                             if posterImage == nil {
                                 ProgressView()
@@ -58,10 +58,12 @@ struct MediaItemRow: View {
                     showingBackdropDialog = true
                 }) {
                     Image(systemName: "photo.artframe")
-                        .font(.title2)
+                        .font(.system(size: 44))
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.orange, .orange.opacity(0.6))
                 }
-                .buttonStyle(.bordered)
-                .help("Load backdrops")
+                .buttonStyle(.borderless)
+                .help("Choose a backdrop...")
             }
             .padding()
             .background(Color(NSColor.controlBackgroundColor))
@@ -70,7 +72,6 @@ struct MediaItemRow: View {
                 // Copy Plex formatted name with title and tmdb-id to clipboard
                 let pasteboard = NSPasteboard.general
                 pasteboard.clearContents()
-                //            pasteboard.setString(String(item.id), forType: .string)
                 pasteboard.setString("\(item.plexTitle)", forType: .string)
                 NSSound.beep()
             }

@@ -20,19 +20,26 @@ struct ImageGridItem: View {
                     Image(nsImage: loadedImage)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
+                        .clipShape(RoundedRectangle(cornerRadius: 8)) // masks the image
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.black, lineWidth: 1)
+                        )
                 } else {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.3))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.black, lineWidth: 1)
+                        )
                         .overlay {
                             ProgressView()
                                 .scaleEffect(0.6)
                         }
                 }
             }
-            .frame(height: 200)
-            .cornerRadius(8)
         }
         .buttonStyle(.plain)
-        .help("Click to download")
+        .help("Click to download...")
     }
 }
