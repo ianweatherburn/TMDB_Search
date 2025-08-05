@@ -1,0 +1,25 @@
+//
+//  TMDB_SearchApp.swift
+//  TMDB Search
+//
+//  Created by Ian Weatherburn on 2025/08/05.
+//
+
+import SwiftUI
+
+@main
+struct TMDB_SearchApp: App {
+    @State private var appModel = AppModel()
+    
+    var body: some Scene {
+        WindowGroup {
+            TMDBSearchView()
+                .environment(appModel)
+        }
+        
+        Settings {
+            SettingsView()
+                .environment(appModel)
+        }
+    }
+}
