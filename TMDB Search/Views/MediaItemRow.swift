@@ -77,19 +77,17 @@ struct MediaItemRow: View {
             }
             .sheet(isPresented: $showingPosterDialog) {
                 ImageGalleryView(
-                    itemId: item.id,
+                    item: item,
                     mediaType: appModel.selectedMediaType,
                     imageType: .poster,
-                    title: "Posters - \(item.displayTitle)"
                 )
                 .environment(appModel)
             }
             .sheet(isPresented: $showingBackdropDialog) {
                 ImageGalleryView(
-                    itemId: item.id,
+                    item: item,
                     mediaType: appModel.selectedMediaType,
                     imageType: .backdrop,
-                    title: "Backdrops - \(item.displayTitle)"
                 )
                 .environment(appModel)
             }

@@ -25,6 +25,21 @@ struct TMDBSearchView: View {
                                 await appModel.performSearch()
                             }
                         }
+                        .onKeyPress { keyPress in
+                            // Check for Enter key with modifiers
+                            if keyPress.key == .return {
+                                if keyPress.modifiers.contains(.option) {
+                                    // Option+Enter searches for movies
+                                    Task {
+                                        appModel.selectedMediaType = .movie
+                                        await appModel.performSearch()
+                                    }
+                                    return .handled
+                                }
+                            }
+                            appModel.selectedMediaType = .tv // Revert the default search-type
+                            return .ignored
+                        }
                         .onChange(of: appModel.searchText) {
                             if appModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                 appModel.searchResults = []
@@ -92,19 +107,25 @@ struct TMDBSearchView: View {
                     }
                     
                     if appModel.searchResults.isEmpty && !appModel.isLoading && appModel.errorMessage == nil {
-                        VStack(spacing: 8) {
+                        VStack(spacing: 16) {
                             Image("tmdb")
                                 .resizable()
+                                .aspectRatio(contentMode: .fill)
                                 .scaledToFit()
                                 .frame(width: 256, height: 256)
-                                .opacity(0.6)
+                                .clipped()
+                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray, lineWidth: 1)
+                                )
+//                                .opacity(0.6)
+                                .shadow(color: .black.opacity(0.6), radius: 8, x: 0, y: 4)
                             Group {
-                                Text("Search The Movie Database (TMDB) for a show (by default) or a movie.")
-                                Text("Left-Click on a search result to copy the Plex folder name with the TMDB-ID.")
-                                Text("Right-click on a search result to just copy the TMDB-ID.")
-                                Text("Click the media poster to display and download various posters.")
-                                Text("Click the backdrop icon to display and download various backgrounds.")
-                                Text("Start typing to search for TV shows or movies.")
+                                Text("Start typing to search TMDB for TV shows or movies. (**↵** to search for **shows** or **⌥↵** for **movies**.)")
+                                Text("**Left-Click** a result to copy the Plex folder name with the TMDB ID (*\"Movie Name (Year) {tmdb-ID}*\".")
+                                Text("**Right-click** a result to copy the TMDB *ID* only.")
+                                Text("Click the **thumnail** to download **posters** or the **artwork** for **backdrops**.")
                             }
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)

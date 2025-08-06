@@ -9,10 +9,9 @@ import SwiftUI
 
 // MARK: - Image Gallery View
 struct ImageGalleryView: View {
-    let itemId: Int
+    let item: TMDBMediaItem
     let mediaType: MediaType
     let imageType: ImageType
-    let title: String
     
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
@@ -56,7 +55,7 @@ struct ImageGalleryView: View {
                     }
                 }
             }
-            .navigationTitle(title)
+            .navigationTitle(title(imageType, title: item.displayTitle))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") {
@@ -71,8 +70,12 @@ struct ImageGalleryView: View {
         }
     }
     
+    private func title(_ type: ImageType, title: String) -> String {
+        return ("\(type == .poster ? "Posters" : "Backdrops") - \(title)")
+    }
+    
     private func loadImages() async {
-        guard let response = await appModel.loadImages(for: itemId, mediaType: mediaType) else {
+        guard let response = await appModel.loadImages(for: item.id, mediaType: mediaType) else {
             isLoading = false
             return
         }
@@ -90,10 +93,9 @@ struct ImageGalleryView: View {
     }
     
     private func downloadImage(_ image: TMDBImage) async {
-        // TODO: Create a folder in the downloads folder named "Media-Item (Year) {tmdb-id}" and save as either the poster.jpg or the backdrop.jpg
-        let filename = "\(itemId)_\(imageType == .poster ? "poster" : "backdrop")_\(image.filePath.replacingOccurrences(of: "/", with: ""))"
-        let success = await appModel.downloadImage(path: image.filePath, filename: filename)
-            
+        let filename = imageType == .poster ? "poster.jpg" : "backdrop.jpg"
+        let success = await appModel.downloadImage(sourcePath: image.filePath, destPath: item.plexTitle, filename: filename)
+
         if success {
             await MainActor.run {
                 NSSound.beep() // Success sound
@@ -104,4 +106,5 @@ struct ImageGalleryView: View {
             }
         }
     }
+
 }

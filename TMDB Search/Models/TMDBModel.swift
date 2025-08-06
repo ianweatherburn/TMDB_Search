@@ -68,7 +68,6 @@ final class AppModel {
     @MainActor
     func loadPosterImage(for item: TMDBMediaItem) async -> NSImage? {
         guard let posterPath = item.posterPath else { return nil }
-//        return await tmdbService.loadImage(path: posterPath, size: .w342)
         guard let data = await tmdbService.loadImage(path: posterPath, size: .w342) else {return nil }
         return NSImage(data: data)
     }
@@ -82,9 +81,10 @@ final class AppModel {
         }
     }
     
-    func downloadImage(path: String, filename: String) async -> Bool {
-        return await tmdbService.downloadImage(path: path, to: downloadPath, filename: filename)
-    }
+    func downloadImage(sourcePath: String, destPath: String, filename: String) async -> Bool {
+        // Append the Plex-style foldername to the destination path
+        let destPath = URL(fileURLWithPath: downloadPath).appendingPathComponent(destPath).path
+        return await tmdbService.downloadImage(path: sourcePath, to: destPath, filename: filename)    }
 }
 
 enum MediaType: String, CaseIterable {

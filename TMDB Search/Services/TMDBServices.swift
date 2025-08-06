@@ -60,14 +60,27 @@ final class TMDBService {
         let urlString = "\(imageBaseURL)/original\(path)"
         
         guard let url = URL(string: urlString) else { return false }
-        
+
         do {
-            // Create directory if it doesn't exist
             let directoryURL = URL(fileURLWithPath: directory)
             try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
             
             let (data, _) = try await URLSession.shared.data(from: url)
-            let fileURL = directoryURL.appendingPathComponent(filename)
+            
+            // Break the filename into base and extension
+            let fileBase = (filename as NSString).deletingPathExtension
+            let fileExtension = (filename as NSString).pathExtension
+            
+            var fileURL = directoryURL.appendingPathComponent(filename)
+            var counter = 1
+            
+            // Check if the file exists or find a unique name
+            while FileManager.default.fileExists(atPath: fileURL.path) {
+                let newFilename = "\(fileBase)_\(counter).\(fileExtension)"
+                fileURL = directoryURL.appendingPathComponent(newFilename)
+                counter += 1
+            }
+
             try data.write(to: fileURL)
             return true
         } catch {
@@ -75,4 +88,5 @@ final class TMDBService {
             return false
         }
     }
+
 }
