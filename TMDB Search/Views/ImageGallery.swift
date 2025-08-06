@@ -37,17 +37,36 @@ struct ImageGalleryView: View {
                     ScrollView {
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: imageType == .poster ? 5 : 3), spacing: imageType == .poster ? 4 : 5) {
                             ForEach(images) { image in
-                                ImageGridItem(
-                                    image: image,
-                                    loadedImage: loadedImages[image.filePath],
-                                    onTap: {
-                                        Task {
-                                            await downloadImage(image)
+                                ZStack(alignment: .bottomTrailing) {
+                                    ImageGridItem(
+                                        image: image,
+                                        loadedImage: loadedImages[image.filePath],
+                                        onTap: {
+                                            Task {
+                                                await downloadImage(image)
+                                            }
                                         }
+                                    )
+                                    .task {
+                                        await loadImage(image)
                                     }
-                                )
-                                .task {
-                                    await loadImage(image)
+                                    .transition(.scale.combined(with: .opacity))
+                                    .animation(.easeOut(duration: 0.3), value: loadedImages[image.filePath])
+                                    
+                                    if loadedImages[image.filePath] != nil {
+                                        Text("\(image.width)x\(image.height)")
+                                            .font(.caption)
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 6)
+                                                    .fill(Color.gray.opacity(0.5))
+                                            )
+                                            .padding(6) // spacing from the edge
+                                            .transition(.opacity.combined(with: .scale))
+                                            .animation(.easeOut(duration: 0.3), value: loadedImages[image.filePath])
+                                    }
                                 }
                             }
                         }
@@ -95,9 +114,9 @@ struct ImageGalleryView: View {
     private func downloadImage(_ image: TMDBImage) async {
         let filename = imageType == .poster ? "poster.jpg" : "backdrop.jpg"
         let destPath = mediaType == .collection ? item.displayTitle : item.plexTitle
-
+        
         let success = await appModel.downloadImage(sourcePath: image.filePath, destPath: destPath, filename: filename)
-
+        
         if success {
             await MainActor.run {
                 NSSound.beep() // Success sound
@@ -108,5 +127,5 @@ struct ImageGalleryView: View {
             }
         }
     }
-
+    
 }
