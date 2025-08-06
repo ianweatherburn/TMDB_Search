@@ -147,13 +147,12 @@ struct TMDBSearchView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
-                                //                                .opacity(0.6)
                                     .shadow(color: .black.opacity(0.6), radius: 8, x: 0, y: 4)
                                 
                                 Image(systemName: "photo.badge.magnifyingglass")
                                     .font(.system(size: 50))
                                     .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.green.opacity(0.4), .mint.opacity(0.8))
+                                    .foregroundStyle(.mint.opacity(0.9), .mint.opacity(0.5))
                                     .shadow(radius: 4)
                                     .padding(-2)
                             }

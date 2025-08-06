@@ -60,7 +60,7 @@ struct MediaItemRow: View {
                     Image(systemName: "photo.artframe")
                         .font(.system(size: 44))
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(.orange, .orange.opacity(0.6))
+                        .foregroundStyle(.mint.opacity(0.9), .mint.opacity(0.5))
                 }
                 .buttonStyle(.borderless)
                 .help("Choose a backdrop...")
