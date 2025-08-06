@@ -94,7 +94,9 @@ struct ImageGalleryView: View {
     
     private func downloadImage(_ image: TMDBImage) async {
         let filename = imageType == .poster ? "poster.jpg" : "backdrop.jpg"
-        let success = await appModel.downloadImage(sourcePath: image.filePath, destPath: item.plexTitle, filename: filename)
+        let destPath = mediaType == .collection ? item.displayTitle : item.plexTitle
+
+        let success = await appModel.downloadImage(sourcePath: image.filePath, destPath: destPath, filename: filename)
 
         if success {
             await MainActor.run {

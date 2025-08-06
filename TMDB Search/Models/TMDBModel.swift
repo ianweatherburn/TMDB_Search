@@ -90,11 +90,13 @@ final class AppModel {
 enum MediaType: String, CaseIterable {
     case tv = "tv"
     case movie = "movie"
+    case collection = "collection"
     
     var displayName: String {
         switch self {
         case .tv: return "TV"
         case .movie: return "Movies"
+        case .collection: return "Collections"
         }
     }
 }

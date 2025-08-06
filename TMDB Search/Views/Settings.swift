@@ -15,8 +15,8 @@ struct SettingsView: View {
     
     var body: some View {
         Form {
-            Section(header: Text("TMDB API Settings")) {
-                TextField("API Key", text: $tempApiKey)
+            Section(header: Text("TMDB Search Settings")) {
+                TextField("TMDB API Key", text: $tempApiKey)
                     .textFieldStyle(.roundedBorder)
                 
                 HStack {

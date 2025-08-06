@@ -35,6 +35,13 @@ struct TMDBSearchView: View {
                                         await appModel.performSearch()
                                     }
                                     return .handled
+                                } else if keyPress.modifiers.contains(.shift) {
+                                    // Shift+Enter searches for collections
+                                    Task {
+                                        appModel.selectedMediaType = .collection
+                                        await appModel.performSearch()
+                                    }
+                                    return .handled
                                 }
                             }
                             appModel.selectedMediaType = .tv // Revert the default search-type
@@ -57,7 +64,9 @@ struct TMDBSearchView: View {
                             Image(systemName: "photo.tv")
                             Text("Shows")
                         }
+                        .frame(maxWidth: .infinity)
                     }
+                    .frame(width: 120)
                     .buttonStyle(.borderedProminent) // Consistent style
                     .controlSize(.large)
                     
@@ -71,8 +80,26 @@ struct TMDBSearchView: View {
                             Image(systemName: "movieclapper")
                             Text("Movies")
                         }
+                        .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered) 
+                    .frame(width: 120)
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    
+                    Button(action: {
+                        appModel.selectedMediaType = .collection
+                        Task {
+                            await appModel.performSearch()
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "film.stack")
+                            Text("Collections")
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .frame(width: 120)
+                    .buttonStyle(.bordered)
                     .controlSize(.large)
                     
                 }
@@ -107,29 +134,43 @@ struct TMDBSearchView: View {
                     }
                     
                     if appModel.searchResults.isEmpty && !appModel.isLoading && appModel.errorMessage == nil {
-                        VStack(spacing: 16) {
-                            Image("tmdb")
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .scaledToFit()
-                                .frame(width: 256, height: 256)
-                                .clipped()
-                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray, lineWidth: 1)
-                                )
-//                                .opacity(0.6)
-                                .shadow(color: .black.opacity(0.6), radius: 8, x: 0, y: 4)
-                            Group {
-                                Text("Start typing to search TMDB for TV shows or movies. (**↵** to search for **shows** or **⌥↵** for **movies**.)")
-                                Text("**Left-Click** a result to copy the Plex folder name with the TMDB ID (*\"Movie Name (Year) {tmdb-ID}*\".")
-                                Text("**Right-click** a result to copy the TMDB *ID* only.")
-                                Text("Click the **thumnail** to download **posters** or the **artwork** for **backdrops**.")
+                        VStack(spacing: 18) {
+                            ZStack(alignment: .bottom) {
+                                Image("tmdb")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .scaledToFit()
+                                    .frame(width: 256, height: 256)
+                                    .clipped()
+                                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
+                                //                                .opacity(0.6)
+                                    .shadow(color: .black.opacity(0.6), radius: 8, x: 0, y: 4)
+                                
+                                Image(systemName: "photo.badge.magnifyingglass")
+                                    .font(.system(size: 50))
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.green.opacity(0.4), .mint.opacity(0.8))
+                                    .shadow(radius: 4)
+                                    .padding(-2)
                             }
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 20)
+                            VStack {
+                                Group {
+                                    Text("Start typing to search TMDB for TV shows, movies or collections.")
+                                    Text("**↵** to search for **shows**, **⌥↵** for **movies**, or **⇧↵** for **collections**.")
+                                    Text("**Left-Click** a result to copy the Plex folder name with the TMDB ID (*\"Movie Name (Year) {tmdb-ID}*\".")
+                                    Text("**Right-click** a result to copy the TMDB *ID* only.")
+                                    Text("Click the **thumnail** to download **posters** or the **artwork** for **backdrops**.")
+                                }
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                                .padding(.top, 1)
+                            }
+                            .padding(.top, 20)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     }
