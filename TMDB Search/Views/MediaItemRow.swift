@@ -39,7 +39,7 @@ struct MediaItemRow: View {
                 
                 // Content
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(item.formattedTitle)
+                    Text(item.plexTitle.replacingColonsWithDashes)
                         .font(.headline)
                         .lineLimit(2)
                     
