@@ -39,7 +39,17 @@ final class TMDBService {
         }
         
         let (data, _) = try await URLSession.shared.data(from: url)
-        return try JSONDecoder().decode(TMDBImagesResponse.self, from: data)
+//        return try JSONDecoder().decode(TMDBImagesResponse.self, from: data)
+        var response = try JSONDecoder().decode(TMDBImagesResponse.self, from: data)
+        
+        // Sort by area (width × height) in descending order
+        response = TMDBImagesResponse(
+            id: response.id,
+            posters: response.posters.sorted { ($0.width * $0.height) > ($1.width * $1.height) },
+            backdrops: response.backdrops.sorted { ($0.width * $0.height) > ($1.width * $1.height) }
+        )
+        
+        return response
     }
     
     func loadImage(path: String, size: ImageSize = .w342) async -> Data? {
