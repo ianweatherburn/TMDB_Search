@@ -72,8 +72,8 @@ struct MediaItemRow: View {
                 // Copy Plex formatted name with title and tmdb-id to clipboard
                 let pasteboard = NSPasteboard.general
                 pasteboard.clearContents()
-                pasteboard.setString("\(item.plexTitle)", forType: .string)
-                NSSound.beep()
+                pasteboard.setString("\(item.plexTitle.replacingColonsWithDashes)", forType: .string)
+                _ = NSSound(named: NSSound.Name("Glass"))?.play()
             }
             .sheet(isPresented: $showingPosterDialog) {
                 ImageGalleryView(
@@ -95,7 +95,7 @@ struct MediaItemRow: View {
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()
             pasteboard.setString(String(item.id), forType: .string)
-            NSSound.beep()
+            _ = NSSound(named: NSSound.Name("Ping"))?.play()
         }
     }
 }

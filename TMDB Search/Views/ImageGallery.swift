@@ -115,15 +115,15 @@ struct ImageGalleryView: View {
         let filename = imageType == .poster ? "poster.jpg" : "backdrop.jpg"
         let destPath = mediaType == .collection ? item.displayTitle : item.plexTitle
         
-        let success = await appModel.downloadImage(sourcePath: image.filePath, destPath: destPath, filename: filename)
+        let success = await appModel.downloadImage(sourcePath: image.filePath, destPath: destPath.replacingColonsWithDashes, filename: filename)
         
         if success {
             await MainActor.run {
-                NSSound.beep() // Success sound
+                _ = NSSound(named: NSSound.Name("Glass"))?.play()
             }
         } else {
             await MainActor.run {
-                NSSound.beep()
+                _ = NSSound(named: NSSound.Name("Pop"))?.play()
             }
         }
     }
