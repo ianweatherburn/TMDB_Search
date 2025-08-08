@@ -113,7 +113,23 @@ struct ImageGalleryView: View {
     
     private func downloadImage(_ image: TMDBImage) async {
         let filename = imageType == .poster ? "poster.jpg" : "backdrop.jpg"
-        let destPath = mediaType == .collection ? item.displayTitle : item.plexTitle
+
+        // Determine folder prefix based on mediaType
+        let folderPrefix: String
+        switch mediaType {
+        case .tv:
+            folderPrefix = "shows"
+        case .movie:
+            folderPrefix = "movies"
+        case .collection:
+            folderPrefix = "collections"
+        }
+        
+        // Choose title part: for collection use displayTitle, else plexTitle
+        let titlePart = mediaType == .collection ? item.displayTitle : item.plexTitle
+        
+        // Compose the destPath as "folder/title"
+        let destPath = "\(folderPrefix)/\(titlePart)".replacingColonsWithDashes
         
         let success = await appModel.downloadImage(sourcePath: image.filePath, destPath: destPath.replacingColonsWithDashes, filename: filename)
         
