@@ -92,11 +92,11 @@ enum MediaType: String, CaseIterable {
     case movie = "movie"
     case collection = "collection"
     
-    var displayName: String {
+    var displayInfo: (icon: String, title: String, default: Bool) {
         switch self {
-        case .tv: return "TV"
-        case .movie: return "Movies"
-        case .collection: return "Collections"
+        case .tv: return ("photo.tv", "Shows", true)
+        case .movie: return ("movieclapper", "Movies", false)
+        case .collection: return ("film.stack", "Collections", false)
         }
     }
 }

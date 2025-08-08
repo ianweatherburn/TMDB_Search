@@ -54,54 +54,7 @@ struct TMDBSearchView: View {
                             }
                         }
                     
-                    Button(action: {
-                        appModel.selectedMediaType = .tv
-                        Task {
-                            await appModel.performSearch()
-                        }
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "photo.tv")
-                            Text("Shows")
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .frame(width: 120)
-                    .buttonStyle(.borderedProminent) // Consistent style
-                    .controlSize(.large)
-                    
-                    Button(action: {
-                        appModel.selectedMediaType = .movie
-                        Task {
-                            await appModel.performSearch()
-                        }
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "movieclapper")
-                            Text("Movies")
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .frame(width: 120)
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
-                    
-                    Button(action: {
-                        appModel.selectedMediaType = .collection
-                        Task {
-                            await appModel.performSearch()
-                        }
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "film.stack")
-                            Text("Collections")
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .frame(width: 120)
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
-                    
+                    MediaTypeButtons()
                 }
                 .padding(.horizontal)
                 
@@ -120,11 +73,20 @@ struct TMDBSearchView: View {
                         Text("Searching...")
                     }
                     .padding(.horizontal)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
                 
                 ZStack {
                     // Results List
                     ScrollView {
+                        // Heading
+                        HStack(spacing: 4) {
+                            Image(systemName: appModel.selectedMediaType.displayInfo.icon)
+                            Text(appModel.selectedMediaType.displayInfo.title)
+                                .fontWeight(.bold)
+                        }
+                        .font(.title)
+
                         LazyVStack(alignment: .leading, spacing: 12) {
                             ForEach(appModel.searchResults) { item in
                                 MediaItemRow(item: item)
@@ -184,6 +146,43 @@ struct TMDBSearchView: View {
             isSearchFieldFocused = true
         }
         .animation(.easeInOut(duration: 0.75), value: appModel.searchResults)
+    }
+}
+
+struct MediaTypeButtons: View {
+    var body: some View {
+        HStack(spacing: 12) {
+            ForEach(MediaType.allCases, id: \.self) { type in
+                MediaTypeButton(type: type)
+            }
+        }
+    }
+}
+
+struct MediaTypeButton: View {
+    let type: MediaType
+    @Environment(AppModel.self) private var appModel
+
+    var body: some View {
+        let button = Button {
+            appModel.selectedMediaType = type
+            Task {
+                await appModel.performSearch()
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: type.displayInfo.icon)
+                Text(type.displayInfo.title)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+        }
+
+        if type.displayInfo.default {
+            button.buttonStyle(.borderedProminent)
+        } else {
+            button.buttonStyle(.bordered)
+        }
     }
 }
 
