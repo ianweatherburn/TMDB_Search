@@ -42,6 +42,7 @@ struct MediaItemRow: View {
                     Text(item.plexTitle.replacingColonsWithDashes)
                         .font(.headline)
                         .lineLimit(2)
+                        .textSelection(.enabled)
                     
                     Text(item.overview)
                         .font(.body)

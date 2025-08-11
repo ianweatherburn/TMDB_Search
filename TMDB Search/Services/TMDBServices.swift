@@ -7,6 +7,9 @@
 
 import Foundation
 import SwiftUI
+import CoreGraphics
+import ImageIO
+import UniformTypeIdentifiers
 
 
 // MARK: - TMDB Service
@@ -66,7 +69,7 @@ final class TMDBService {
         }
     }
     
-    func downloadImage(path: String, to directory: String, filename: String) async -> Bool {
+    func downloadImage(path: String, to directory: String, filename: String, flip: Bool = false) async -> Bool {
         let urlString = "\(imageBaseURL)/original\(path)"
         
         guard let url = URL(string: urlString) else { return false }
@@ -76,6 +79,18 @@ final class TMDBService {
             try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
             
             let (data, _) = try await URLSession.shared.data(from: url)
+            
+            // Process the image data and only flip horizontally if requested
+            let finalData: Data
+            if flip {
+                guard let flippedData = flipImageHorizontally(data) else {
+                    print("Failed to flip image horizontally")
+                    return false
+                }
+                finalData = flippedData
+            } else {
+                finalData = data
+            }
             
             // Break the filename into base and extension
             let fileBase = (filename as NSString).deletingPathExtension
@@ -91,12 +106,82 @@ final class TMDBService {
                 counter += 1
             }
 
-            try data.write(to: fileURL)
+            try finalData.write(to: fileURL)
             return true
         } catch {
             print("Failed to download image: \(error)")
             return false
         }
     }
+    
+    private func flipImageHorizontally(_ imageData: Data) -> Data? {
+            guard let source = CGImageSourceCreateWithData(imageData as CFData, nil),
+                  let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+                return nil
+            }
+            
+            // Get original image format
+            guard let imageTypeIdentifier = CGImageSourceGetType(source) else {
+                return nil
+            }
+            
+            // Convert to UTType for modern API
+            guard let imageUTType = UTType(imageTypeIdentifier as String) else {
+                return nil
+            }
+            
+            let width = cgImage.width
+            let height = cgImage.height
+            
+            // Create a bitmap context
+            guard let colorSpace = cgImage.colorSpace,
+                  let context = CGContext(
+                    data: nil,
+                    width: width,
+                    height: height,
+                    bitsPerComponent: cgImage.bitsPerComponent,
+                    bytesPerRow: 0,
+                    space: colorSpace,
+                    bitmapInfo: cgImage.bitmapInfo.rawValue
+                  ) else {
+                return nil
+            }
+            
+            // Apply horizontal flip transformation
+            context.translateBy(x: CGFloat(width), y: 0)
+            context.scaleBy(x: -1.0, y: 1.0)
+            
+            // Draw the image
+            context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+            
+            // Get the flipped image
+            guard let flippedCGImage = context.makeImage() else {
+                return nil
+            }
+            
+            // Convert back to data using original format
+            let mutableData = NSMutableData()
+            guard let destination = CGImageDestinationCreateWithData(mutableData, imageTypeIdentifier, 1, nil) else {
+                return nil
+            }
+            
+            // Use lossless settings based on format
+            let options: [CFString: Any]
+            if imageUTType.conforms(to: UTType.jpeg) {
+                // Maximum quality for JPEG (still lossy but minimal loss)
+                options = [kCGImageDestinationLossyCompressionQuality: 0.6]
+            } else {
+                // For PNG and other lossless formats, no compression options needed
+                options = [:]
+            }
+            
+            CGImageDestinationAddImage(destination, flippedCGImage, options.isEmpty ? nil : options as CFDictionary)
+            
+            guard CGImageDestinationFinalize(destination) else {
+                return nil
+            }
+            
+            return mutableData as Data
+        }
 
 }

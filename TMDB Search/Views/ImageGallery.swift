@@ -38,20 +38,21 @@ struct ImageGalleryView: View {
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: imageType == .poster ? 5 : 3), spacing: imageType == .poster ? 4 : 5) {
                             ForEach(images) { image in
                                 ZStack(alignment: .bottomTrailing) {
-                                    ImageGridItem(
+                                    let gridItem = ImageGridItem(
                                         image: image,
                                         loadedImage: loadedImages[image.filePath],
-                                        onTap: {
-                                            Task {
-                                                await downloadImage(image)
-                                            }
-                                        }
+                                        onTap: { handleImageTap(image) }
                                     )
-                                    .task {
-                                        await loadImage(image)
-                                    }
-                                    .transition(.scale.combined(with: .opacity))
-                                    .animation(.easeOut(duration: 0.3), value: loadedImages[image.filePath])
+                                    
+                                    gridItem
+                                        .onTapGesture {
+                                            handleImageTap(image)
+                                        }
+                                        .task {
+                                            await loadImage(image)
+                                        }
+                                        .transition(.scale.combined(with: .opacity))
+                                        .animation(.easeOut(duration: 0.3), value: loadedImages[image.filePath])
                                     
                                     if loadedImages[image.filePath] != nil {
                                         Text("\(image.width)x\(image.height)")
@@ -111,7 +112,7 @@ struct ImageGalleryView: View {
         }
     }
     
-    private func downloadImage(_ image: TMDBImage) async {
+    private func downloadImage(_ image: TMDBImage, flip: Bool = false) async {
         let filename = imageType == .poster ? "poster.jpg" : "backdrop.jpg"
 
         // Determine folder prefix based on mediaType
@@ -131,7 +132,12 @@ struct ImageGalleryView: View {
         // Compose the destPath as "folder/title"
         let destPath = "\(folderPrefix)/\(titlePart)".replacingColonsWithDashes
         
-        let success = await appModel.downloadImage(sourcePath: image.filePath, destPath: destPath.replacingColonsWithDashes, filename: filename)
+        let success = await appModel.downloadImage(
+            sourcePath: image.filePath,
+            destPath: destPath.replacingColonsWithDashes,
+            filename: filename,
+            flip: flip
+        )
         
         if success {
             await MainActor.run {
@@ -141,6 +147,15 @@ struct ImageGalleryView: View {
             await MainActor.run {
                 _ = NSSound(named: NSSound.Name("Pop"))?.play()
             }
+        }
+    }
+    
+    private func handleImageTap(_ image: TMDBImage) {
+        let modifiers = NSEvent.modifierFlags
+        let isOptionPressed = modifiers.contains(.option)
+        
+        Task {
+            await downloadImage(image, flip: isOptionPressed)
         }
     }
     

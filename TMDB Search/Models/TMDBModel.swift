@@ -81,10 +81,10 @@ final class AppModel {
         }
     }
     
-    func downloadImage(sourcePath: String, destPath: String, filename: String) async -> Bool {
+    func downloadImage(sourcePath: String, destPath: String, filename: String, flip: Bool = false) async -> Bool {
         // Append the Plex-style foldername to the destination path
         let destPath = URL(fileURLWithPath: downloadPath).appendingPathComponent(destPath).path
-        return await tmdbService.downloadImage(path: sourcePath, to: destPath, filename: filename)    }
+        return await tmdbService.downloadImage(path: sourcePath, to: destPath, filename: filename, flip: flip)    }
 }
 
 enum MediaType: String, CaseIterable {

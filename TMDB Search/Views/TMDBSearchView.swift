@@ -124,7 +124,8 @@ struct TMDBSearchView: View {
                                     Text("**↵** to search for **shows**, **⌥↵** for **movies**, or **⇧↵** for **collections**.")
                                     Text("**Left-Click** a result to copy the Plex folder name with the TMDB ID (*\"Movie Name (Year) {tmdb-ID}*\".")
                                     Text("**Right-click** a result to copy the TMDB *ID* only.")
-                                    Text("Click the **thumnail** to download **posters** or the **artwork** for **backdrops**.")
+                                    Text("Tap the list **image** to show a gallery of **posters** or the **artwork** icon for **backdrops**.")
+                                    Text("Save the image from the gallery by **tapping** the image, or **⌥+tap** to flip the image horizontally before saving.")
                                 }
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
