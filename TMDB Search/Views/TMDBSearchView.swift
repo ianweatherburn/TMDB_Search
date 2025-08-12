@@ -17,7 +17,7 @@ struct TMDBSearchView: View {
             VStack(alignment: .leading, spacing: 16) {
                 // Search Header
                 HStack {
-                    TextField("Search for TV shows or movies...", text: Bindable(appModel).searchText)
+                    TextField("Search for TV shows, movies or collections from TMDB...", text: Bindable(appModel).searchText)
                         .textFieldStyle(.roundedBorder)
                         .focused($isSearchFieldFocused)
                         .onSubmit {

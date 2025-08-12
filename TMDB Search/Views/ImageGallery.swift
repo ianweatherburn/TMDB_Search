@@ -75,7 +75,7 @@ struct ImageGalleryView: View {
                     }
                 }
             }
-            .navigationTitle(title(imageType, title: item.displayTitle))
+            .navigationTitle(title(imageType, title: item.plexTitle))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") {
