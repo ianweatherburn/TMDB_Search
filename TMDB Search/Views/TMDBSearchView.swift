@@ -195,7 +195,7 @@ struct WelcomeView: View {
                 Group {
                     Text("Start typing to search TMDB for TV shows, movies or collections.")
                     Text("**↵** to search for **shows**, **⇧↵** for **movies**, or **⌥↵** for **collections**.")
-                    Text("**Tap** to copy the Plex folder name with the TMDB ID (*\"Movie Name (Year) {tmdb-ID}*\".")
+                    Text("**Tap** to copy the Plex folder name with the TMDB ID *\"Title (Year) {tmdb-ID}*\".")
                     Text("**⌥+Tap** to copy the TMDB *ID* only.")
                     Text("**Tap** the **image** to show a gallery of **posters**, or the **artwork** icon for **backdrops**.")
                     Text("Save the image from the gallery by **tapping** the image, or **⌥+tap** to flip the image horizontally before saving.")
