@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+
+
 // MARK: - Image Gallery View
 struct ImageGalleryView: View {
     let item: TMDBMediaItem
@@ -18,73 +20,88 @@ struct ImageGalleryView: View {
     @State private var images: [TMDBImage] = []
     @State private var loadedImages: [String: NSImage] = [:]
     @State private var isLoading = true
-    
-    enum ImageType {
-        case poster, backdrop
-    }
-    
+    @State private var gridColumns: Int = 5  // Add this to your main view
+
     var body: some View {
         NavigationStack {
-            VStack {
-                if isLoading {
-                    ProgressView("Loading images...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if images.isEmpty {
-                    Text("No images available")
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    ScrollView {
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: imageType == .poster ? 5 : 3), spacing: imageType == .poster ? 4 : 5) {
-                            ForEach(images) { image in
-                                ZStack(alignment: .bottomTrailing) {
-                                    let gridItem = ImageGridItem(
-                                        image: image,
-                                        loadedImage: loadedImages[image.filePath],
-                                        onTap: { handleImageTap(image) }
-                                    )
-                                    
-                                    gridItem
-                                        .onTapGesture {
-                                            handleImageTap(image)
-                                        }
-                                        .task {
-                                            await loadImage(image)
-                                        }
-                                        .transition(.scale.combined(with: .opacity))
-                                        .animation(.easeOut(duration: 0.3), value: loadedImages[image.filePath])
-                                    
-                                    if loadedImages[image.filePath] != nil {
-                                        Text("\(image.width)x\(image.height)")
-                                            .font(.caption)
-                                            .foregroundColor(.white)
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 2)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 6)
-                                                    .fill(Color.gray.opacity(0.5))
-                                            )
-                                            .padding(6) // spacing from the edge
-                                            .transition(.opacity.combined(with: .scale))
-                                            .animation(.easeOut(duration: 0.3), value: loadedImages[image.filePath])
-                                    }
-                                }
+            VStack(spacing: 0) {
+                // Header with controls
+                VStack(spacing: 0) {
+                    HStack {
+                        // Title and count
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(title(imageType, title: item.plexTitle))
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                            
+                            if !isLoading && !images.isEmpty {
+                                Text("\(images.count) images available")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
                         }
-                        .padding()
+                        
+                        Spacer()
+                        
+                        // View controls
+                        HStack(spacing: 12) {
+                            // Grid size control
+                            if !images.isEmpty {
+                                Menu {
+                                    Button("Small Grid") {
+                                        gridColumns = imageType == .poster ? 6 : 4
+                                    }
+                                    Button("Medium Grid") {
+                                        gridColumns = imageType == .poster ? 5 : 3
+                                    }
+                                    Button("Large Grid") {
+                                        gridColumns = imageType == .poster ? 4 : 2
+                                    }
+                                } label: {
+                                    Image(systemName: "square.grid.3x3")
+                                        .font(.system(size: 16))
+                                }
+                                .menuStyle(.borderlessButton)
+                                .fixedSize()
+                            }
+                            
+                            // Close button
+                            Button("Done") {
+                                dismiss()
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.small)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    
+                    Divider()
+                }
+                .background(.regularMaterial)
+                
+                // Main content
+                Group {
+                    if isLoading {
+                        LoadingView()
+                    } else if images.isEmpty {
+                        EmptyStateView()
+                    } else {
+                        ImageGridView(
+                            images: images,
+                            loadedImages: loadedImages,
+                            gridColumns: gridColumns,
+                            imageType: imageType,
+                            onImageTap: handleImageTap,
+                            onLoadImage: loadImage
+                        )
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .navigationTitle(title(imageType, title: item.plexTitle))
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") {
-                        dismiss()
-                    }
-                }
-            }
+            .background(Color(NSColor.controlBackgroundColor))
         }
-        .frame(width: 800, height: 600)
+        .frame(width: 900, height: 700)
         .task {
             await loadImages()
         }
@@ -160,3 +177,44 @@ struct ImageGalleryView: View {
     }
     
 }
+
+// MARK: - Supporting Views
+
+struct LoadingView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .scaleEffect(1.2)
+            
+            Text("Loading images...")
+                .font(.system(size: 15))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct EmptyStateView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "photo.badge.exclamationmark")
+                .font(.system(size: 48))
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.secondary, .quaternary)
+            
+            VStack(spacing: 8) {
+                Text("No Images Available")
+                    .font(.title3)
+                    .fontWeight(.medium)
+                
+                Text("There are no images of this type for this item")
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+

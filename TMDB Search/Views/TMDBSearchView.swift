@@ -1,9 +1,9 @@
-//
-//  TMDBSearchView.swift
-//  TMDB Search
-//
-//  Created by Ian Weatherburn on 2025/08/05.
-//
+////
+////  TMDBSearchView.swift
+////  TMDB Search
+////
+////  Created by Ian Weatherburn on 2025/08/05.
+////
 
 import SwiftUI
 
@@ -14,68 +14,69 @@ struct TMDBSearchView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                SearchHeader(isSearchFieldFocused: $isSearchFieldFocused)
-                
-                // Error Message
-                if let errorMessage = appModel.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding(.horizontal)
-                }
-                
-                // Loading Indicator
-                if appModel.isLoading {
-                    HStack {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                        Text("Searching...")
-                    }
-                    .padding(.horizontal)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .transition(.opacity)
-                }
-                
-                ZStack {
-                    // Results List
-                    ScrollView {
-                        // Heading
-                        HStack(spacing: 4) {
-                            Image(systemName: appModel.selectedMediaType.displayInfo.icon)
-                            Text(appModel.selectedMediaType.displayInfo.title)
-                                .fontWeight(.bold)
-                        }
-                        .font(.title)
-
-                        LazyVStack(alignment: .leading, spacing: 12) {
-                            ForEach(appModel.searchResults) { item in
-                                MediaItemRow(item: item)
-                                    .transition(.opacity.combined(with: .move(edge: .top))) // Fade + slide for rows
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: appModel.searchResults)
+            VStack(spacing: 0) {
+                // Toolbar-style header
+                VStack(spacing: 0) {
+                    SearchHeader(isSearchFieldFocused: $isSearchFieldFocused)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
                     
-                    if appModel.searchResults.isEmpty && !appModel.isLoading && appModel.errorMessage == nil {
-                        WelcomeView()
-                            .transition(.opacity) 
+                    Divider()
+                }
+                .background(.regularMaterial)
+                
+                // Main content area
+                ZStack {
+                    Color(NSColor.controlBackgroundColor)
+                        .ignoresSafeArea()
+                    
+                    VStack(spacing: 0) {
+                        // Status messages (errors/loading)
+                        if let errorMessage = appModel.errorMessage {
+                            StatusMessageView(
+                                icon: "exclamationmark.triangle.fill",
+                                message: errorMessage,
+                                style: .error
+                            )
+                            .padding(.horizontal, 20)
+                            .padding(.top, 16)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                        
+                        if appModel.isLoading {
+                            StatusMessageView(
+                                icon: "magnifyingglass",
+                                message: "Searching TMDB...",
+                                style: .loading
+                            )
+                            .padding(.horizontal, 20)
+                            .padding(.top, 16)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                        
+                        // Results content
+                        if !appModel.searchResults.isEmpty {
+                            ResultsView()
+                        } else if !appModel.isLoading && appModel.errorMessage == nil {
+                            WelcomeView()
+                                .transition(.opacity)
+                        }
+                        
+                        Spacer(minLength: 0)
                     }
                 }
-                
-                Spacer()
             }
-            .padding(.top, 16)
-            .animation(.easeInOut(duration: 0.3), value: appModel.isLoading) // Animate loading state
-            .animation(.easeInOut(duration: 0.3), value: appModel.errorMessage) // Animate error state
+            .animation(.easeInOut(duration: 0.25), value: appModel.isLoading)
+            .animation(.easeInOut(duration: 0.25), value: appModel.errorMessage)
         }
-        .frame(minWidth: 800, minHeight: 600)
+        .frame(minWidth: 900, minHeight: 650)
         .onAppear {
             isSearchFieldFocused = true
         }
     }
 }
 
+// MARK: - Search Header
 struct SearchHeader: View {
     @Environment(AppModel.self) private var appModel
     private var isSearchFieldFocused: FocusState<Bool>.Binding
@@ -85,129 +86,388 @@ struct SearchHeader: View {
     }
     
     var body: some View {
-        // Search Header
-        HStack {
-            TextField("Search for TV shows, movies or collections from TMDB...", text: Bindable(appModel).searchText)
-                .textFieldStyle(.roundedBorder)
-                .focused(isSearchFieldFocused)
-                .onSubmit {
-                    Task {
-                        await appModel.performSearch()
-                    }
-                }
-                .onKeyPress { keyPress in
-                    // Check for Enter key with modifiers
-                    if keyPress.key == .return {
-                        if keyPress.modifiers.contains(.shift) {
-                            // Option+Enter searches for movies
-                            Task {
-                                appModel.selectedMediaType = .movie
-                                await appModel.performSearch()
-                            }
-                            return .handled
-                        } else if keyPress.modifiers.contains(.option) {
-                            // Shift+Enter searches for collections
-                            Task {
-                                appModel.selectedMediaType = .collection
-                                await appModel.performSearch()
-                            }
-                            return .handled
+        HStack(spacing: 16) {
+            // Search field with integrated icon
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+                    .font(.system(size: 15))
+                
+                TextField("Search TMDB for shows, movies, or collections", text: Bindable(appModel).searchText)
+                    .textFieldStyle(.plain)
+                    .focused(isSearchFieldFocused)
+                    .font(.system(size: 13))
+                    .onSubmit {
+                        Task {
+                            await appModel.performSearch()
                         }
                     }
-                    appModel.selectedMediaType = .tv // Revert the default search-type
-                    return .ignored
-                }
-                .onChange(of: appModel.searchText) {
-                    if appModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        appModel.searchResults = []
-                        appModel.errorMessage = nil
+                    .onKeyPress { keyPress in
+                        if keyPress.key == .return {
+                            if keyPress.modifiers.contains(.shift) {
+                                Task {
+                                    appModel.selectedMediaType = .movie
+                                    await appModel.performSearch()
+                                }
+                                return .handled
+                            } else if keyPress.modifiers.contains(.option) {
+                                Task {
+                                    appModel.selectedMediaType = .collection
+                                    await appModel.performSearch()
+                                }
+                                return .handled
+                            } else {
+                                // Plain return - default to TV
+                                Task {
+                                    appModel.selectedMediaType = .tv
+                                    await appModel.performSearch()
+                                }
+                                return .handled
+                            }
+                        }
+                        return .ignored
                     }
-                }
+                    .onChange(of: appModel.searchText) {
+                        if appModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            appModel.searchResults = []
+                            appModel.errorMessage = nil
+                        }
+                    }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Color(NSColor.textBackgroundColor))
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color(NSColor.separatorColor), lineWidth: 0.5)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .frame(minWidth: 300)
             
-            MediaTypeButtons()
+            // Media type selector
+            MediaTypeSegmentedPicker()
         }
-        .padding(.horizontal)
     }
 }
 
-struct MediaTypeButtons: View {
+// MARK: - Media Type Picker
+struct MediaTypeSegmentedPicker: View {
+    @Environment(AppModel.self) private var appModel
+    
+    //    var body: some View {
+    //        Picker("", selection: Bindable(appModel).selectedMediaType) {
+    //            ForEach(MediaType.allCases, id: \.self) { type in
+    //                Text(type.displayInfo.title)
+    //                    .tag(type)
+    //            }
+    //        }
+    //        .pickerStyle(.segmented)
+    //        .frame(width: 280)
+    //        .onChange(of: appModel.selectedMediaType) { _, _ in
+    //            if !appModel.searchText.isEmpty {
+    //                Task {
+    //                    await appModel.performSearch()
+    //                }
+    //            }
+    //        }
+    //    }
+    var body: some View {
+        HStack(spacing: 1) {
+            ForEach(Array(MediaType.allCases.enumerated()), id: \.element) { index, type in
+                Button {
+                    appModel.selectedMediaType = type
+                    if !appModel.searchText.isEmpty {
+                        Task { await appModel.performSearch() }
+                    }
+                } label: {
+                    HStack(spacing: 2) {
+                        Image(systemName: type.displayInfo.icon)
+                        Text(type.displayInfo.title)
+                    }
+                    .font(.system(size: 14))
+                    .padding(.horizontal, 2)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+                .background(appModel.selectedMediaType == type ? .accentColor : Color(NSColor.controlColor))
+                .foregroundStyle(appModel.selectedMediaType == type ? .white : .primary)
+                .clipShape(RoundedRectangle(cornerRadius: index == 0 ? 6 : 0,
+                                            style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: index == MediaType.allCases.count - 1 ? 6 : 0,
+                                            style: .continuous))
+            }
+        }
+        .background(Color(NSColor.controlColor), in: RoundedRectangle(cornerRadius: 6))
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(.separator, lineWidth: 0.5))
+    }
+}
+
+// MARK: - Status Message View
+struct StatusMessageView: View {
+    let icon: String
+    let message: String
+    let style: MessageStyle
+    
+    enum MessageStyle {
+        case error, loading, info
+        
+        var color: Color {
+            switch self {
+            case .error: return .red
+            case .loading: return .blue
+            case .info: return .secondary
+            }
+        }
+    }
+    
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(MediaType.allCases, id: \.self) { type in
-                MediaTypeButton(type: type)
+            Group {
+                if style == .loading {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                        .frame(width: 16, height: 16)
+                } else {
+                    Image(systemName: icon)
+                        .foregroundStyle(style.color)
+                        .font(.system(size: 16))
+                }
             }
+            
+            Text(message)
+                .foregroundStyle(style.color)
+                .font(.system(size: 13))
+            
+            Spacer()
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(style.color.opacity(0.3), lineWidth: 1)
+        )
     }
 }
 
-struct MediaTypeButton: View {
-    let type: MediaType
+// MARK: - Results View
+struct ResultsView: View {
     @Environment(AppModel.self) private var appModel
-
+    
     var body: some View {
-        let button = Button {
-            appModel.selectedMediaType = type
-            Task {
-                await appModel.performSearch()
+        VStack(spacing: 0) {
+            // Results header
+            HStack {
+                HStack(spacing: 8) {
+                    Image(systemName: appModel.selectedMediaType.displayInfo.icon)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    
+                    Text(appModel.selectedMediaType.displayInfo.title)
+                        .font(.system(size: 17, weight: .semibold))
+                    
+                    Text("(\(appModel.searchResults.count) results)")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                }
+                
+                Spacer()
             }
-        } label: {
-            HStack(spacing: 4) {
-                Image(systemName: type.displayInfo.icon)
-                Text(type.displayInfo.title)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(Color(NSColor.controlBackgroundColor))
+            
+            Divider()
+            
+            // Results list
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 1) {
+                    ForEach(appModel.searchResults) { item in
+                        VStack(spacing: 0) {
+                            MediaItemRow(item: item)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 12)
+                                .background(Color(NSColor.controlBackgroundColor))
+                                .contentShape(Rectangle())
+                            
+                            if item.id != appModel.searchResults.last?.id {
+                                Divider()
+                                    .padding(.leading, 20)
+                            }
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                }
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
-        }
-
-        if type.displayInfo.default {
-            button.buttonStyle(.borderedProminent)
-        } else {
-            button.buttonStyle(.bordered)
+            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: appModel.searchResults)
         }
     }
 }
 
+// MARK: - Welcome View
 struct WelcomeView: View {
     var body: some View {
-        VStack(spacing: 18) {
-            ZStack(alignment: .bottom) {
-                Image("tmdb")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .scaledToFit()
-                    .frame(width: 256, height: 256)
-                    .clipped()
-                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray, lineWidth: 1)
-                    )
-                    .shadow(color: .black.opacity(0.6), radius: 8, x: 0, y: 4)
-                
-                Image(systemName: "photo.badge.magnifyingglass")
-                    .font(.system(size: 50))
-                    .symbolRenderingMode(.palette)
-                    .foregroundStyle(.mint.opacity(0.9), .mint.opacity(0.5))
-                    .shadow(radius: 4)
-                    .padding(-2)
-            }
-            VStack {
-                Group {
-                    Text("Start typing to search TMDB for TV shows, movies or collections.")
-                    Text("**↵** to search for **shows**, **⇧↵** for **movies**, or **⌥↵** for **collections**.")
-                    Text("**Tap** to copy the Plex folder name with the TMDB ID *\"Title (Year) {tmdb-ID}*\".")
-                    Text("**⌥+Tap** to copy the TMDB *ID* only.")
-                    Text("**Tap** the **image** to show a gallery of **posters**, or the **artwork** icon for **backdrops**.")
-                    Text("Save the image from the gallery by **tapping** the image, or **⌥+tap** to flip the image horizontally before saving.")
+        VStack(spacing: 32) {
+            VStack(spacing: 24) {
+                // TMDB Logo with overlay icon
+                ZStack(alignment: .bottomTrailing) {
+                    Image("tmdb")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 180, height: 180)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(.quaternary, lineWidth: 1)
+                        )
+                        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
+                    
+                    Image(systemName: "magnifyingglass.circle.fill")
+                        .font(.system(size: 40))
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.white, .blue)
+                        .background(Circle().fill(.white))
+                        .offset(x: 8, y: 8)
                 }
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
-                .padding(.top, 1)
+                
+                VStack(spacing: 8) {
+                    Text("Search The Movie Database")
+                        .font(.system(size: 24, weight: .medium))
+                        .foregroundStyle(.primary)
+                    
+                    Text("Find shows, movies, or collections with detailed metadata & artwork")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
             }
-            .padding(.top, 20)
+            
+            // Instructions - Two column layout
+            HStack(alignment: .top, spacing: 32) {
+                // Search Instructions (Left)
+                VStack(alignment: .trailing, spacing: 12) {
+                    Text("Search")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .padding(.bottom, 4)
+                    
+                    InstructionRow(
+                        symbol: "return",
+                        title: "Shows",
+                        description: "Press Return",
+                        alignment: .trailing
+                    )
+                    
+                    InstructionRow(
+                        symbol: "shift",
+                        title: "Movies",
+                        description: "Shift + Return",
+                        alignment: .trailing
+                    )
+                    
+                    InstructionRow(
+                        symbol: "option",
+                        title: "Collections",
+                        description: "Option + Return",
+                        alignment: .trailing
+                    )
+                }
+                .frame(maxWidth: 220, alignment: .trailing)
+                
+                // Vertical divider
+                Rectangle()
+                    .fill(.quaternary)
+                    .frame(width: 1)
+                    .frame(maxHeight: 180)
+                
+                // Action Instructions (Right)
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Actions")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .padding(.bottom, 4)
+                    
+                    InstructionRow(
+                        symbol: "hand.tap",
+                        title: "Copy Formatted Filename",
+                        description: "Click result item"
+                    )
+                    
+                    InstructionRow(
+                        symbol: "option",
+                        title: "Copy TMDB-ID Only",
+                        description: "Option + Click"
+                    )
+                    
+                    InstructionRow(
+                        symbol: "photo",
+                        title: "Browse Images",
+                        description: "Click poster or artwork logo"
+                    )
+                }
+                .frame(maxWidth: 220, alignment: .leading)
+            }
+            
+            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.top, 60)
+    }
+}
+
+// MARK: - Instruction Row
+struct InstructionRow: View {
+    let symbol: String
+    let title: String
+    let description: String
+    let alignment: HorizontalAlignment
+    
+    init(symbol: String, title: String, description: String, alignment: HorizontalAlignment = .leading) {
+        self.symbol = symbol
+        self.title = title
+        self.description = description
+        self.alignment = alignment
+    }
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            if alignment == .trailing {
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary)
+                    
+                    Text(description)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+                
+                Image(systemName: symbol)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(.blue)
+                    .frame(width: 20, alignment: .center)
+            } else {
+                Image(systemName: symbol)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(.blue)
+                    .frame(width: 20, alignment: .center)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary)
+                    
+                    Text(description)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+                
+                Spacer()
+            }
+        }
     }
 }
 

@@ -5,6 +5,10 @@
 //  Created by Ian Weatherburn on 2025/08/05.
 //
 
+enum ImageType {
+    case poster, backdrop
+}
+
 struct TMDBImagesResponse: Codable {
     let id: Int
     let posters: [TMDBImage]

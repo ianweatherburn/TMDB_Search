@@ -13,12 +13,17 @@ import SwiftUI
 @Observable
 final class AppModel {
     var apiKey: String = ""
-    var downloadPath: String = ""
+    var downloadPath: DownloadPath = DownloadPath(primary: "", backup: nil)
     var searchResults: [TMDBMediaItem] = []
     var isLoading: Bool = false
     var searchText: String = ""
     var selectedMediaType: MediaType = .tv
     var errorMessage: String?
+    
+    struct DownloadPath {
+        var primary: String = ""
+        var backup: String? = nil
+    }
     
     private let tmdbService = TMDBService()
     
@@ -29,13 +34,14 @@ final class AppModel {
     // Settings management
     func loadSettings() {
         apiKey = UserDefaults.standard.string(forKey: "TMDBAPIKey") ?? ""
-        downloadPath = UserDefaults.standard.string(forKey: "DownloadPath") ??
-                      NSHomeDirectory() + "/Downloads/TMDB"
+        downloadPath.primary = UserDefaults.standard.string(forKey: "DownloadPath") ?? NSHomeDirectory() + "/Downloads/TMDB"
+        downloadPath.backup = UserDefaults.standard.string(forKey: "DownloadPathBackup")
     }
     
     func saveSettings() {
         UserDefaults.standard.set(apiKey, forKey: "TMDBAPIKey")
-        UserDefaults.standard.set(downloadPath, forKey: "DownloadPath")
+        UserDefaults.standard.set(downloadPath.primary, forKey: "DownloadPath")
+        UserDefaults.standard.set(downloadPath.backup, forKey: "DownloadPathBackup")
     }
     
     // Search functionality
@@ -82,9 +88,19 @@ final class AppModel {
     }
     
     func downloadImage(sourcePath: String, destPath: String, filename: String, flip: Bool = false) async -> Bool {
+        var path = ""
+        
         // Append the Plex-style foldername to the destination path
-        let destPath = URL(fileURLWithPath: downloadPath).appendingPathComponent(destPath).path
-        return await tmdbService.downloadImage(path: sourcePath, to: destPath, filename: filename, flip: flip)    }
+        path = URL(fileURLWithPath: downloadPath.primary).appendingPathComponent(destPath).path
+        guard await tmdbService.downloadImage(path: sourcePath, to: path, filename: filename, flip: flip) else { return false }
+        
+        // Check if there is a backup download required
+        guard let backupPath = downloadPath.backup, !backupPath.isEmpty else { return true }
+        path = URL(fileURLWithPath: backupPath).appendingPathComponent(destPath).path
+        guard await tmdbService.downloadImage(path: sourcePath, to: path, filename: filename, flip: flip) else { return false }
+
+        return true
+    }
 }
 
 enum MediaType: String, CaseIterable {
