@@ -154,23 +154,6 @@ struct SearchHeader: View {
 struct MediaTypeSegmentedPicker: View {
     @Environment(AppModel.self) private var appModel
     
-    //    var body: some View {
-    //        Picker("", selection: Bindable(appModel).selectedMediaType) {
-    //            ForEach(MediaType.allCases, id: \.self) { type in
-    //                Text(type.displayInfo.title)
-    //                    .tag(type)
-    //            }
-    //        }
-    //        .pickerStyle(.segmented)
-    //        .frame(width: 280)
-    //        .onChange(of: appModel.selectedMediaType) { _, _ in
-    //            if !appModel.searchText.isEmpty {
-    //                Task {
-    //                    await appModel.performSearch()
-    //                }
-    //            }
-    //        }
-    //    }
     var body: some View {
         HStack(spacing: 1) {
             ForEach(Array(MediaType.allCases.enumerated()), id: \.element) { index, type in
@@ -190,7 +173,18 @@ struct MediaTypeSegmentedPicker: View {
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.plain)
-                .background(appModel.selectedMediaType == type ? .accentColor : Color(NSColor.controlColor))
+                .background(
+                    Group {
+                        if appModel.selectedMediaType == type {
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .fill(Color.accentColor)
+                                .padding(3)
+
+                        } else {
+                            Color(NSColor.controlColor)
+                        }
+                    }
+                )
                 .foregroundStyle(appModel.selectedMediaType == type ? .white : .primary)
                 .clipShape(RoundedRectangle(cornerRadius: index == 0 ? 6 : 0,
                                             style: .continuous))

@@ -20,8 +20,9 @@ struct ImageGalleryView: View {
     @State private var images: [TMDBImage] = []
     @State private var loadedImages: [String: NSImage] = [:]
     @State private var isLoading = true
-    @State private var gridColumns: Int = 5  // Add this to your main view
-
+    @State private var gridColumns: Int = 0
+    @State private var showDownloadFailedAlert = false
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -48,14 +49,12 @@ struct ImageGalleryView: View {
                             // Grid size control
                             if !images.isEmpty {
                                 Menu {
-                                    Button("Small Grid") {
-                                        gridColumns = imageType == .poster ? 6 : 4
-                                    }
-                                    Button("Medium Grid") {
-                                        gridColumns = imageType == .poster ? 5 : 3
-                                    }
-                                    Button("Large Grid") {
-                                        gridColumns = imageType == .poster ? 4 : 2
+                                    ForEach(GridSize.allCases) { gridSize in
+                                        Button(gridSize.displayName) {
+                                            setGridSize(gridSize)
+                                        }
+                                        .keyboardShortcut(KeyEquivalent(Character(gridSize.keyboardShortcut)), modifiers: .control)
+                                        .help(gridSize.helpText)
                                     }
                                 } label: {
                                     Image(systemName: "square.grid.3x3")
@@ -63,6 +62,7 @@ struct ImageGalleryView: View {
                                 }
                                 .menuStyle(.borderlessButton)
                                 .fixedSize()
+                                .help("Change grid size")
                             }
                             
                             // Close button
@@ -71,6 +71,16 @@ struct ImageGalleryView: View {
                             }
                             .buttonStyle(.borderedProminent)
                             .controlSize(.small)
+                        }
+                    }
+                    .background {
+                        // Hidden buttons for reliable keyboard shortcuts
+                        ForEach(GridSize.allCases) { gridSize in
+                            Button("") {
+                                setGridSize(gridSize)
+                            }
+                            .keyboardShortcut(KeyEquivalent(Character(gridSize.keyboardShortcut)), modifiers: .control)
+                            .hidden()
                         }
                     }
                     .padding(.horizontal, 20)
@@ -105,6 +115,20 @@ struct ImageGalleryView: View {
         .task {
             await loadImages()
         }
+        .alert("Download Failed", isPresented: $showDownloadFailedAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("The image could not be downloaded. Please try again.")
+        }
+        .onAppear {
+            // Set initial grid size from app model
+            if gridColumns == 0 { // Only set if not already configured
+                gridColumns = appModel.gridSize.columnCount(for: imageType)
+            }
+        }
+        .onChange(of: appModel.gridSize) { oldValue, newValue in
+            gridColumns = newValue.columnCount(for: imageType)
+        }
     }
     
     private func title(_ type: ImageType, title: String) -> String {
@@ -131,7 +155,7 @@ struct ImageGalleryView: View {
     
     private func downloadImage(_ image: TMDBImage, flip: Bool = false) async {
         let filename = imageType == .poster ? "poster.jpg" : "backdrop.jpg"
-
+        
         // Determine folder prefix based on mediaType
         let folderPrefix: String
         switch mediaType {
@@ -160,7 +184,9 @@ struct ImageGalleryView: View {
             await MainActor.run {
                 _ = NSSound(named: NSSound.Name("Glass"))?.play()
             }
-        } else {
+        }
+        else {
+            showDownloadFailedAlert = true
             await MainActor.run {
                 _ = NSSound(named: NSSound.Name("Pop"))?.play()
             }
@@ -176,6 +202,9 @@ struct ImageGalleryView: View {
         }
     }
     
+    private func setGridSize(_ size: GridSize) {
+        gridColumns = size.columnCount(for: imageType)
+    }
 }
 
 // MARK: - Supporting Views

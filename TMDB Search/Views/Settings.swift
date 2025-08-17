@@ -10,8 +10,10 @@ import SwiftUI
 // MARK: - Settings View
 struct SettingsView: View {
     @Environment(AppModel.self) private var appModel
+    @Environment(\.dismiss) private var dismiss
     @State private var tempApiKey: String = ""
     @State private var tempDownloadPath: AppModel.DownloadPath = AppModel.DownloadPath(primary: "", backup: nil)
+    @State private var tempDefaultGridSize: GridSize = .medium
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -55,6 +57,35 @@ struct SettingsView: View {
                                 .foregroundStyle(.secondary)
                             Spacer()
                         }
+                    }
+                }
+                
+                // Display Preferences Section
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Display Preferences")
+                        .font(.headline)
+                        .fontWeight(.medium)
+                    
+                    HStack {
+                        Text("Default Grid Size:")
+                            .frame(width: 140, alignment: .trailing)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Picker("", selection: $tempDefaultGridSize) {
+                                ForEach(GridSize.allCases) { gridSize in
+                                    Text(gridSize.displayName)
+                                        .tag(gridSize)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .frame(maxWidth: 400, alignment: .leading)
+                            
+                            Text("This will be the default grid size when opening image collections")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        Spacer()
                     }
                 }
                 
@@ -141,13 +172,13 @@ struct SettingsView: View {
                 
                 Button("Cancel") {
                     resetToOriginalValues()
-                    closeSettingsWindow()
+                    dismiss()
                 }
                 .keyboardShortcut(.cancelAction)
                 
                 Button("Save") {
                     saveSettings()
-                    closeSettingsWindow()
+                    dismiss()
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
@@ -168,7 +199,8 @@ struct SettingsView: View {
     private var hasChanges: Bool {
         tempApiKey != appModel.apiKey ||
         tempDownloadPath.primary != appModel.downloadPath.primary ||
-        tempDownloadPath.backup != appModel.downloadPath.backup
+        tempDownloadPath.backup != appModel.downloadPath.backup ||
+        tempDefaultGridSize != appModel.gridSize
     }
     
     // MARK: - Helper Methods
@@ -176,17 +208,20 @@ struct SettingsView: View {
     private func loadCurrentSettings() {
         tempApiKey = appModel.apiKey
         tempDownloadPath = appModel.downloadPath
+        tempDefaultGridSize = appModel.gridSize
     }
     
     private func resetToOriginalValues() {
         tempApiKey = appModel.apiKey
         tempDownloadPath.primary = appModel.downloadPath.primary
         tempDownloadPath.backup = appModel.downloadPath.backup
+        tempDefaultGridSize = appModel.gridSize
     }
     
     private func saveSettings() {
         appModel.apiKey = tempApiKey
         appModel.downloadPath = tempDownloadPath
+        appModel.gridSize = tempDefaultGridSize
         appModel.saveSettings()
     }
     
@@ -205,13 +240,6 @@ struct SettingsView: View {
         }
         
         return nil
-    }
-    
-    private func closeSettingsWindow() {
-        // Find the Settings window and close it
-        if let settingsWindow = NSApplication.shared.windows.first(where: { $0.title == "TMDB Search Settings" }) {
-            settingsWindow.close()
-        }
     }
 }
 
