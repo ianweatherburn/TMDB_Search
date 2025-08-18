@@ -12,6 +12,7 @@ import SwiftUI
 // MARK: - App Model (Observable)
 @Observable
 final class AppModel {
+    var appTitle: String = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search"
     var apiKey: String = ""
     var downloadPath: DownloadPath = DownloadPath(primary: "", backup: nil)
     var searchResults: [TMDBMediaItem] = []

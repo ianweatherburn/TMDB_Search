@@ -72,6 +72,9 @@ struct TMDBSearchView: View {
         .frame(minWidth: 900, minHeight: 650)
         .onAppear {
             isSearchFieldFocused = true
+            if let window = NSApplication.shared.windows.first {
+                window.title = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search"
+            }
         }
     }
 }
@@ -97,22 +100,35 @@ struct SearchHeader: View {
                     .textFieldStyle(.plain)
                     .focused(isSearchFieldFocused)
                     .font(.system(size: 13))
-                    .onSubmit {
-                        Task {
-                            await appModel.performSearch()
-                        }
-                    }
+//                    .onSubmit {
+//                        // Update title before performing search
+//                        if let window = NSApplication.shared.windows.first {
+//                            if appModel.searchText.isEmpty {
+//                                window.title = appModel.appTitle
+//                            }
+//                            else {
+//                                let searchText = appModel.searchText.capitalized
+//                                window.title = "\(appModel.appTitle) - '\(searchText)'"
+//                            }
+//                        }
+//                        
+//                        Task {
+//                            await appModel.performSearch()
+//                        }
+//                    }
                     .onKeyPress { keyPress in
                         if keyPress.key == .return {
                             if keyPress.modifiers.contains(.shift) {
                                 Task {
                                     appModel.selectedMediaType = .movie
+                                    UpdateAppTitle(title: appModel.appTitle, searchText: appModel.searchText, type: appModel.selectedMediaType)
                                     await appModel.performSearch()
                                 }
                                 return .handled
                             } else if keyPress.modifiers.contains(.option) {
                                 Task {
                                     appModel.selectedMediaType = .collection
+                                    UpdateAppTitle(title: appModel.appTitle, searchText: appModel.searchText, type: appModel.selectedMediaType)
                                     await appModel.performSearch()
                                 }
                                 return .handled
@@ -120,6 +136,7 @@ struct SearchHeader: View {
                                 // Plain return - default to TV
                                 Task {
                                     appModel.selectedMediaType = .tv
+                                    UpdateAppTitle(title: appModel.appTitle, searchText: appModel.searchText, type: appModel.selectedMediaType)
                                     await appModel.performSearch()
                                 }
                                 return .handled
@@ -129,6 +146,7 @@ struct SearchHeader: View {
                     }
                     .onChange(of: appModel.searchText) {
                         if appModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            UpdateAppTitle(title: appModel.appTitle, searchText: appModel.searchText, type: appModel.selectedMediaType)
                             appModel.searchResults = []
                             appModel.errorMessage = nil
                         }
@@ -150,6 +168,24 @@ struct SearchHeader: View {
     }
 }
 
+private func UpdateAppTitle(title: String, searchText: String, type: MediaType) {
+    // Update title before performing search
+    if let window = NSApplication.shared.windows.first {
+        if searchText.isEmpty {
+            window.title = title
+        }
+        else {
+            window.title =
+                "\(title)" +
+                "- " +
+                "'\(searchText.capitalized) " +
+                "(" +
+            "\(type == .tv ? "Show" : type.rawValue.capitalized)" +
+                ")'"
+        }
+    }
+}
+
 // MARK: - Media Type Picker
 struct MediaTypeSegmentedPicker: View {
     @Environment(AppModel.self) private var appModel
@@ -159,6 +195,8 @@ struct MediaTypeSegmentedPicker: View {
             ForEach(Array(MediaType.allCases.enumerated()), id: \.element) { index, type in
                 Button {
                     appModel.selectedMediaType = type
+                    UpdateAppTitle(title: appModel.appTitle, searchText: appModel.searchText, type: appModel.selectedMediaType)
+
                     if !appModel.searchText.isEmpty {
                         Task { await appModel.performSearch() }
                     }
