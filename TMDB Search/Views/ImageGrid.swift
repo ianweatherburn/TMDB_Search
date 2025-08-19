@@ -12,7 +12,7 @@ struct ImageGrid: View {
     let images: [TMDBImage]
     let loadedImages: [String: NSImage]
     let gridColumns: Int
-    let imageType: ImageType  // Back to ImageType enum
+    let imageType: ImageType
     let onImageTap: (TMDBImage) -> Void
     let onLoadImage: (TMDBImage) async -> Void
     

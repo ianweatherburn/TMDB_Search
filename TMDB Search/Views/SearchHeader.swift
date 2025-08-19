@@ -87,7 +87,7 @@ struct SearchHeader: View {
                     .stroke(Color(NSColor.separatorColor), lineWidth: 0.5)
             )
             .clipShape(RoundedRectangle(cornerRadius: 6))
-            .frame(minWidth: 300)
+            .frame(minWidth: Constants.App.Window.Main.height)
             .popover(isPresented: $showingHistory, arrowEdge: .bottom) {
                 SearchHistoryDropdown()
             }
@@ -116,9 +116,9 @@ struct MediaTypeSegmentedPicker: View {
                         Text(type.displayInfo.title)
                     }
                     .font(.system(size: 14))
-                    .padding(.horizontal, 2)
+                    .padding(.horizontal, 14)
                     .padding(.vertical, 8)
-                    .frame(maxWidth: .infinity)
+//                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.plain)
                 .background(
@@ -143,4 +143,12 @@ struct MediaTypeSegmentedPicker: View {
         .background(Color(NSColor.controlColor), in: RoundedRectangle(cornerRadius: 6))
         .overlay(RoundedRectangle(cornerRadius: 6).stroke(.separator, lineWidth: 0.5))
     }
+}
+
+#Preview {
+    @Previewable @FocusState var isSearchFieldFocused: Bool
+    SearchHeader(isSearchFieldFocused: $isSearchFieldFocused)
+        .environment(AppModel())   // inject a test AppModel
+        .padding()
+        .frame(width: Constants.App.Window.Main.width)
 }

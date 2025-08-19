@@ -14,16 +14,32 @@ enum Constants {
             static let height: CGFloat = 140
             static let ratio: CGFloat = 2.0/3.0 // Typical movie poster ratio
             static let spacing: CGFloat = 8
+            enum Gallery {
+                enum Count {
+                    static let small = 8
+                    static let medium = 6
+                    static let large = 5
+                    static let huge = 4
+                }
+            }
         }
         enum Backdrop {
             static let width: CGFloat = 140
             static let height: CGFloat = 100
             static let ratio: CGFloat = 16.0/9.0 // Widescreen ratio for backdrops
             static let spacing: CGFloat = 12
+            enum Gallery {
+                enum Count {
+                    static let small = 5
+                    static let medium = 4
+                    static let large = 3
+                    static let huge = 2
+                }
+            }
         }
         enum Gallery {
-            static let width: CGFloat = 900
-            static let height: CGFloat = 700
+            static let width: CGFloat = 1366
+            static let height: CGFloat = 768
         }
         enum Types {
             static let poster = "poster.jpg"
@@ -66,12 +82,12 @@ enum Constants {
         }
         enum Window {
             enum Main {
-                static let width: CGFloat = 900
-                static let height: CGFloat = 650
+                static let width: CGFloat = 1366
+                static let height: CGFloat = 768
             }
             enum Help {
-                static let width: CGFloat = 700
-                static let height: CGFloat = 450
+                static let width: CGFloat = 800
+                static let height: CGFloat = 600
             }
         }
         static let image = "tmdb"

@@ -212,7 +212,7 @@ enum MediaType: String, CaseIterable, Codable {
 }
 
 // MARK: - Grid Size Enum
-enum GridSize: String, CaseIterable, Identifiable {
+enum GridSize: String, CaseIterable, Identifiable, Equatable {
     case small = "small"
     case medium = "medium"
     case large = "large"
@@ -260,17 +260,24 @@ enum GridSize: String, CaseIterable, Identifiable {
     }
     
     func columnCount(for imageType: ImageType) -> Int {
-        switch self {
-        case .small:
-            return imageType == .poster ? 6 : 4
-        case .medium:
-            return imageType == .poster ? 5 : 3
-        case .large:
-            return imageType == .poster ? 4 : 2
-        case .huge:
-            return imageType == .poster ? 3 : 1
+        switch imageType {
+        case .poster:
+            switch self {
+            case .small:  return Constants.Image.Poster.Gallery.Count.small
+            case .medium: return Constants.Image.Poster.Gallery.Count.medium
+            case .large:  return Constants.Image.Poster.Gallery.Count.large
+            case .huge:   return Constants.Image.Poster.Gallery.Count.huge
+            }
+        case .backdrop:
+            switch self {
+            case .small:  return Constants.Image.Backdrop.Gallery.Count.small
+            case .medium: return Constants.Image.Backdrop.Gallery.Count.medium
+            case .large:  return Constants.Image.Backdrop.Gallery.Count.large
+            case .huge:   return Constants.Image.Backdrop.Gallery.Count.huge
+            }
         }
     }
+
 }
 
 // MARK: - Search History Item

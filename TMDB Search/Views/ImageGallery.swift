@@ -10,7 +10,7 @@ import SwiftUI
 
 
 // MARK: - Image Gallery View
-struct ImageGalleryView: View {
+struct ImageGallery: View {
     let item: TMDBMediaItem
     let mediaType: MediaType
     let imageType: ImageType
