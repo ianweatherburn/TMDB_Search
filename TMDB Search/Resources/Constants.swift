@@ -69,7 +69,7 @@ enum Constants {
                 static let minimum: CGFloat = 5
                 static let maximum: CGFloat = 50
             }
-            static let gridSize: GridSize = .medium
+            static let gridSize: GridSize = .small
         }
     }
     

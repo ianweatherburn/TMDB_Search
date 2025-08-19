@@ -18,7 +18,7 @@ final class AppModel {
     var isLoading: Bool = false
     var searchText: String = ""
     var selectedMediaType: MediaType = .tv
-    var gridSize: GridSize = .medium
+    var gridSize: GridSize = .small
     var errorMessage: String?
     var searchHistory: [SearchHistoryItem] = []
     var maxHistoryItems: Int = 20
@@ -213,48 +213,48 @@ enum MediaType: String, CaseIterable, Codable {
 
 // MARK: - Grid Size Enum
 enum GridSize: String, CaseIterable, Identifiable, Equatable {
+    case tiny = "tiny"
     case small = "small"
     case medium = "medium"
     case large = "large"
-    case huge = "huge"
     
     var id: String { rawValue }
     
     var displayName: String {
         switch self {
+        case .tiny:
+            return "Tiny"
         case .small:
             return "Small"
         case .medium:
             return "Medium"
         case .large:
             return "Large"
-        case .huge:
-            return "Huge"
         }
     }
     
     var helpText: String {
         switch self {
-        case .small:
+        case .tiny:
             return "Show more items in a smaller grid layout"
-        case .medium:
+        case .small:
             return "Show items in a medium-sized grid layout"
-        case .large:
+        case .medium:
             return "Show fewer items in a larger grid layout"
-        case .huge:
+        case .large:
             return "Show items in the largest grid layou"
         }
     }
     
     var keyboardShortcut: String {
         switch self {
-        case .small:
+        case .tiny:
             return "1"
-        case .medium:
+        case .small:
             return "2"
-        case .large:
+        case .medium:
             return "3"
-        case .huge:
+        case .large:
             return "4"
         }
     }
@@ -263,17 +263,17 @@ enum GridSize: String, CaseIterable, Identifiable, Equatable {
         switch imageType {
         case .poster:
             switch self {
-            case .small:  return Constants.Image.Poster.Gallery.Count.small
-            case .medium: return Constants.Image.Poster.Gallery.Count.medium
-            case .large:  return Constants.Image.Poster.Gallery.Count.large
-            case .huge:   return Constants.Image.Poster.Gallery.Count.huge
+            case .tiny:  return Constants.Image.Poster.Gallery.Count.small
+            case .small: return Constants.Image.Poster.Gallery.Count.medium
+            case .medium:  return Constants.Image.Poster.Gallery.Count.large
+            case .large:   return Constants.Image.Poster.Gallery.Count.huge
             }
         case .backdrop:
             switch self {
-            case .small:  return Constants.Image.Backdrop.Gallery.Count.small
-            case .medium: return Constants.Image.Backdrop.Gallery.Count.medium
-            case .large:  return Constants.Image.Backdrop.Gallery.Count.large
-            case .huge:   return Constants.Image.Backdrop.Gallery.Count.huge
+            case .tiny:  return Constants.Image.Backdrop.Gallery.Count.small
+            case .small: return Constants.Image.Backdrop.Gallery.Count.medium
+            case .medium:  return Constants.Image.Backdrop.Gallery.Count.large
+            case .large:   return Constants.Image.Backdrop.Gallery.Count.huge
             }
         }
     }
