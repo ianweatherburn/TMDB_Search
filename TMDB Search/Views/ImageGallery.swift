@@ -97,7 +97,7 @@ struct ImageGalleryView: View {
                     } else if images.isEmpty {
                         EmptyStateView()
                     } else {
-                        ImageGridView(
+                        ImageGrid(
                             images: images,
                             loadedImages: loadedImages,
                             gridColumns: gridColumns,

@@ -1,0 +1,15 @@
+{
+  "originHash" : "df480fe082a0ca2ff5dd458051218196390a81e2c262a3e309bb1db65b986e46",
+  "pins" : [
+    {
+      "identity" : "sfsymbol",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Nirma/SFSymbol",
+      "state" : {
+        "revision" : "1870d4da704042fcabcd086235d97149c2196ea7",
+        "version" : "3.0.0"
+      }
+    }
+  ],
+  "version" : 3
+}

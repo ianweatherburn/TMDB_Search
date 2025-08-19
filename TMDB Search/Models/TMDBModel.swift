@@ -12,7 +12,6 @@ import SwiftUI
 // MARK: - App Model (Observable)
 @Observable
 final class AppModel {
-    var appTitle: String = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search"
     var apiKey: String = ""
     var downloadPath: DownloadPath = DownloadPath(primary: "", backup: nil)
     var searchResults: [TMDBMediaItem] = []
@@ -21,6 +20,14 @@ final class AppModel {
     var selectedMediaType: MediaType = .tv
     var gridSize: GridSize = .medium
     var errorMessage: String?
+    var searchHistory: [SearchHistoryItem] = []
+    var maxHistoryItems: Int = 20
+    
+    var version: String {
+        "\(Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search") - " +
+        "Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown") " +
+        "(\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"))"
+    }
     
     struct DownloadPath {
         var primary: String = ""
@@ -42,6 +49,10 @@ final class AppModel {
         if let gridSizeRaw = UserDefaults.standard.string(forKey: "GridSize"), let gridSize = GridSize(rawValue: gridSizeRaw) {
             self.gridSize = gridSize
         }
+
+        maxHistoryItems = UserDefaults.standard.integer(forKey: "MaxHistoryItems")
+        if maxHistoryItems == 0 { maxHistoryItems = 20 } // Default value
+        loadSearchHistory()
     }
     
     func saveSettings() {
@@ -49,6 +60,56 @@ final class AppModel {
         UserDefaults.standard.set(downloadPath.primary, forKey: "DownloadPath")
         UserDefaults.standard.set(downloadPath.backup, forKey: "DownloadPathBackup")
         UserDefaults.standard.set(gridSize.rawValue, forKey: "GridSize")
+        UserDefaults.standard.set(maxHistoryItems, forKey: "MaxHistoryItems")
+        saveSearchHistory()
+    }
+    
+    // Search history management
+    private func loadSearchHistory() {
+        if let data = UserDefaults.standard.data(forKey: "SearchHistory"),
+           let history = try? JSONDecoder().decode([SearchHistoryItem].self, from: data) {
+            searchHistory = history
+        }
+    }
+    
+    private func saveSearchHistory() {
+        if let data = try? JSONEncoder().encode(searchHistory) {
+            UserDefaults.standard.set(data, forKey: "SearchHistory")
+        }
+    }
+    
+    func addToSearchHistory(searchText: String, mediaType: MediaType) {
+        let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedText.isEmpty else { return }
+        
+        // Remove any existing entry with the same search text and media type
+        searchHistory.removeAll { $0.searchText.lowercased() == trimmedText.lowercased() && $0.mediaType == mediaType }
+        
+        // Add new item to the beginning
+        let newItem = SearchHistoryItem(searchText: trimmedText, mediaType: mediaType)
+        searchHistory.insert(newItem, at: 0)
+        
+        // Maintain maximum history size
+        if searchHistory.count > maxHistoryItems {
+            searchHistory = Array(searchHistory.prefix(maxHistoryItems))
+        }
+        
+        saveSearchHistory()
+    }
+    
+    func clearSearchHistory() {
+        searchHistory.removeAll()
+        saveSearchHistory()
+    }
+    
+    func removeFromHistory(_ item: SearchHistoryItem) {
+        searchHistory.removeAll { $0.id == item.id }
+        saveSearchHistory()
+    }
+    
+    func selectHistoryItem(_ item: SearchHistoryItem) {
+        searchText = item.searchText
+        selectedMediaType = item.mediaType
     }
     
     // Search functionality
@@ -63,12 +124,17 @@ final class AppModel {
         errorMessage = nil
         
         do {
+            updateAppTitle(with: searchText, showing: selectedMediaType.displayInfo.title)
+            
             let results = try await tmdbService.searchMedia(
                 query: searchText,
                 mediaType: selectedMediaType,
                 apiKey: apiKey
             )
             searchResults = results
+            
+            // Add to search history on successful search
+            addToSearchHistory(searchText: searchText, mediaType: selectedMediaType)
         } catch {
             errorMessage = "Search failed: \(error.localizedDescription)"
             searchResults = []
@@ -79,9 +145,18 @@ final class AppModel {
     
     // Image loading and downloading
     @MainActor
-    func loadPosterImage(for item: TMDBMediaItem) async -> NSImage? {
-        guard let posterPath = item.posterPath else { return nil }
-        guard let data = await tmdbService.loadImage(path: posterPath, size: .w342) else {return nil }
+    func loadImage(for item: TMDBMediaItem, as type: ImageType) async -> NSImage? {
+        let path: String?
+        
+        switch type {
+        case .poster:
+            path = item.posterPath
+        case .backdrop:
+            path = item.backdropPath
+        }
+
+        guard let path else { return nil }
+        guard let data = await tmdbService.loadImage(path: path, size: .w342) else { return nil }
         return NSImage(data: data)
     }
     
@@ -109,9 +184,20 @@ final class AppModel {
 
         return true
     }
+    
+    func updateAppTitle(with searchText: String = "", showing type: String = "") {
+        if let window = NSApplication.shared.windows.first {
+            let windowTitle = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search"
+            if searchText.isEmpty {
+                window.title = windowTitle
+            } else {
+                window.title = "\(windowTitle) - '\(searchText.capitalized) (\(type))'"
+            }
+        }
+    }
 }
 
-enum MediaType: String, CaseIterable {
+enum MediaType: String, CaseIterable, Codable {
     case tv = "tv"
     case movie = "movie"
     case collection = "collection"
@@ -184,5 +270,20 @@ enum GridSize: String, CaseIterable, Identifiable {
         case .huge:
             return imageType == .poster ? 3 : 1
         }
+    }
+}
+
+// MARK: - Search History Item
+struct SearchHistoryItem: Codable, Identifiable, Equatable {
+    let id: UUID
+    let searchText: String
+    let mediaType: MediaType
+    let timestamp: Date
+    
+    init(searchText: String, mediaType: MediaType) {
+        self.id = UUID()
+        self.searchText = searchText
+        self.mediaType = mediaType
+        self.timestamp = Date()
     }
 }

@@ -1,5 +1,5 @@
 //
-//  ImageGridView.swift
+//  ImageGrid.swift
 //  TMDB Search
 //
 //  Created by Ian Weatherburn on 2025/08/16.
@@ -8,7 +8,7 @@
 import SwiftUI
 
 // MARK: - Image Grid Item
-struct ImageGridView: View {
+struct ImageGrid: View {
     let images: [TMDBImage]
     let loadedImages: [String: NSImage]
     let gridColumns: Int

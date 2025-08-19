@@ -12,13 +12,14 @@ struct MediaItemRow: View {
     let item: TMDBMediaItem
     @Environment(AppModel.self) private var appModel
     @State private var posterImage: NSImage?
+    @State private var backdropImage: NSImage?
     @State private var showingPosterDialog = false
     @State private var showingBackdropDialog = false
     
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             // Poster Thumbnail
-            AsyncImage(image: posterImage) {
+            AsyncImage(image: posterImage, type: .poster) {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 100, height: 140)
@@ -33,8 +34,9 @@ struct MediaItemRow: View {
                 showingPosterDialog = true
             }
             .task {
-                posterImage = await appModel.loadPosterImage(for: item)
+                posterImage = await appModel.loadImage(for: item, as: .poster)
             }
+            .help("Choose a poster...")
             
             // Content
             VStack(alignment: .leading, spacing: 8) {
@@ -53,17 +55,29 @@ struct MediaItemRow: View {
             
             Spacer()
             
-            // Backdrop Button
-            Button(action: {
-                showingBackdropDialog = true
-            }) {
-                Image(systemName: "photo.artframe")
-                    .font(.system(size: 44))
-                    .symbolRenderingMode(.palette)
-                    .foregroundStyle(.mint.opacity(0.9), .mint.opacity(0.5))
+            // Backdrop Thumbnail
+            VStack {
+                Spacer()
+                AsyncImage(image: backdropImage, type: .backdrop) {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 140, height: 100)
+                        .overlay {
+                            if backdropImage == nil {
+                                ProgressView()
+                                    .scaleEffect(0.6)
+                            }
+                        }
+                }
+                .onTapGesture {
+                    showingBackdropDialog = true
+                }
+                .task {
+                    backdropImage = await appModel.loadImage(for: item, as: .backdrop)
+                }
+                .help("Choose a backdrop...")
+                Spacer()
             }
-            .buttonStyle(.borderless)
-            .help("Choose a backdrop...")
         }
         .padding()
         .background(Color(NSColor.controlBackgroundColor))

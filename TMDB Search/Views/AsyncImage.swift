@@ -7,11 +7,17 @@
 
 import SwiftUI
 
-
 // MARK: - Async Image Helper
 struct AsyncImage<Content: View>: View {
     let image: NSImage?
+    let type: ImageType
     let content: () -> Content
+    var width: CGFloat {
+        type == .poster ? 100 : 140
+    }
+    var height: CGFloat {
+        type == .poster ? 140 : 100
+    }
 
     var body: some View {
         Group {
@@ -19,7 +25,7 @@ struct AsyncImage<Content: View>: View {
                 Image(nsImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: 100, height: 140)
+                    .frame(width: width, height: height)
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     .overlay(
@@ -36,6 +42,5 @@ struct AsyncImage<Content: View>: View {
             }
         }
         .shadow(color: .black.opacity(0.6), radius: 8, x: 0, y: 4)
-        .help("Choose a poster...")
     }
 }

@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3CEDCB4F2E54A709000BE2E0 /* SFSymbol in Frameworks */ = {isa = PBXBuildFile; productRef = 3CEDCB4E2E54A709000BE2E0 /* SFSymbol */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		3C2A229E2E42017500ADB004 /* TMDB Search.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TMDB Search.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CEDCB4F2E54A709000BE2E0 /* SFSymbol in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = "TMDB Search";
 			packageProductDependencies = (
+				3CEDCB4E2E54A709000BE2E0 /* SFSymbol */,
 			);
 			productName = "TMDB Search";
 			productReference = 3C2A229E2E42017500ADB004 /* TMDB Search.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = 3C2A22952E42017500ADB004;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3CEDCB4D2E54A709000BE2E0 /* XCRemoteSwiftPackageReference "SFSymbol" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3C2A229F2E42017500ADB004 /* Products */;
 			projectDirPath = "";
@@ -329,6 +338,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3CEDCB4D2E54A709000BE2E0 /* XCRemoteSwiftPackageReference "SFSymbol" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Nirma/SFSymbol";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3CEDCB4E2E54A709000BE2E0 /* SFSymbol */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3CEDCB4D2E54A709000BE2E0 /* XCRemoteSwiftPackageReference "SFSymbol" */;
+			productName = SFSymbol;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3C2A22962E42017500ADB004 /* Project object */;
 }
