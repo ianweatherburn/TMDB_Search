@@ -42,6 +42,6 @@ struct ImageGrid: View {
     }
     
     private var gridSpacing: CGFloat {
-        imageType == .poster ? 8 : 12
+        imageType == .poster ? Constants.Image.Poster.spacing : Constants.Image.Backdrop.spacing
     }
 }

@@ -111,7 +111,7 @@ struct ImageGalleryView: View {
             }
             .background(Color(NSColor.controlBackgroundColor))
         }
-        .frame(width: 900, height: 700)
+        .frame(width: Constants.Image.Gallery.width, height: Constants.Image.Gallery.height)
         .task {
             await loadImages()
         }
@@ -154,17 +154,17 @@ struct ImageGalleryView: View {
     }
     
     private func downloadImage(_ image: TMDBImage, flip: Bool = false) async {
-        let filename = imageType == .poster ? "poster.jpg" : "backdrop.jpg"
-        
+        let filename = imageType == .poster ? Constants.Image.Types.poster : Constants.Image.Types.backdrop
+
         // Determine folder prefix based on mediaType
         let folderPrefix: String
         switch mediaType {
         case .tv:
-            folderPrefix = "shows"
+            folderPrefix = Constants.Media.Types.shows
         case .movie:
-            folderPrefix = "movies"
+            folderPrefix = Constants.Media.Types.movies
         case .collection:
-            folderPrefix = "collections"
+            folderPrefix = Constants.Media.Types.collections
         }
         
         // Choose title part: for collection use displayTitle, else plexTitle
@@ -182,13 +182,13 @@ struct ImageGalleryView: View {
         
         if success {
             await MainActor.run {
-                _ = NSSound(named: NSSound.Name("Glass"))?.play()
+                _ = NSSound(named: NSSound.Name(Constants.App.Sounds.success))?.play()
             }
         }
         else {
             showDownloadFailedAlert = true
             await MainActor.run {
-                _ = NSSound(named: NSSound.Name("Pop"))?.play()
+                _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
             }
         }
     }

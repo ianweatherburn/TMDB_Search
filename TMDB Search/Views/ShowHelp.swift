@@ -30,7 +30,7 @@ struct AppInfo: View {
         VStack(spacing: 24) {
             // TMDB Logo with overlay icon
             ZStack(alignment: .bottomTrailing) {
-                Image("tmdb")
+                Image(Constants.App.image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 180, height: 180)

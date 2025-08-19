@@ -6,6 +6,7 @@
 ////
 
 import SwiftUI
+import SFSymbol
 
 // MARK: - Main Content View
 struct Search: View {
@@ -35,7 +36,8 @@ struct Search: View {
                         // Status messages (errors/loading)
                         if let errorMessage = appModel.errorMessage {
                             StatusMessage(
-                                icon: "exclamationmark.triangle.fill",
+//                                icon: "exclamationmark.triangle.fill",
+                                icon: SFSymbol6.Exclamationmark.exclamationmarkTriangleFill.rawValue,
                                 message: errorMessage,
                                 style: .error
                             )
@@ -46,7 +48,8 @@ struct Search: View {
                         
                         if appModel.isLoading {
                             StatusMessage(
-                                icon: "magnifyingglass",
+//                                icon: "magnifyingglass",
+                                icon: SFSymbol6.Magnifyingglass.magnifyingglass.rawValue,
                                 message: "Searching TMDB...",
                                 style: .loading
                             )
@@ -70,17 +73,15 @@ struct Search: View {
             .animation(.easeInOut(duration: 0.25), value: appModel.isLoading)
             .animation(.easeInOut(duration: 0.25), value: appModel.errorMessage)
         }
-        .frame(minWidth: 900, minHeight: 650)
+        .frame(minWidth: Constants.App.Window.Main.width, minHeight: Constants.App.Window.Main.height)
         .onAppear {
             isSearchFieldFocused = true
-            if let window = NSApplication.shared.windows.first {
-                window.title = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search"
-            }
+            appModel.updateAppTitle(with: "")
         }
         .sheet(isPresented: $showHelp) {
             ShowHelp()
                 .padding()
-                .frame(minWidth: 750, minHeight: 450)
+                .frame(minWidth: Constants.App.Window.Help.width, minHeight: Constants.App.Window.Help.height)
         }
     }
 }

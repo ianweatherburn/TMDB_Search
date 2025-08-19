@@ -13,8 +13,8 @@ struct Configure: View {
     @State private var selectedSection: SettingsSection = .api
     @State private var tempApiKey = ""
     @State private var tempDownloadPath = AppModel.DownloadPath(primary: "", backup: nil)
-    @State private var tempDefaultGridSize: GridSize = .medium
-    @State private var tempHistorySize = 25
+    @State private var tempDefaultGridSize: GridSize = Constants.Configure.Preferences.gridSize
+    @State private var tempHistorySize = Constants.Configure.Preferences.History.size
     
     enum SettingsSection: String, CaseIterable {
         case api = "API"
@@ -48,7 +48,7 @@ struct Configure: View {
     
     var body: some View {
         GeometryReader { geometry in
-            let maxHeight = geometry.size.height * 0.80
+            let maxHeight = geometry.size.height * Constants.Configure.Window.multiplier
             
             HStack(spacing: 0) {
                 // Sidebar
@@ -120,7 +120,6 @@ struct Configure: View {
                                     .foregroundColor(.secondary)
                             }
                             .padding(.horizontal, 32)
-//                            .padding(.top, 0)
                             .padding(.bottom, 8)
                             
                             // Content based on selected section
@@ -189,7 +188,7 @@ struct Configure: View {
                     .textFieldStyle(.roundedBorder)
                     .font(.system(.body, design: .monospaced))
                 
-                Text("Get your API key from [themoviedb.org](https://www.themoviedb.org/settings/api)")
+                Text("Get your API key from [\(Constants.Configure.API.tmdbSite)](\(Constants.Configure.API.tmdbURL))")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -212,7 +211,7 @@ struct Configure: View {
                     }
                     .pickerStyle(.segmented)
                     .padding(.leading, -8)
-                    .frame(width: geometry.size.width * 0.75)
+                    .frame(width: geometry.size.width * Constants.Configure.Window.multiplier)
                 }
                 .frame(height: 30)
                 
@@ -241,21 +240,21 @@ struct Configure: View {
                                     get: { Double(tempHistorySize) },
                                     set: { tempHistorySize = Int($0) }
                                 ),
-                                in: 5...50,
+                                in: Constants.Configure.Preferences.History.minimum...Constants.Configure.Preferences.History.maximum,
                                 step: 1
                             )
                             
                             HStack {
-                                Text("5")
+                                Text("\(Int(Constants.Configure.Preferences.History.minimum))")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                                 Spacer()
-                                Text("50")
+                                Text("\(Int(Constants.Configure.Preferences.History.maximum))")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
                         }
-                        .frame(width: geometry.size.width * 0.75)
+                        .frame(width: geometry.size.width * Constants.Configure.Window.multiplier)
                     }
                     .frame(height: 30)
 

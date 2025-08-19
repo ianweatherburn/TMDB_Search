@@ -22,7 +22,7 @@ struct MediaItemRow: View {
             AsyncImage(image: posterImage, type: .poster) {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.gray.opacity(0.3))
-                    .frame(width: 100, height: 140)
+                    .frame(width: Constants.Image.Poster.width, height: Constants.Image.Poster.height)
                     .overlay {
                         if posterImage == nil {
                             ProgressView()
@@ -61,7 +61,7 @@ struct MediaItemRow: View {
                 AsyncImage(image: backdropImage, type: .backdrop) {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.3))
-                        .frame(width: 140, height: 100)
+                        .frame(width: Constants.Image.Backdrop.width, height: Constants.Image.Backdrop.height)
                         .overlay {
                             if backdropImage == nil {
                                 ProgressView()
@@ -90,11 +90,11 @@ struct MediaItemRow: View {
             if NSEvent.modifierFlags.contains(.option) {
                 // Copy TMDB ID only
                 pasteboard.setString(String(item.id), forType: .string)
-                _ = NSSound(named: NSSound.Name("Ping"))?.play()
+                _ = NSSound(named: NSSound.Name(Constants.App.Sounds.idCopy))?.play()
             } else {
                 // Copy Plex formatted name with title and tmdb-id
                 pasteboard.setString("\(item.plexTitle.replacingColonsWithDashes)", forType: .string)
-                _ = NSSound(named: NSSound.Name("Glass"))?.play()
+                _ = NSSound(named: NSSound.Name(Constants.App.Sounds.nameCopy))?.play()
             }
         })
         .sheet(isPresented: $showingPosterDialog) {

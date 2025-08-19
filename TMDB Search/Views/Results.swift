@@ -37,10 +37,10 @@ struct ResultsHeader: View {
                     .foregroundStyle(.secondary)
                 
                 Text(mediaType.displayInfo.title)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                 
                 Text("(\(count) results)")
-                    .font(.system(size: 13))
+                    .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }
             

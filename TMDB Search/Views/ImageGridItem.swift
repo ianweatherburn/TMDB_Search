@@ -73,8 +73,8 @@ struct ImageGridItem: View {
     
     private var aspectRatioForImageType: CGFloat {
         switch imageType {
-        case .poster: return 2.0/3.0  // Typical movie poster ratio
-        case .backdrop: return 16.0/9.0  // Widescreen ratio for backdrops
+        case .poster: return Constants.Image.Poster.ratio
+        case .backdrop: return Constants.Image.Backdrop.ratio
         }
     }
 }
