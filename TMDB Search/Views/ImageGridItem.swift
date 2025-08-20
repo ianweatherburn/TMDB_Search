@@ -67,7 +67,7 @@ struct ImageGridItem: View {
                 .stroke(.primary.opacity(isHovered ? 0.3 : 0), lineWidth: 2)
                 .animation(.easeInOut(duration: 0.2), value: isHovered)
         )
-        .scaleEffect(isHovered ? 1.05 : 1.0)
+        .scaleEffect(isHovered ? Constants.Image.Gallery.scaleEffect : 1.0)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
     }
     

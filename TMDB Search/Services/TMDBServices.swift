@@ -14,8 +14,8 @@ import UniformTypeIdentifiers
 
 // MARK: - TMDB Service
 final class TMDBService {
-    private let baseURL = "https://api.themoviedb.org/3"
-    private let imageBaseURL = "https://image.tmdb.org/t/p"
+    private let baseURL = Constants.Services.TMDB.baseURL
+    private let imageBaseURL = Constants.Services.TMDB.imageURL
     
     enum ImageSize: String {
         case w92, w154, w185, w342, w500, w780, original
@@ -267,7 +267,7 @@ final class TMDBService {
             let options: [CFString: Any]
             if imageUTType.conforms(to: UTType.jpeg) {
                 // Maximum quality for JPEG (still lossy but minimal loss)
-                options = [kCGImageDestinationLossyCompressionQuality: 0.6]
+                options = [kCGImageDestinationLossyCompressionQuality: Constants.Services.Flip.quality]
             } else {
                 // For PNG and other lossless formats, no compression options needed
                 options = [:]

@@ -10,10 +10,10 @@ enum Constants {
     
     enum Image {
         enum Poster {
-            static let width: CGFloat = 100
-            static let height: CGFloat = 140
             static let ratio: CGFloat = 2.0/3.0 // Typical movie poster ratio
-            static let spacing: CGFloat = 8
+            static let width: CGFloat = 100
+            static let height: CGFloat = width / ratio
+            static let spacing: CGFloat = 12
             enum Gallery {
                 enum Count {
                     static let small = 8
@@ -24,9 +24,9 @@ enum Constants {
             }
         }
         enum Backdrop {
-            static let width: CGFloat = 140
-            static let height: CGFloat = 100
             static let ratio: CGFloat = 16.0/9.0 // Widescreen ratio for backdrops
+            static let height: CGFloat = 100
+            static let width: CGFloat = height * ratio
             static let spacing: CGFloat = 12
             enum Gallery {
                 enum Count {
@@ -40,6 +40,7 @@ enum Constants {
         enum Gallery {
             static let width: CGFloat = 1366
             static let height: CGFloat = 768
+            static let scaleEffect: CGFloat = 1.04
         }
         enum Types {
             static let poster = "poster.jpg"
@@ -65,7 +66,7 @@ enum Constants {
         }
         enum Preferences {
             enum History {
-                static let size = 25
+                static let size = 20
                 static let minimum: CGFloat = 5
                 static let maximum: CGFloat = 50
             }
@@ -77,8 +78,8 @@ enum Constants {
         enum Sounds {
             static let success = "Glass"
             static let failure = "Pop"
-            static let idCopy = "Ping"
-            static let nameCopy = "Glass"
+            static let idCopy = "Morse"
+            static let nameCopy = "Tink"
         }
         enum Window {
             enum Main {
@@ -91,5 +92,15 @@ enum Constants {
             }
         }
         static let image = "tmdb"
+    }
+    
+    enum Services {
+        enum TMDB {
+            static let baseURL = "https://api.themoviedb.org/3"
+            static let imageURL = "https://image.tmdb.org/t/p"
+        }
+        enum Flip {
+            static let quality = 0.6
+        }
     }
 }

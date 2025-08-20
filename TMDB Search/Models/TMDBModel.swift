@@ -18,10 +18,10 @@ final class AppModel {
     var isLoading: Bool = false
     var searchText: String = ""
     var selectedMediaType: MediaType = .tv
-    var gridSize: GridSize = .small
+    var gridSize: GridSize = Constants.Configure.Preferences.gridSize
     var errorMessage: String?
     var searchHistory: [SearchHistoryItem] = []
-    var maxHistoryItems: Int = 20
+    var maxHistoryItems: Int = Constants.Configure.Preferences.History.size
     
     var version: String {
         "\(Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search") - " +
@@ -193,6 +193,22 @@ final class AppModel {
             } else {
                 window.title = "\(windowTitle) - '\(searchText.capitalized) (\(type))'"
             }
+        }
+    }
+    
+    func copyToClipboard(_ item: TMDBMediaItem, idOnly: Bool = false) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        
+        // Check for option key (⌥) modifier
+        if idOnly {
+            // Copy TMDB ID only
+            pasteboard.setString(String(item.id), forType: .string)
+            _ = NSSound(named: NSSound.Name(Constants.App.Sounds.idCopy))?.play()
+        } else {
+            // Copy Plex formatted name with title and tmdb-id
+            pasteboard.setString("\(item.plexTitle.replacingColonsWithDashes)", forType: .string)
+            _ = NSSound(named: NSSound.Name(Constants.App.Sounds.nameCopy))?.play()
         }
     }
 }

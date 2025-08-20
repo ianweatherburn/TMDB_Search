@@ -83,19 +83,7 @@ struct MediaItemRow: View {
         .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(8)
         .onTapGesture(count: 1, perform: { position in
-            let pasteboard = NSPasteboard.general
-            pasteboard.clearContents()
-            
-            // Check for option key (⌥) modifier
-            if NSEvent.modifierFlags.contains(.option) {
-                // Copy TMDB ID only
-                pasteboard.setString(String(item.id), forType: .string)
-                _ = NSSound(named: NSSound.Name(Constants.App.Sounds.idCopy))?.play()
-            } else {
-                // Copy Plex formatted name with title and tmdb-id
-                pasteboard.setString("\(item.plexTitle.replacingColonsWithDashes)", forType: .string)
-                _ = NSSound(named: NSSound.Name(Constants.App.Sounds.nameCopy))?.play()
-            }
+            appModel.copyToClipboard(item, idOnly: NSEvent.modifierFlags.contains(.option))
         })
         .sheet(isPresented: $showingPosterDialog) {
             ImageGallery(
