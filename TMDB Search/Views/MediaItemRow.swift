@@ -80,7 +80,6 @@ struct MediaItemRow: View {
             }
         }
         .padding()
-        .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(8)
         .onTapGesture(count: 1, perform: { position in
             appModel.copyToClipboard(item, idOnly: NSEvent.modifierFlags.contains(.option))

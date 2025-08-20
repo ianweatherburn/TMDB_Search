@@ -118,10 +118,8 @@ struct MediaTypeSegmentedPicker: View {
                     .font(.system(size: 14))
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
-//                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.plain)
-                .focusEffect(.ho)
                 .background(
                     Group {
                         if appModel.selectedMediaType == type {

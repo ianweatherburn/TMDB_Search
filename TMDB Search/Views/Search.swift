@@ -29,7 +29,7 @@ struct Search: View {
                 
                 // Main content area
                 ZStack {
-                    Color(NSColor.controlBackgroundColor)
+                    Color(NSColor.windowBackgroundColor)
                         .ignoresSafeArea()
                     
                     VStack(spacing: 0) {

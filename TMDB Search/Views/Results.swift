@@ -59,12 +59,14 @@ struct ResultsList: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 1) {
-                ForEach(items) { item in
+                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                     VStack(spacing: 0) {
                         MediaItemRow(item: item)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 12)
-                            .background(Color(NSColor.controlBackgroundColor))
+                            .background(
+                                Color(index.isMultiple(of: 2) ? NSColor.windowBackgroundColor : NSColor.controlBackgroundColor)
+                            )
                             .contentShape(Rectangle())
                         
                         if item.id != items.last?.id {
