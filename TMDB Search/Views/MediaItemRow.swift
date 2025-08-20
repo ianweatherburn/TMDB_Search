@@ -79,7 +79,8 @@ struct MediaItemRow: View {
                 Spacer()
             }
         }
-        .padding()
+        .padding(.horizontal,  20)
+        .padding(.vertical, 6)
         .cornerRadius(8)
         .onTapGesture(count: 1, perform: { position in
             appModel.copyToClipboard(item, idOnly: NSEvent.modifierFlags.contains(.option))

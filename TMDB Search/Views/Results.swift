@@ -62,8 +62,6 @@ struct ResultsList: View {
                 ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                     VStack(spacing: 0) {
                         MediaItemRow(item: item)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
                             .background(
                                 Color(index.isMultiple(of: 2) ? NSColor.windowBackgroundColor : NSColor.controlBackgroundColor)
                             )
