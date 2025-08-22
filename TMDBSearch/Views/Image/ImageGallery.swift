@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-
-
 // MARK: - Image Gallery View
 struct ImageGallery: View {
     let item: TMDBMediaItem
@@ -126,7 +124,7 @@ struct ImageGallery: View {
                 gridColumns = appModel.gridSize.columnCount(for: imageType)
             }
         }
-        .onChange(of: appModel.gridSize) { oldValue, newValue in
+        .onChange(of: appModel.gridSize) { _, newValue in
             gridColumns = newValue.columnCount(for: imageType)
         }
     }
@@ -184,8 +182,7 @@ struct ImageGallery: View {
             await MainActor.run {
                 _ = NSSound(named: NSSound.Name(Constants.App.Sounds.success))?.play()
             }
-        }
-        else {
+        } else {
             showDownloadFailedAlert = true
             await MainActor.run {
                 _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
@@ -245,5 +242,3 @@ struct EmptyStateView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
-
-

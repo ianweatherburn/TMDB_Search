@@ -46,5 +46,3 @@ struct TMDBMediaItem: Codable, Identifiable, Equatable {
         return "\(displayTitle)\(year) {tmdb-\(id)}"
     }
 }
-
-

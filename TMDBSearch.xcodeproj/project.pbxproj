@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C31C6A72E586406009BDBDF /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 3C31C6A62E586406009BDBDF /* .swiftlint.yml */; };
 		3CEDCB4F2E54A709000BE2E0 /* SFSymbol in Frameworks */ = {isa = PBXBuildFile; productRef = 3CEDCB4E2E54A709000BE2E0 /* SFSymbol */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3C2A229E2E42017500ADB004 /* TMDBSearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TMDBSearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C31C6A62E586406009BDBDF /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -37,6 +39,7 @@
 		3C2A22952E42017500ADB004 = {
 			isa = PBXGroup;
 			children = (
+				3C31C6A62E586406009BDBDF /* .swiftlint.yml */,
 				3C2A22A02E42017500ADB004 /* TMDBSearch */,
 				3C2A229F2E42017500ADB004 /* Products */,
 			);
@@ -64,6 +67,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				3C7C3B892E58635C00C7BB1F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				3C2A22A02E42017500ADB004 /* TMDBSearch */,
@@ -102,6 +106,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				3CEDCB4D2E54A709000BE2E0 /* XCRemoteSwiftPackageReference "SFSymbol" */,
+				3C7C3B872E58633800C7BB1F /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3C2A229F2E42017500ADB004 /* Products */;
@@ -118,6 +123,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C31C6A72E586406009BDBDF /* .swiftlint.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,6 +138,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3C7C3B892E58635C00C7BB1F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 3C7C3B882E58635C00C7BB1F /* SwiftLintBuildToolPlugin */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		3C2A22A82E42017600ADB004 /* Debug */ = {
@@ -340,6 +353,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3C7C3B872E58633800C7BB1F /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.59.1;
+			};
+		};
 		3CEDCB4D2E54A709000BE2E0 /* XCRemoteSwiftPackageReference "SFSymbol" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Nirma/SFSymbol";
@@ -351,6 +372,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3C7C3B882E58635C00C7BB1F /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3C7C3B872E58633800C7BB1F /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
 		3CEDCB4E2E54A709000BE2E0 /* SFSymbol */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3CEDCB4D2E54A709000BE2E0 /* XCRemoteSwiftPackageReference "SFSymbol" */;

@@ -69,11 +69,11 @@ struct SearchHeader: View {
                 if !appModel.searchHistory.isEmpty {
                     Button(action: {
                         showingHistory.toggle()
-                    }) {
+                    }, label: {
                         Image(systemName: "clock.arrow.circlepath")
                             .foregroundStyle(.secondary)
                             .font(.system(size: 13))
-                    }
+                    })
                     .buttonStyle(.plain)
                     .help("Search History")
                 }

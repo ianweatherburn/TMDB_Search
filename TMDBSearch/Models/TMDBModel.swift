@@ -32,7 +32,7 @@ final class AppModel {
     
     struct DownloadPath {
         var primary: String = ""
-        var backup: String? = nil
+        var backup: String?
     }
     
     private let tmdbService = TMDBService()
@@ -219,9 +219,9 @@ final class AppModel {
 }
 
 enum MediaType: String, CaseIterable, Codable {
-    case tv = "tv"
-    case movie = "movie"
-    case collection = "collection"
+    case tv // = "tv"
+    case movie // = "movie"
+    case collection // = "collection"
     
     var displayInfo: (icon: String, title: String, default: Bool) {
         switch self {
@@ -234,10 +234,10 @@ enum MediaType: String, CaseIterable, Codable {
 
 // MARK: - Grid Size Enum
 enum GridSize: String, CaseIterable, Identifiable, Equatable {
-    case tiny = "tiny"
-    case small = "small"
-    case medium = "medium"
-    case large = "large"
+    case tiny // = "tiny"
+    case small // = "small"
+    case medium // = "medium"
+    case large // = "large"
     
     var id: String { rawValue }
     

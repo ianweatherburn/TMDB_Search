@@ -86,8 +86,6 @@ struct Search: View {
     }
 }
 
-
-
 // MARK: - Search History Dropdown
 struct SearchHistoryDropdown: View {
     @Environment(AppModel.self) private var appModel
@@ -164,11 +162,11 @@ struct SearchHistoryRow: View {
             // Remove button
             Button(action: {
                 appModel.removeFromHistory(item)
-            }) {
+            }, label: {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.secondary)
                     .font(.system(size: 12))
-            }
+            })
             .buttonStyle(.plain)
             .opacity(0.6)
             .help("Remove from history")
@@ -178,9 +176,6 @@ struct SearchHistoryRow: View {
         .contentShape(Rectangle())
         .onTapGesture {
             onSelect()
-        }
-        .onHover { isHovering in
-            // Optional: Add hover effect if desired
         }
         .background(
             Rectangle()

@@ -1,0 +1,28 @@
+# .swiftlint.yml
+
+# Where SwiftLint should look for source files
+included:
+  - TMDB Search
+
+# Exclude build artifacts and dependencies
+excluded:
+  - Carthage
+  - Pods
+  - .build
+  - DerivedData
+
+# Disable some of the more "noisy" rules to start with
+disabled_rules:
+  - line_length
+  - trailing_whitespace
+  - identifier_name
+  - todo
+  - force_cast
+  - force_try
+  - large_tuple
+
+# Customize thresholds if you want
+opt_in_rules: []
+
+# Reporter type (output format) — 'xcode' is what shows up nicely in Xcode
+reporter: "xcode"

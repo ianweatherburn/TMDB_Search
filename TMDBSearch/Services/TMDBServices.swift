@@ -11,7 +11,6 @@ import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
 
-
 // MARK: - TMDB Service
 final class TMDBService {
     private let baseURL = Constants.Services.TMDB.baseURL

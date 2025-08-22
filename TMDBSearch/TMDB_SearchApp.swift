@@ -7,7 +7,7 @@
 import SwiftUI
 
 @main
-struct TMDB_SearchApp: App {
+struct TMDBSearchApp: App {
     @State private var appModel = AppModel()
     @State private var showHelp = false
     
