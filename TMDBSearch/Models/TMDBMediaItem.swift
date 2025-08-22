@@ -14,7 +14,7 @@ struct TMDBMediaItem: Codable, Identifiable, Equatable {
     let backdropPath: String?
     let releaseDate: String?
     let firstAirDate: String? // TV shows use 'first_air_date'
-    
+
     enum CodingKeys: String, CodingKey {
         case id, title, name, overview
         case posterPath = "poster_path"
@@ -22,12 +22,12 @@ struct TMDBMediaItem: Codable, Identifiable, Equatable {
         case releaseDate = "release_date"
         case firstAirDate = "first_air_date"
     }
-    
+
     // Computed properties for unified access
     var displayTitle: String {
         return title ?? name ?? "Unknown Title"
     }
-    
+
     var displayYear: String {
         let dateString = releaseDate ?? firstAirDate ?? ""
         if dateString.count >= 4 {
@@ -35,12 +35,12 @@ struct TMDBMediaItem: Codable, Identifiable, Equatable {
         }
         return ""
     }
-    
+
     var formattedTitle: String {
         let year = displayYear.isEmpty ? "" : " (\(displayYear))"
-        return "\(displayTitle)\(year) [\(id)]"
+        return "\(displayTitle)\(year)"
     }
-    
+
     var plexTitle: String {
         let year = displayYear.isEmpty ? "" : " (\(displayYear))"
         return "\(displayTitle)\(year) {tmdb-\(id)}"

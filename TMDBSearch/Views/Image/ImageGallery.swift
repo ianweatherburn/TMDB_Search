@@ -29,7 +29,7 @@ struct ImageGallery: View {
                     HStack {
                         // Title and count
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(title(imageType, title: item.plexTitle))
+                            Text(title(imageType, title: item.formattedTitle))
                                 .font(.title2)
                                 .fontWeight(.semibold)
                             
@@ -51,7 +51,8 @@ struct ImageGallery: View {
                                         Button(gridSize.displayName) {
                                             setGridSize(gridSize)
                                         }
-                                        .keyboardShortcut(KeyEquivalent(Character(gridSize.keyboardShortcut)), modifiers: .control)
+                                        .keyboardShortcut(KeyEquivalent(Character(gridSize.keyboardShortcut)),
+                                                          modifiers: .control)
                                         .help(gridSize.helpText)
                                     }
                                 } label: {
@@ -145,7 +146,12 @@ struct ImageGallery: View {
     
     private func loadImage(_ image: TMDBImage) async {
         guard loadedImages[image.filePath] == nil else { return }
-        guard let loadedData = await TMDBService().loadImage(path: image.filePath, size: TMDBService.ImageSize.w342) else { return }
+        guard let loadedData = await TMDBService().loadImage(
+            path: image.filePath,
+            size: TMDBService.ImageSize.w342
+        ) else {
+            return
+        }
         await MainActor.run {
             loadedImages[image.filePath] = NSImage(data: loadedData)
         }
@@ -166,7 +172,7 @@ struct ImageGallery: View {
         }
         
         // Choose title part: for collection use displayTitle, else plexTitle
-        let titlePart = mediaType == .collection ? item.displayTitle : item.plexTitle
+        let titlePart = mediaType == .collection ? item.displayTitle : item.formattedTitle
         
         // Compose the destPath as "folder/title"
         let destPath = "\(folderPrefix)/\(titlePart)".replacingColonsWithDashes

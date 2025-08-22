@@ -15,27 +15,34 @@ import UniformTypeIdentifiers
 final class TMDBService {
     private let baseURL = Constants.Services.TMDB.baseURL
     private let imageBaseURL = Constants.Services.TMDB.imageURL
-    
+
     enum ImageSize: String {
         case w92, w154, w185, w342, w500, w780, original
     }
-    
+
     func searchMedia(query: String, mediaType: MediaType, apiKey: String) async throws -> [TMDBMediaItem] {
         let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "\(baseURL)/search/\(mediaType.rawValue)?api_key=\(apiKey)&query=\(encodedQuery)"
-        
+
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
         }
-        
+
         let (data, _) = try await URLSession.shared.data(from: url)
         let response = try JSONDecoder().decode(TMDBSearchResponse.self, from: data)
         return response.results
     }
-    
-    func getImages(itemId: Int, mediaType: MediaType, languages: [String], apiKey: String) async throws -> TMDBImagesResponse {
+
+    func getImages(itemId: Int,
+                   mediaType: MediaType,
+                   languages: [String],
+                   apiKey: String) async throws -> TMDBImagesResponse {
         let includeLanguages = (languages.isEmpty ? "" : languages.joined(separator: ",") + ",") + "null"
-        let urlString = "\(baseURL)/\(mediaType.rawValue)/\(itemId)/images?api_key=\(apiKey)&include_image_language=\(includeLanguages)"
+        let urlString = "\(baseURL)/" +
+                        "\(mediaType.rawValue)/" +
+                        "\(itemId)/" +
+                        "images?api_key=\(apiKey)" +
+                        "&include_image_language=\(includeLanguages)"
         
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
@@ -113,7 +120,10 @@ final class TMDBService {
         }
     }
     
-    func downloadImageWithShellHelper(path: String, to directory: String, filename: String, flip: Bool = false) async -> Bool {
+    func downloadImageWithShellHelper(path: String,
+                                      to directory: String,
+                                      filename: String,
+                                      flip: Bool = false) async -> Bool {
         let urlString = "\(imageBaseURL)/original\(path)"
         
         guard let url = URL(string: urlString) else { return false }
@@ -153,7 +163,9 @@ final class TMDBService {
         let mkdirSuccess = await runShellCommand("/bin/mkdir", arguments: ["-p", directory])
         guard mkdirSuccess else {
             try? FileManager.default.removeItem(atPath: tempFile)
-            throw NSError(domain: "ShellError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to create directory"])
+            throw NSError(domain: "ShellError",
+                          code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "Failed to create directory"])
         }
         
         // Handle filename conflicts

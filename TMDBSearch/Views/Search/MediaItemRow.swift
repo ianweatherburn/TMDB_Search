@@ -10,11 +10,17 @@ import SwiftUI
 // MARK: - Media Item Row
 struct MediaItemRow: View {
     let item: TMDBMediaItem
+    let type: MediaType
     @Environment(AppModel.self) private var appModel
     @State private var posterImage: NSImage?
     @State private var backdropImage: NSImage?
     @State private var showingPosterDialog = false
     @State private var showingBackdropDialog = false
+    
+    var mediaPopover: String {
+        let type = String(describing: type.displayInfo.title)
+        return "\(String(type.dropLast()).lowercased()) '\(item.displayTitle)'."
+    }
     
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -36,22 +42,10 @@ struct MediaItemRow: View {
             .task {
                 posterImage = await appModel.loadImage(for: item, as: .poster)
             }
-            .help("Choose a poster...")
+            .help("Show all posters for the \(mediaPopover)")
             
             // Content
-            VStack(alignment: .leading, spacing: 8) {
-                Text(item.plexTitle.replacingColonsWithDashes)
-                    .font(.headline)
-                    .lineLimit(2)
-                    .textSelection(.enabled)
-                
-                Text(item.overview)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .lineLimit(4)
-                
-                Spacer()
-            }
+            contentRow(for: item)
             
             Spacer()
             
@@ -75,7 +69,7 @@ struct MediaItemRow: View {
                 .task {
                     backdropImage = await appModel.loadImage(for: item, as: .backdrop)
                 }
-                .help("Choose a backdrop...")
+                .help("Show all backdrops for the \(mediaPopover)")
                 Spacer()
             }
         }
@@ -102,4 +96,35 @@ struct MediaItemRow: View {
             .environment(appModel)
         }
     }
+    
+    @ViewBuilder
+    private func contentRow(for item: TMDBMediaItem) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(item.formattedTitle.replacingColonsWithDashes)
+                    .font(.headline)
+                    .lineLimit(2)
+                    .textSelection(.enabled)
+                    .help("Tap to copy the name or Opt+Tap to copy the ID")
+                
+                Spacer()
+                
+                Text("\(item.id)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .textSelection(.enabled)
+                    .padding(.leading, 8)
+                    .help("TMDB-ID")
+            }
+
+            Text(item.overview)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .lineLimit(4)
+                .help("Tap to copy the name or Opt+Tap to copy the ID")
+
+            Spacer()
+        }
+    }
+
 }

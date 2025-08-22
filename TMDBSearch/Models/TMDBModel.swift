@@ -23,31 +23,33 @@ final class AppModel {
     var errorMessage: String?
     var searchHistory: [SearchHistoryItem] = []
     var maxHistoryItems: Int = Constants.Configure.Preferences.History.size
-    
+
     var version: String {
         "\(Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search") - " +
         "Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown") " +
         "(\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"))"
     }
-    
+
     struct DownloadPath {
         var primary: String = ""
         var backup: String?
     }
-    
+
     private let tmdbService = TMDBService()
-    
+
     init() {
         loadSettings()
     }
-    
+
     // Settings management
     func loadSettings() {
         apiKey = UserDefaults.standard.string(forKey: "TMDBAPIKey") ?? ""
-        downloadPath.primary = UserDefaults.standard.string(forKey: "DownloadPath") ?? NSHomeDirectory() + "/Downloads/TMDB"
+        downloadPath.primary = UserDefaults.standard.string(forKey: "DownloadPath") ?? NSHomeDirectory() +
+                               "/Downloads/TMDB"
         downloadPath.backup = UserDefaults.standard.string(forKey: "DownloadPathBackup")
-        
-        if let gridSizeRaw = UserDefaults.standard.string(forKey: "GridSize"), let gridSize = GridSize(rawValue: gridSizeRaw) {
+
+        if let gridSizeRaw = UserDefaults.standard.string(forKey: "GridSize"),
+           let gridSize = GridSize(rawValue: gridSizeRaw) {
             self.gridSize = gridSize
         }
 
@@ -55,7 +57,7 @@ final class AppModel {
         if maxHistoryItems == 0 { maxHistoryItems = 20 } // Default value
         loadSearchHistory()
     }
-    
+
     func saveSettings() {
         UserDefaults.standard.set(apiKey, forKey: "TMDBAPIKey")
         UserDefaults.standard.set(downloadPath.primary, forKey: "DownloadPath")
@@ -64,7 +66,7 @@ final class AppModel {
         UserDefaults.standard.set(maxHistoryItems, forKey: "MaxHistoryItems")
         saveSearchHistory()
     }
-    
+
     // Search history management
     private func loadSearchHistory() {
         if let data = UserDefaults.standard.data(forKey: "SearchHistory"),
@@ -72,47 +74,47 @@ final class AppModel {
             searchHistory = history
         }
     }
-    
+
     private func saveSearchHistory() {
         if let data = try? JSONEncoder().encode(searchHistory) {
             UserDefaults.standard.set(data, forKey: "SearchHistory")
         }
     }
-    
+
     func addToSearchHistory(searchText: String, mediaType: MediaType) {
         let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedText.isEmpty else { return }
-        
+
         // Remove any existing entry with the same search text and media type
         searchHistory.removeAll { $0.searchText.lowercased() == trimmedText.lowercased() && $0.mediaType == mediaType }
-        
+
         // Add new item to the beginning
         let newItem = SearchHistoryItem(searchText: trimmedText, mediaType: mediaType)
         searchHistory.insert(newItem, at: 0)
-        
+
         // Maintain maximum history size
         if searchHistory.count > maxHistoryItems {
             searchHistory = Array(searchHistory.prefix(maxHistoryItems))
         }
-        
+
         saveSearchHistory()
     }
-    
+
     func clearSearchHistory() {
         searchHistory.removeAll()
         saveSearchHistory()
     }
-    
+
     func removeFromHistory(_ item: SearchHistoryItem) {
         searchHistory.removeAll { $0.id == item.id }
         saveSearchHistory()
     }
-    
+
     func selectHistoryItem(_ item: SearchHistoryItem) {
         searchText = item.searchText
         selectedMediaType = item.mediaType
     }
-    
+
     // Search functionality
     @MainActor
     func performSearch() async {
@@ -120,35 +122,35 @@ final class AppModel {
             errorMessage = apiKey.isEmpty ? "Please set your TMDB API key in Settings" : "Please enter a search term"
             return
         }
-        
+
         isLoading = true
         errorMessage = nil
-        
+
         do {
             updateAppTitle(with: searchText, showing: selectedMediaType.displayInfo.title)
-            
+
             let results = try await tmdbService.searchMedia(
                 query: searchText,
                 mediaType: selectedMediaType,
                 apiKey: apiKey
             )
             searchResults = results
-            
+
             // Add to search history on successful search
             addToSearchHistory(searchText: searchText, mediaType: selectedMediaType)
         } catch {
             errorMessage = "Search failed: \(error.localizedDescription)"
             searchResults = []
         }
-        
+
         isLoading = false
     }
-    
+
     // Image loading and downloading
     @MainActor
     func loadImage(for item: TMDBMediaItem, as type: ImageType) async -> NSImage? {
         let path: String?
-        
+
         switch type {
         case .poster:
             path = item.posterPath
@@ -160,7 +162,7 @@ final class AppModel {
         guard let data = await tmdbService.loadImage(path: path, size: .w342) else { return nil }
         return NSImage(data: data)
     }
-    
+
     func loadImages(for itemId: Int, mediaType: MediaType) async -> TMDBImagesResponse? {
         do {
             return try await tmdbService.getImages(
@@ -173,23 +175,33 @@ final class AppModel {
             return nil
         }
     }
-    
+
     func downloadImage(sourcePath: String, destPath: String, filename: String, flip: Bool = false) async -> Bool {
         var path = ""
-        
+
         // Append the Plex-style foldername to the destination path
         path = URL(fileURLWithPath: downloadPath.primary).appendingPathComponent(destPath).path
-        guard await tmdbService.downloadImage(path: sourcePath, to: path, filename: filename, flip: flip) else { return false }
-        
+        guard await tmdbService.downloadImage(path: sourcePath, to: path, filename: filename, flip: flip)
+            else { return false }
+
         // Check if there is a backup download required
         guard let backupPath = downloadPath.backup, !backupPath.isEmpty else { return true }
         path = URL(fileURLWithPath: backupPath).appendingPathComponent(destPath).path
-        guard await tmdbService.downloadImage(path: sourcePath, to: path, filename: filename, flip: flip) else { return false }
-//        guard await tmdbService.downloadImageWithShellHelper(path: sourcePath, to: path, filename: filename, flip: flip) else { return false }
+        guard await tmdbService.downloadImage(
+            path: sourcePath,
+            to: path,
+            filename: filename,
+            flip: flip) else { return false }
+//        guard await tmdbService.downloadImageWithShellHelper(
+//            path: sourcePath,
+//            to: path,
+//            filename: filename,
+//            flip: flip
+//        ) else { return false }
 
         return true
     }
-    
+
     func updateAppTitle(with searchText: String = "", showing type: String = "") {
         if let window = NSApplication.shared.windows.first {
             let windowTitle = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search"
@@ -200,11 +212,11 @@ final class AppModel {
             }
         }
     }
-    
+
     func copyToClipboard(_ item: TMDBMediaItem, idOnly: Bool = false) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        
+
         // Check for option key (⌥) modifier
         if idOnly {
             // Copy TMDB ID only
@@ -218,11 +230,12 @@ final class AppModel {
     }
 }
 
+/* // swiftlint:disable identifier_name */
 enum MediaType: String, CaseIterable, Codable {
-    case tv // = "tv"
-    case movie // = "movie"
-    case collection // = "collection"
-    
+    case tv
+    case movie
+    case collection
+
     var displayInfo: (icon: String, title: String, default: Bool) {
         switch self {
         case .tv: return ("photo.tv", "Shows", true)
@@ -231,16 +244,17 @@ enum MediaType: String, CaseIterable, Codable {
         }
     }
 }
+/* // swiftlint:enable identifier_name */
 
 // MARK: - Grid Size Enum
 enum GridSize: String, CaseIterable, Identifiable, Equatable {
-    case tiny // = "tiny"
-    case small // = "small"
-    case medium // = "medium"
-    case large // = "large"
-    
+    case tiny
+    case small
+    case medium
+    case large
+
     var id: String { rawValue }
-    
+
     var displayName: String {
         switch self {
         case .tiny:
@@ -253,7 +267,7 @@ enum GridSize: String, CaseIterable, Identifiable, Equatable {
             return "Large"
         }
     }
-    
+
     var helpText: String {
         switch self {
         case .tiny:
@@ -266,7 +280,7 @@ enum GridSize: String, CaseIterable, Identifiable, Equatable {
             return "Show items in the largest grid layou"
         }
     }
-    
+
     var keyboardShortcut: String {
         switch self {
         case .tiny:
@@ -279,7 +293,7 @@ enum GridSize: String, CaseIterable, Identifiable, Equatable {
             return "4"
         }
     }
-    
+
     func columnCount(for imageType: ImageType) -> Int {
         switch imageType {
         case .poster:
@@ -307,7 +321,7 @@ struct SearchHistoryItem: Codable, Identifiable, Equatable {
     let searchText: String
     let mediaType: MediaType
     let timestamp: Date
-    
+
     init(searchText: String, mediaType: MediaType) {
         self.id = UUID()
         self.searchText = searchText

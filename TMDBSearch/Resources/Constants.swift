@@ -26,7 +26,7 @@ extension Constants.App {
     }
     enum Window {
         enum Main {
-            static let width: CGFloat = 1366
+            static let width: CGFloat = 1_366
             static let height: CGFloat = 768
         }
         enum Help {
@@ -40,7 +40,7 @@ extension Constants.App {
 // Image Display Constants
 extension Constants.Image {
     enum Poster {
-        static let ratio: CGFloat = 2.0/3.0 // Typical movie poster ratio
+        static let ratio: CGFloat = 2.0 / 3.0 // Typical movie poster ratio
         static let width: CGFloat = 100
         static let height: CGFloat = width / ratio
         static let spacing: CGFloat = 12
@@ -54,7 +54,7 @@ extension Constants.Image {
         }
     }
     enum Backdrop {
-        static let ratio: CGFloat = 16.0/9.0 // Widescreen ratio for backdrops
+        static let ratio: CGFloat = 16.0 / 9.0 // Widescreen ratio for backdrops
         static let height: CGFloat = 100
         static let width: CGFloat = height * ratio
         static let spacing: CGFloat = 12
@@ -68,7 +68,7 @@ extension Constants.Image {
         }
     }
     enum Gallery {
-        static let width: CGFloat = 1366
+        static let width: CGFloat = 1_366
         static let height: CGFloat = 768
         static let scaleEffect: CGFloat = 1.04
     }

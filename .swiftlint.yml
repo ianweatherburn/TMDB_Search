@@ -2,7 +2,7 @@
 
 # Where SwiftLint should look for source files
 included:
-  - TMDB Search
+  - TMDBSearch
 
 # Exclude build artifacts and dependencies
 excluded:
@@ -13,16 +13,30 @@ excluded:
 
 # Disable some of the more "noisy" rules to start with
 disabled_rules:
-  - line_length
   - trailing_whitespace
-  - identifier_name
   - todo
   - force_cast
   - force_try
   - large_tuple
-
+  
+identifier_name:
+  min_length: 2
+  
 # Customize thresholds if you want
-opt_in_rules: []
+# opt_in_rules: []
+opt_in_rules:
+  - file_name_no_space
+  - multiline_literal_brackets
+  - number_separator
+  - operator_usage_whitespace
+  - prefer_self_in_static_references
+  - toggle_bool
+  - unused_parameter
+  
+analyzer_rules:
+  - explicit_self
+  - unused_declaration
+  - unused_import
 
 # Reporter type (output format) — 'xcode' is what shows up nicely in Xcode
 reporter: "xcode"

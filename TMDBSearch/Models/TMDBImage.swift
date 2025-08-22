@@ -6,7 +6,8 @@
 //
 
 enum ImageType {
-    case poster, backdrop
+    case backdrop
+    case poster
 }
 
 struct TMDBImagesResponse: Codable {
@@ -22,7 +23,7 @@ struct TMDBImage: Codable, Identifiable {
     let filePath: String
     let voteAverage: Double
     let voteCount: Int
-    
+
     enum CodingKeys: String, CodingKey {
         case height, width
         case aspectRatio = "aspect_ratio"
@@ -30,6 +31,6 @@ struct TMDBImage: Codable, Identifiable {
         case voteAverage = "vote_average"
         case voteCount = "vote_count"
     }
-    
+
     var id: String { filePath }
 }
