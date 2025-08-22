@@ -5,6 +5,7 @@
 //  Created by Ian Weatherburn on 2025/08/19.
 //
 import SwiftUI
+import SFSymbol
 
 // MARK: - Show Help View
 struct ShowHelp: View {
@@ -41,7 +42,7 @@ struct AppInfo: View {
                     )
                     .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
                 
-                Image(systemName: "magnifyingglass.circle.fill")
+                Image(symbol: SFSymbol6.Magnifyingglass.magnifyingglassCircleFill)
                     .font(.system(size: 40))
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(.white, .blue)
@@ -80,21 +81,21 @@ struct AppInstructions: View {
                     .padding(.bottom, 4)
                 
                 InstructionRow(
-                    symbol: "return",
+                    symbol: SFSymbol6.Return.returnLeft.rawValue,
                     title: "Shows",
                     description: "Press Return",
                     alignment: .trailing
                 )
                 
                 InstructionRow(
-                    symbol: "shift",
+                    symbol: SFSymbol6.Shift.shiftFill.rawValue,
                     title: "Movies",
                     description: "Shift + Return",
                     alignment: .trailing
                 )
                 
                 InstructionRow(
-                    symbol: "option",
+                    symbol: SFSymbol6.Option.option.rawValue,
                     title: "Collections",
                     description: "Option + Return",
                     alignment: .trailing
@@ -116,19 +117,19 @@ struct AppInstructions: View {
                     .padding(.bottom, 4)
                 
                 InstructionRow(
-                    symbol: "hand.tap",
+                    symbol: SFSymbol6.Hand.handTapFill.rawValue,
                     title: "Copy Formatted Filename",
                     description: "Click result item"
                 )
                 
                 InstructionRow(
-                    symbol: "option",
+                    symbol: SFSymbol6.Option.option.rawValue,
                     title: "Copy TMDB-ID Only",
                     description: "Option + Click"
                 )
                 
                 InstructionRow(
-                    symbol: "photo",
+                    symbol: SFSymbol6.Photo.photoFill.rawValue,
                     title: "Browse Images",
                     description: "Click poster or artwork logo"
                 )

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SFSymbol
 
 // MARK: - Models and Data Structures
 
@@ -232,11 +233,12 @@ enum MediaType: String, CaseIterable, Codable {
 
     var displayInfo: (icon: String, title: String, default: Bool) {
         switch self {
-        case .tv: return ("photo.tv", "Shows", true)
-        case .movie: return ("movieclapper", "Movies", false)
-        case .collection: return ("film.stack", "Collections", false)
+        case .tv: return (SFSymbol6.Photo.photo.rawValue, "Shows", true)
+        case .movie: return (SFSymbol6.Movieclapper.movieclapper.rawValue, "Movies", false)
+        case .collection: return (SFSymbol6.Film.filmStack.rawValue, "Collections", false)
         }
     }
+
 }
 /* // swiftlint:enable identifier_name */
 

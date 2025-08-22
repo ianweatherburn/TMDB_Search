@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SFSymbol
 
 struct DownloadPathSection: View {
     let title: String

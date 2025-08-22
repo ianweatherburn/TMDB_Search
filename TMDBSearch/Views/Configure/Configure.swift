@@ -6,6 +6,7 @@
 ////
 
 import SwiftUI
+import SFSymbol
 
 struct Configure: View {
     @Environment(AppModel.self) private var appModel
@@ -101,9 +102,9 @@ struct Configure: View {
 
         var symbol: String {
             switch self {
-            case .api: return "key.fill"
-            case .preferences: return "gearshape.fill"
-            case .download: return "folder.fill"
+            case .api: return SFSymbol6.Key.keyFill.rawValue
+            case .preferences: return SFSymbol6.Gearshape.gearshapeFill.rawValue
+            case .download: return SFSymbol6.Folder.folderFill.rawValue
             }
         }
 

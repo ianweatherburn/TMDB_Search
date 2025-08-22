@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SFSymbol
 
 // MARK: - Search Header
 struct SearchHeader: View {
@@ -21,10 +22,10 @@ struct SearchHeader: View {
         HStack(spacing: 16) {
             // Search field with integrated icon
             HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass")
+                Image(symbol: SFSymbol6.Magnifyingglass.magnifyingglass)
                     .foregroundStyle(.secondary)
                     .font(.system(size: 15))
-                
+
                 TextField("Search TMDB for shows, movies, or collections", text: Bindable(appModel).searchText)
                     .textFieldStyle(.plain)
                     .focused(isSearchFieldFocused)

@@ -5,6 +5,7 @@
 //  Created by Ian Weatherburn on 2025/08/19.
 //
 import SwiftUI
+import SFSymbol
 
 //// MARK: - Results View
 struct Results: View {

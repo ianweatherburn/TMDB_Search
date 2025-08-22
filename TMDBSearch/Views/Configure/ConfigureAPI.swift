@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SFSymbol
 
 struct ConfigureAPI: View {
     @Binding var apiKey: String
@@ -19,10 +20,24 @@ struct ConfigureAPI: View {
                 SecureField("Enter your TMDB API key", text: $apiKey)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(.body, design: .monospaced))
-                Text("Get your API key from [TMDB](https://www.themoviedb.org)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                HStack(spacing: 2) {
+                    Text("Get your API key from")
+                    Link(destination: URL(string: "https://www.themoviedb.org")!) {
+                        HStack(spacing: 2) {
+                            Image(symbol: SFSymbol6.Network.network)
+                                .imageScale(.medium)
+                            Text("The Movie Database")
+                        }
+                    }
+                    .tint(.accentColor)
+                }
+                .font(.caption)
             }
         }
     }
+}
+
+#Preview {
+    @Previewable @State var apiKey = "12345"
+    ConfigureAPI(apiKey: $apiKey)
 }

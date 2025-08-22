@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SFSymbol
 
 // MARK: - Image Gallery View
 struct ImageGallery: View {
@@ -56,7 +57,8 @@ struct ImageGallery: View {
                                         .help(gridSize.helpText)
                                     }
                                 } label: {
-                                    Image(systemName: "square.grid.3x3")
+//                                    Image(systemName: "square.grid.3x3")
+                                    Image(symbol: SFSymbol6.Square.squareGrid3x3)
                                         .font(.system(size: 16))
                                 }
                                 .menuStyle(.borderlessButton)

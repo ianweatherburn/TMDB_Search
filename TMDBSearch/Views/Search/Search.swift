@@ -36,7 +36,6 @@ struct Search: View {
                         // Status messages (errors/loading)
                         if let errorMessage = appModel.errorMessage {
                             StatusMessage(
-//                                icon: "exclamationmark.triangle.fill",
                                 icon: SFSymbol6.Exclamationmark.exclamationmarkTriangleFill.rawValue,
                                 message: errorMessage,
                                 style: .error
@@ -48,7 +47,6 @@ struct Search: View {
                         
                         if appModel.isLoading {
                             StatusMessage(
-//                                icon: "magnifyingglass",
                                 icon: SFSymbol6.Magnifyingglass.magnifyingglass.rawValue,
                                 message: "Searching TMDB...",
                                 style: .loading
