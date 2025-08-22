@@ -95,7 +95,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3C2A22992E42017500ADB004 /* Build configuration list for PBXProject "TMDBSearch" */;
+			buildConfigurationList = 3C2A22992E42017500ADB004 /* Build configuration list for PBXProject "TMDB Search" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -276,13 +276,13 @@
 				CODE_SIGN_ENTITLEMENTS = TMDBSearch/Resources/TMDB_Search.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 698M9J99J2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "TMDB-Search-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_CFBundleDisplayName = "TMDB Search";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -307,13 +307,13 @@
 				CODE_SIGN_ENTITLEMENTS = TMDBSearch/Resources/TMDB_Search.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 698M9J99J2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "TMDB-Search-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_CFBundleDisplayName = "TMDB Search";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -332,7 +332,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3C2A22992E42017500ADB004 /* Build configuration list for PBXProject "TMDBSearch" */ = {
+		3C2A22992E42017500ADB004 /* Build configuration list for PBXProject "TMDB Search" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3C2A22A82E42017600ADB004 /* Debug */,

@@ -59,7 +59,7 @@ struct AppInfo: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                 
-                Text(appModel.version)
+                Text("\(Bundle.main.appDisplayTitle) - \(Bundle.main.version)")
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.secondary)
             }

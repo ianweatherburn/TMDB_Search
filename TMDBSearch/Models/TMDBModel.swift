@@ -24,12 +24,6 @@ final class AppModel {
     var searchHistory: [SearchHistoryItem] = []
     var maxHistoryItems: Int = Constants.Configure.Preferences.History.size
 
-    var version: String {
-        "\(Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search") - " +
-        "Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown") " +
-        "(\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"))"
-    }
-
     struct DownloadPath {
         var primary: String = ""
         var backup: String?
