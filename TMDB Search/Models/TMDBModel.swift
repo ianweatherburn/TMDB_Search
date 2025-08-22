@@ -18,6 +18,7 @@ final class AppModel {
     var isLoading: Bool = false
     var searchText: String = ""
     var selectedMediaType: MediaType = .tv
+    var selectedLanguages: [String] = Constants.Services.TMDB.languages
     var gridSize: GridSize = Constants.Configure.Preferences.gridSize
     var errorMessage: String?
     var searchHistory: [SearchHistoryItem] = []
@@ -162,7 +163,11 @@ final class AppModel {
     
     func loadImages(for itemId: Int, mediaType: MediaType) async -> TMDBImagesResponse? {
         do {
-            return try await tmdbService.getImages(itemId: itemId, mediaType: mediaType, apiKey: apiKey)
+            return try await tmdbService.getImages(
+                itemId: itemId,
+                mediaType: mediaType,
+                languages: selectedLanguages,
+                apiKey: apiKey)
         } catch {
             print("Failed to load images: \(error)")
             return nil

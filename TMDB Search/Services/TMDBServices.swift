@@ -34,15 +34,15 @@ final class TMDBService {
         return response.results
     }
     
-    func getImages(itemId: Int, mediaType: MediaType, apiKey: String) async throws -> TMDBImagesResponse {
-        let urlString = "\(baseURL)/\(mediaType.rawValue)/\(itemId)/images?api_key=\(apiKey)"
+    func getImages(itemId: Int, mediaType: MediaType, languages: [String], apiKey: String) async throws -> TMDBImagesResponse {
+        let includeLanguages = (languages.isEmpty ? "" : languages.joined(separator: ",") + ",") + "null"
+        let urlString = "\(baseURL)/\(mediaType.rawValue)/\(itemId)/images?api_key=\(apiKey)&include_image_language=\(includeLanguages)"
         
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
         }
         
         let (data, _) = try await URLSession.shared.data(from: url)
-//        return try JSONDecoder().decode(TMDBImagesResponse.self, from: data)
         var response = try JSONDecoder().decode(TMDBImagesResponse.self, from: data)
         
         // Sort by area (width × height) in descending order
