@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3C2A229D2E42017500ADB004"
-               BuildableName = "TMDBSearch.app"
-               BlueprintName = "TMDBSearch"
+               BuildableName = "TMDB Search.app"
+               BlueprintName = "TMDB Search"
                ReferencedContainer = "container:TMDB Search.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3C2A229D2E42017500ADB004"
-            BuildableName = "TMDBSearch.app"
-            BlueprintName = "TMDBSearch"
+            BuildableName = "TMDB Search.app"
+            BlueprintName = "TMDB Search"
             ReferencedContainer = "container:TMDB Search.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3C2A229D2E42017500ADB004"
-            BuildableName = "TMDBSearch.app"
-            BlueprintName = "TMDBSearch"
+            BuildableName = "TMDB Search.app"
+            BlueprintName = "TMDB Search"
             ReferencedContainer = "container:TMDB Search.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
