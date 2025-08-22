@@ -19,7 +19,7 @@ struct MediaItemRow: View {
     
     var mediaPopover: String {
         let type = String(describing: type.displayInfo.title)
-        return "\(String(type.dropLast()).lowercased()) '\(item.displayTitle)'."
+        return "\(String(type.dropLast()).lowercased()) '\(item.formattedTitle)'."
     }
     
     var body: some View {
