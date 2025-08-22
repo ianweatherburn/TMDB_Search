@@ -11,13 +11,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3C2A229E2E42017500ADB004 /* TMDB Search.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TMDB Search.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C2A229E2E42017500ADB004 /* TMDBSearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TMDBSearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		3C2A22A02E42017500ADB004 /* TMDB Search */ = {
+		3C2A22A02E42017500ADB004 /* TMDBSearch */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "TMDB Search";
+			path = TMDBSearch;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -37,7 +37,7 @@
 		3C2A22952E42017500ADB004 = {
 			isa = PBXGroup;
 			children = (
-				3C2A22A02E42017500ADB004 /* TMDB Search */,
+				3C2A22A02E42017500ADB004 /* TMDBSearch */,
 				3C2A229F2E42017500ADB004 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -45,7 +45,7 @@
 		3C2A229F2E42017500ADB004 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				3C2A229E2E42017500ADB004 /* TMDB Search.app */,
+				3C2A229E2E42017500ADB004 /* TMDBSearch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -53,9 +53,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		3C2A229D2E42017500ADB004 /* TMDB Search */ = {
+		3C2A229D2E42017500ADB004 /* TMDBSearch */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3C2A22AA2E42017600ADB004 /* Build configuration list for PBXNativeTarget "TMDB Search" */;
+			buildConfigurationList = 3C2A22AA2E42017600ADB004 /* Build configuration list for PBXNativeTarget "TMDBSearch" */;
 			buildPhases = (
 				3C2A229A2E42017500ADB004 /* Sources */,
 				3C2A229B2E42017500ADB004 /* Frameworks */,
@@ -66,14 +66,14 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				3C2A22A02E42017500ADB004 /* TMDB Search */,
+				3C2A22A02E42017500ADB004 /* TMDBSearch */,
 			);
-			name = "TMDB Search";
+			name = TMDBSearch;
 			packageProductDependencies = (
 				3CEDCB4E2E54A709000BE2E0 /* SFSymbol */,
 			);
 			productName = "TMDB Search";
-			productReference = 3C2A229E2E42017500ADB004 /* TMDB Search.app */;
+			productReference = 3C2A229E2E42017500ADB004 /* TMDBSearch.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -91,7 +91,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3C2A22992E42017500ADB004 /* Build configuration list for PBXProject "TMDB Search" */;
+			buildConfigurationList = 3C2A22992E42017500ADB004 /* Build configuration list for PBXProject "TMDBSearch" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -108,7 +108,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				3C2A229D2E42017500ADB004 /* TMDB Search */,
+				3C2A229D2E42017500ADB004 /* TMDBSearch */,
 			);
 		};
 /* End PBXProject section */
@@ -260,7 +260,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CODE_SIGN_ENTITLEMENTS = "TMDB Search/Resources/TMDB_Search.entitlements";
+				CODE_SIGN_ENTITLEMENTS = TMDBSearch/Resources/TMDB_Search.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 3;
@@ -291,7 +291,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CODE_SIGN_ENTITLEMENTS = "TMDB Search/Resources/TMDB_Search.entitlements";
+				CODE_SIGN_ENTITLEMENTS = TMDBSearch/Resources/TMDB_Search.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 3;
@@ -319,7 +319,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3C2A22992E42017500ADB004 /* Build configuration list for PBXProject "TMDB Search" */ = {
+		3C2A22992E42017500ADB004 /* Build configuration list for PBXProject "TMDBSearch" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3C2A22A82E42017600ADB004 /* Debug */,
@@ -328,7 +328,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3C2A22AA2E42017600ADB004 /* Build configuration list for PBXNativeTarget "TMDB Search" */ = {
+		3C2A22AA2E42017600ADB004 /* Build configuration list for PBXNativeTarget "TMDBSearch" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3C2A22AB2E42017600ADB004 /* Debug */,
