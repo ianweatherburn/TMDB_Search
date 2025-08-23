@@ -174,7 +174,7 @@ struct ImageGallery: View {
         }
         
         // Choose title part: for collection use displayTitle, else plexTitle
-        let titlePart = mediaType == .collection ? item.displayTitle : item.formattedTitle
+        let titlePart = mediaType == .collection ? item.displayTitle : item.plexTitle
         
         // Compose the destPath as "folder/title"
         let destPath = "\(folderPrefix)/\(titlePart)".replacingColonsWithDashes
