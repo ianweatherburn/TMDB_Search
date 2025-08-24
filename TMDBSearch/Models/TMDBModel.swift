@@ -24,7 +24,8 @@ final class AppModel {
     var errorMessage: String?
     var searchHistory: [SearchHistoryItem] = []
     var maxHistoryItems: Int = Constants.Configure.Preferences.History.size
-
+    var showHistoryFromMenu = false
+    
     struct DownloadPath {
         var primary: String = ""
         var backup: String?
@@ -222,6 +223,17 @@ final class AppModel {
             pasteboard.setString("\(item.plexTitle.replacingColonsWithDashes)", forType: .string)
             _ = NSSound(named: NSSound.Name(Constants.App.Sounds.nameCopy))?.play()
         }
+    }
+    
+    func clearSearchFromMenu() {
+        searchText = ""
+        searchResults = []
+        errorMessage = nil
+        updateAppTitle()
+    }
+    
+    func toggleSearchHistoryFromMenu() {
+        showHistoryFromMenu.toggle()
     }
 }
 

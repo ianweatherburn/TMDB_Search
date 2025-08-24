@@ -18,6 +18,18 @@ struct SearchHeader: View {
         self.isSearchFieldFocused = isSearchFieldFocused
     }
     
+    // MARK: - Actions
+    private func clearSearch() {
+        appModel.searchText = ""
+        appModel.searchResults = []
+        appModel.errorMessage = nil
+        appModel.updateAppTitle()
+    }
+    
+    private func toggleHistory() {
+        showingHistory.toggle()
+    }
+    
     var body: some View {
         HStack(spacing: 16) {
             // Search field with integrated icon
@@ -69,30 +81,29 @@ struct SearchHeader: View {
                 // Clear button - only visible when there's text
                 if !appModel.searchText.isEmpty {
                     Button(action: {
-                        appModel.searchText = ""
-                        appModel.searchResults = []
-                        appModel.errorMessage = nil
-                        appModel.updateAppTitle()
+                        clearSearch()
                     }, label: {
                         Image(symbol: SFSymbol6.Xmark.xmarkCircle)
                             .foregroundStyle(.secondary)
                             .font(.system(size: 13))
                     })
                     .buttonStyle(.plain)
-                    .help("Clear search")
+                    .help("Clear search (⌘⌫)")
+                    .keyboardShortcut(.delete, modifiers: .command)
                 }
                 
                 // History dropdown button
                 if !appModel.searchHistory.isEmpty {
                     Button(action: {
-                        showingHistory.toggle()
+                        toggleHistory()
                     }, label: {
                         Image(systemName: "clock.arrow.circlepath")
                             .foregroundStyle(.secondary)
                             .font(.system(size: 13))
                     })
                     .buttonStyle(.plain)
-                    .help("Search History")
+                    .help("Search History (⌘⇧H)")
+                    .keyboardShortcut("h", modifiers: [.command, .shift])
                 }
                 
             }
