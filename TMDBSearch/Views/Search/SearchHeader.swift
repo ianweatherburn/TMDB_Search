@@ -66,6 +66,22 @@ struct SearchHeader: View {
                         }
                     }
                 
+                // Clear button - only visible when there's text
+                if !appModel.searchText.isEmpty {
+                    Button(action: {
+                        appModel.searchText = ""
+                        appModel.searchResults = []
+                        appModel.errorMessage = nil
+                        appModel.updateAppTitle()
+                    }, label: {
+                        Image(symbol: SFSymbol6.Xmark.xmarkCircle)
+                            .foregroundStyle(.secondary)
+                            .font(.system(size: 13))
+                    })
+                    .buttonStyle(.plain)
+                    .help("Clear search")
+                }
+                
                 // History dropdown button
                 if !appModel.searchHistory.isEmpty {
                     Button(action: {
@@ -145,10 +161,17 @@ struct MediaTypeSegmentedPicker: View {
     }
 }
 
+// #Preview {
+//    @Previewable @FocusState var isSearchFieldFocused: Bool
+//    SearchHeader(isSearchFieldFocused: $isSearchFieldFocused)
+//        .environment(AppModel())   // inject a test AppModel
+//        .padding()
+//        .frame(width: Constants.App.Window.Main.width)
+// }
+
 #Preview {
     @Previewable @FocusState var isSearchFieldFocused: Bool
     SearchHeader(isSearchFieldFocused: $isSearchFieldFocused)
-        .environment(AppModel())   // inject a test AppModel
+        .environment(AppModel())
         .padding()
-        .frame(width: Constants.App.Window.Main.width)
 }
