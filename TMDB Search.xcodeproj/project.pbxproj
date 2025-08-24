@@ -60,7 +60,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3C2A22AA2E42017600ADB004 /* Build configuration list for PBXNativeTarget "TMDB Search" */;
 			buildPhases = (
-				3C431BE32E59FA7900A9369B /* ShellScript */,
 				3C2A229A2E42017500ADB004 /* Sources */,
 				3C2A229B2E42017500ADB004 /* Frameworks */,
 				3C2A229C2E42017500ADB004 /* Resources */,
@@ -130,27 +129,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		3C431BE32E59FA7900A9369B /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" = \"Debug\" ] || [ \"$CONFIGURATION\" = \"Release\" ]; then\n    xcrun agvtool next-version -all\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		3C2A229A2E42017500ADB004 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -203,7 +181,8 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 8;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 698M9J99J2;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -270,7 +249,8 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 8;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 698M9J99J2;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -304,7 +284,8 @@
 				CODE_SIGN_ENTITLEMENTS = TMDBSearch/Resources/TMDB_Search.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 8;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 698M9J99J2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -336,7 +317,8 @@
 				CODE_SIGN_ENTITLEMENTS = TMDBSearch/Resources/TMDB_Search.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 8;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 698M9J99J2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
