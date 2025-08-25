@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ConfigureDownload: View {
-    @Binding var downloadPath: AppModel.DownloadPath
+    @Binding var downloadPath: SettingsManager.DownloadPath
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {

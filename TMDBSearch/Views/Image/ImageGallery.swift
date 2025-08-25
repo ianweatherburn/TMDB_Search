@@ -124,10 +124,10 @@ struct ImageGallery: View {
         .onAppear {
             // Set initial grid size from app model
             if gridColumns == 0 { // Only set if not already configured
-                gridColumns = appModel.gridSize.columnCount(for: imageType)
+                gridColumns = appModel.settingsManager.gridSize.columnCount(for: imageType)
             }
         }
-        .onChange(of: appModel.gridSize) { _, newValue in
+        .onChange(of: appModel.settingsManager.gridSize) { _, newValue in
             gridColumns = newValue.columnCount(for: imageType)
         }
     }

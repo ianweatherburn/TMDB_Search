@@ -64,7 +64,7 @@ struct SearchHeader: View {
                                 }
                                 return .handled
                             }
-                        } else if keyPress.key == .downArrow && !appModel.searchHistory.isEmpty {
+                        } else if keyPress.key == .downArrow && !appModel.settingsManager.searchHistory.isEmpty {
                             showingHistory = true
                             return .handled
                         }
@@ -93,7 +93,7 @@ struct SearchHeader: View {
                 }
                 
                 // History dropdown button
-                if !appModel.searchHistory.isEmpty {
+                if !appModel.settingsManager.searchHistory.isEmpty {
                     Button(action: {
                         toggleHistory()
                     }, label: {
@@ -102,6 +102,9 @@ struct SearchHeader: View {
                             .font(.system(size: 13))
                     })
                     .buttonStyle(.plain)
+                    .popover(isPresented: $showingHistory, arrowEdge: .bottom) {
+                        SearchHistoryDropdown()
+                    }
                     .help("Search History (⌘⇧H)")
                     .keyboardShortcut("h", modifiers: [.command, .shift])
                 }
@@ -116,9 +119,6 @@ struct SearchHeader: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .frame(minWidth: Constants.App.Window.Main.height)
-            .popover(isPresented: $showingHistory, arrowEdge: .bottom) {
-                SearchHistoryDropdown()
-            }
             
             // Media type selector
             MediaTypeSegmentedPicker()

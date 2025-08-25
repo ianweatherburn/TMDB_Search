@@ -13,7 +13,7 @@ struct Configure: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedSection: SettingsSection = .api
     @State private var tempApiKey = ""
-    @State private var tempDownloadPath = AppModel.DownloadPath(primary: "", backup: nil)
+    @State private var tempDownloadPath = SettingsManager.DownloadPath(primary: "", backup: nil)
     @State private var tempDefaultGridSize: GridSize = Constants.Configure.Preferences.gridSize
     @State private var tempHistorySize = Constants.Configure.Preferences.History.size
 
@@ -60,32 +60,32 @@ struct Configure: View {
 
     // MARK: - Helper Properties & Methods
     private var hasChanges: Bool {
-        tempApiKey != appModel.apiKey ||
-        tempDownloadPath.primary != appModel.downloadPath.primary ||
-        tempDownloadPath.backup != appModel.downloadPath.backup ||
-        tempDefaultGridSize != appModel.gridSize ||
-        tempHistorySize != appModel.maxHistoryItems
+        tempApiKey != appModel.settingsManager.apiKey ||
+        tempDownloadPath.primary != appModel.settingsManager.downloadPath.primary ||
+        tempDownloadPath.backup != appModel.settingsManager.downloadPath.backup ||
+        tempDefaultGridSize != appModel.settingsManager.gridSize ||
+        tempHistorySize != appModel.settingsManager.maxHistoryItems
     }
 
     private func loadCurrentSettings() {
-        tempApiKey = appModel.apiKey
-        tempDownloadPath = appModel.downloadPath
-        tempDefaultGridSize = appModel.gridSize
-        tempHistorySize = appModel.maxHistoryItems
+        tempApiKey = appModel.settingsManager.apiKey
+        tempDownloadPath = appModel.settingsManager.downloadPath
+        tempDefaultGridSize = appModel.settingsManager.gridSize
+        tempHistorySize = appModel.settingsManager.maxHistoryItems
     }
 
     private func resetToOriginalValues() {
-        tempApiKey = appModel.apiKey
-        tempDownloadPath = appModel.downloadPath
-        tempDefaultGridSize = appModel.gridSize
-        tempHistorySize = appModel.maxHistoryItems
+        tempApiKey = appModel.settingsManager.apiKey
+        tempDownloadPath = appModel.settingsManager.downloadPath
+        tempDefaultGridSize = appModel.settingsManager.gridSize
+        tempHistorySize = appModel.settingsManager.maxHistoryItems
     }
 
     private func saveSettings() {
-        appModel.apiKey = tempApiKey
-        appModel.downloadPath = tempDownloadPath
-        appModel.gridSize = tempDefaultGridSize
-        appModel.maxHistoryItems = tempHistorySize
+        appModel.settingsManager.apiKey = tempApiKey
+        appModel.settingsManager.downloadPath = tempDownloadPath
+        appModel.settingsManager.gridSize = tempDefaultGridSize
+        appModel.settingsManager.maxHistoryItems = tempHistorySize
         appModel.saveSettings()
     }
 

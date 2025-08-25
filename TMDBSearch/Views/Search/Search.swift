@@ -116,7 +116,7 @@ struct SearchHistoryDropdown: View {
             // History items
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 2) {
-                    ForEach(appModel.searchHistory) { item in
+                    ForEach(appModel.settingsManager.searchHistory) { item in
                         SearchHistoryRow(item: item) {
                             appModel.selectHistoryItem(item)
                             dismiss()

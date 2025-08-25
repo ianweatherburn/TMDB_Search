@@ -32,7 +32,7 @@ struct TMDBSearchApp: App {
                     NotificationCenter.default.post(name: .showSearchHistory, object: nil)
                 }
                 .keyboardShortcut("h", modifiers: [.command, .shift])
-                .disabled(appModel.searchHistory.isEmpty)
+                .disabled(appModel.settingsManager.searchHistory.isEmpty)
             }
             CommandGroup(replacing: .help) {
                 Button("TMDB Search Help") {

@@ -1,5 +1,5 @@
 //
-//  TMDB_Model.swift
+//  AppModel.swift
 //  TMDB Search
 //
 //  Created by Ian Weatherburn on 2025/08/05.
@@ -13,97 +13,39 @@ import SFSymbol
 // MARK: - App Model (Observable)
 @Observable
 final class AppModel {
-    var apiKey: String = ""
-    var downloadPath: DownloadPath = DownloadPath(primary: "", backup: nil)
     var searchResults: [TMDBMediaItem] = []
     var isLoading: Bool = false
     var searchText: String = ""
     var selectedMediaType: MediaType = .tv
     var selectedLanguages: [String] = Constants.Services.TMDB.languages
-    var gridSize: GridSize = Constants.Configure.Preferences.gridSize
     var errorMessage: String?
-    var searchHistory: [SearchHistoryItem] = []
-    var maxHistoryItems: Int = Constants.Configure.Preferences.History.size
     var showHistoryFromMenu = false
     
-    struct DownloadPath {
-        var primary: String = ""
-        var backup: String?
-    }
+    // Settings management through SettingsManager
+    private(set) var settingsManager = SettingsManager()
 
     private let tmdbService = TMDBService()
 
     init() {
-        loadSettings()
+        // Settings are now loaded through SettingsManager
     }
 
-    // Settings management
-    func loadSettings() {
-        apiKey = UserDefaults.standard.string(forKey: "TMDBAPIKey") ?? ""
-        downloadPath.primary = UserDefaults.standard.string(forKey: "DownloadPath") ?? NSHomeDirectory() +
-                               "/Downloads/TMDB"
-        downloadPath.backup = UserDefaults.standard.string(forKey: "DownloadPathBackup")
-
-        if let gridSizeRaw = UserDefaults.standard.string(forKey: "GridSize"),
-           let gridSize = GridSize(rawValue: gridSizeRaw) {
-            self.gridSize = gridSize
-        }
-
-        maxHistoryItems = UserDefaults.standard.integer(forKey: "MaxHistoryItems")
-        if maxHistoryItems == 0 { maxHistoryItems = 20 } // Default value
-        loadSearchHistory()
-    }
-
+    // MARK: - Settings Management
     func saveSettings() {
-        UserDefaults.standard.set(apiKey, forKey: "TMDBAPIKey")
-        UserDefaults.standard.set(downloadPath.primary, forKey: "DownloadPath")
-        UserDefaults.standard.set(downloadPath.backup, forKey: "DownloadPathBackup")
-        UserDefaults.standard.set(gridSize.rawValue, forKey: "GridSize")
-        UserDefaults.standard.set(maxHistoryItems, forKey: "MaxHistoryItems")
-        saveSearchHistory()
+        settingsManager.saveSettings()
     }
 
-    // Search history management
-    private func loadSearchHistory() {
-        if let data = UserDefaults.standard.data(forKey: "SearchHistory"),
-           let history = try? JSONDecoder().decode([SearchHistoryItem].self, from: data) {
-            searchHistory = history
-        }
-    }
-
-    private func saveSearchHistory() {
-        if let data = try? JSONEncoder().encode(searchHistory) {
-            UserDefaults.standard.set(data, forKey: "SearchHistory")
-        }
-    }
-
+    // MARK: - Search History Management
     func addToSearchHistory(searchText: String, mediaType: MediaType) {
-        let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedText.isEmpty else { return }
-
-        // Remove any existing entry with the same search text and media type
-        searchHistory.removeAll { $0.searchText.lowercased() == trimmedText.lowercased() && $0.mediaType == mediaType }
-
-        // Add new item to the beginning
-        let newItem = SearchHistoryItem(searchText: trimmedText, mediaType: mediaType)
-        searchHistory.insert(newItem, at: 0)
-
-        // Maintain maximum history size
-        if searchHistory.count > maxHistoryItems {
-            searchHistory = Array(searchHistory.prefix(maxHistoryItems))
-        }
-
-        saveSearchHistory()
+        settingsManager.addToSearchHistory(searchText: searchText, mediaType: mediaType)
     }
 
     func clearSearchHistory() {
-        searchHistory.removeAll()
-        saveSearchHistory()
+        settingsManager.clearSearchHistory()
     }
 
     func removeFromHistory(_ item: SearchHistoryItem) {
-        searchHistory.removeAll { $0.id == item.id }
-        saveSearchHistory()
+        settingsManager.removeFromHistory(item)
     }
 
     func selectHistoryItem(_ item: SearchHistoryItem) {
@@ -111,11 +53,15 @@ final class AppModel {
         selectedMediaType = item.mediaType
     }
 
-    // Search functionality
+    // MARK: - Search functionality
     @MainActor
     func performSearch() async {
-        guard !apiKey.isEmpty, !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            errorMessage = apiKey.isEmpty ? "Please set your TMDB API key in Settings" : "Please enter a search term"
+        guard !settingsManager.apiKey.isEmpty,
+               !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
+            errorMessage = 
+                settingsManager.apiKey.isEmpty ?
+                "Please set your TMDB API key in Settings" : "Please enter a search term"
             return
         }
 
@@ -128,7 +74,7 @@ final class AppModel {
             let results = try await tmdbService.searchMedia(
                 query: searchText,
                 mediaType: selectedMediaType,
-                apiKey: apiKey
+                apiKey: settingsManager.apiKey
             )
             searchResults = results
 
@@ -142,7 +88,7 @@ final class AppModel {
         isLoading = false
     }
 
-    // Image loading and downloading
+    // MARK: - Image loading and downloading
     @MainActor
     func loadImage(for item: TMDBMediaItem, as type: ImageType) async -> NSImage? {
         let path: String?
@@ -165,7 +111,7 @@ final class AppModel {
                 itemId: itemId,
                 mediaType: mediaType,
                 languages: selectedLanguages,
-                apiKey: apiKey)
+                apiKey: settingsManager.apiKey)
         } catch {
             print("Failed to load images: \(error)")
             return nil
@@ -176,12 +122,12 @@ final class AppModel {
         var path = ""
 
         // Append the Plex-style foldername to the destination path
-        path = URL(fileURLWithPath: downloadPath.primary).appendingPathComponent(destPath).path
+        path = URL(fileURLWithPath: settingsManager.downloadPath.primary).appendingPathComponent(destPath).path
         guard await tmdbService.downloadImage(path: sourcePath, to: path, filename: filename, flip: flip)
             else { return false }
 
         // Check if there is a backup download required
-        guard let backupPath = downloadPath.backup, !backupPath.isEmpty else { return true }
+        guard let backupPath = settingsManager.downloadPath.backup, !backupPath.isEmpty else { return true }
         path = URL(fileURLWithPath: backupPath).appendingPathComponent(destPath).path
         guard await tmdbService.downloadImage(
             path: sourcePath,
