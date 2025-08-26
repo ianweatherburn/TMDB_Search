@@ -34,7 +34,18 @@ extension Constants.App {
             static let height: CGFloat = 600
         }
     }
+    enum Menu {
+        static let clearSearch = "Clear Search"
+        static let showSearchHistory = "Show Search History"
+        static let help = "\(name) Help"
+    }
+    enum Help {
+        static let tapHelp = "Tap to copy the name or Opt+Tap to copy the ID"
+    }
+    
+    static let name = "TMDB Search"
     static let image = "tmdb"
+    static let defaultMediaType = MediaType.tv
 }
 
 // Image Display Constants

@@ -12,7 +12,6 @@ import SFSymbol
 struct SearchHeader: View {
     @Environment(AppModel.self) private var appModel
     private var isSearchFieldFocused: FocusState<Bool>.Binding
-    @State private var showingHistory = false
 
     init(isSearchFieldFocused: FocusState<Bool>.Binding) {
         self.isSearchFieldFocused = isSearchFieldFocused
@@ -24,10 +23,6 @@ struct SearchHeader: View {
         appModel.searchResults = []
         appModel.errorMessage = nil
         appModel.updateAppTitle()
-    }
-    
-    private func toggleHistory() {
-        showingHistory.toggle()
     }
     
     var body: some View {
@@ -65,7 +60,7 @@ struct SearchHeader: View {
                                 return .handled
                             }
                         } else if keyPress.key == .downArrow && !appModel.settingsManager.searchHistory.isEmpty {
-                            showingHistory = true
+                            appModel.showHistory = true
                             return .handled
                         }
                         return .ignored
@@ -95,14 +90,14 @@ struct SearchHeader: View {
                 // History dropdown button
                 if !appModel.settingsManager.searchHistory.isEmpty {
                     Button(action: {
-                        toggleHistory()
+                        appModel.showHistory.toggle()
                     }, label: {
                         Image(systemName: "clock.arrow.circlepath")
                             .foregroundStyle(.secondary)
                             .font(.system(size: 13))
                     })
                     .buttonStyle(.plain)
-                    .popover(isPresented: $showingHistory, arrowEdge: .bottom) {
+                    .popover(isPresented: Bindable(appModel).showHistory, arrowEdge: .bottom) {
                         SearchHistoryDropdown()
                     }
                     .help("Search History (⌘⇧H)")

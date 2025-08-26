@@ -73,12 +73,16 @@ struct MediaItemRow: View {
                 Spacer()
             }
         }
+        .background(
+            Color.clear
+                .contentShape(Rectangle()) // make the whole row tappable
+                .onTapGesture {
+                    appModel.copyToClipboard(item, idOnly: NSEvent.modifierFlags.contains(.option))
+                }
+        )
         .padding(.horizontal, 20)
         .padding(.vertical, 6)
         .cornerRadius(8)
-        .onTapGesture(count: 1, perform: { _ in
-            appModel.copyToClipboard(item, idOnly: NSEvent.modifierFlags.contains(.option))
-        })
         .sheet(isPresented: $showingPosterDialog) {
             ImageGallery(
                 item: item,
@@ -105,7 +109,7 @@ struct MediaItemRow: View {
                     .font(.headline)
                     .lineLimit(2)
                     .textSelection(.enabled)
-                    .help("Tap to copy the name or Opt+Tap to copy the ID")
+                    .help(Constants.App.Help.tapHelp)
                 
                 Spacer()
                 
@@ -121,10 +125,10 @@ struct MediaItemRow: View {
                 .font(.body)
                 .foregroundColor(.secondary)
                 .lineLimit(4)
-                .help("Tap to copy the name or Opt+Tap to copy the ID")
+                .allowsHitTesting(false)
+                .help(Constants.App.Help.tapHelp)
 
             Spacer()
         }
     }
-
 }

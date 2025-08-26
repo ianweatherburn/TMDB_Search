@@ -16,10 +16,11 @@ final class AppModel {
     var searchResults: [TMDBMediaItem] = []
     var isLoading: Bool = false
     var searchText: String = ""
-    var selectedMediaType: MediaType = .tv
+    var selectedMediaType: MediaType = Constants.App.defaultMediaType
     var selectedLanguages: [String] = Constants.Services.TMDB.languages
     var errorMessage: String?
-    var showHistoryFromMenu = false
+    var showHistory = false
+    var showHelp = false
     
     // Settings management through SettingsManager
     private(set) var settingsManager = SettingsManager()
@@ -157,9 +158,5 @@ final class AppModel {
         searchResults = []
         errorMessage = nil
         updateAppTitle()
-    }
-    
-    func toggleSearchHistoryFromMenu() {
-        showHistoryFromMenu.toggle()
     }
 }

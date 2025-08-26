@@ -12,7 +12,7 @@ import SFSymbol
 struct Search: View {
     @Environment(AppModel.self) private var appModel
     @FocusState private var isSearchFieldFocused: Bool
-    @Binding var showHelp: Bool
+//    @Binding var showHelp: Bool
 
     var body: some View {
         NavigationStack {
@@ -76,7 +76,7 @@ struct Search: View {
             isSearchFieldFocused = true
             appModel.updateAppTitle(with: "")
         }
-        .sheet(isPresented: $showHelp) {
+        .sheet(isPresented: Binding(appModel, keyPath: \.showHelp)) {
             ShowHelp()
                 .padding()
                 .frame(minWidth: Constants.App.Window.Help.width, minHeight: Constants.App.Window.Help.height)
@@ -184,6 +184,6 @@ struct SearchHistoryRow: View {
 }
 
 #Preview {
-    Search(showHelp: .constant(false))
+    Search()
         .environment(AppModel())
 }
