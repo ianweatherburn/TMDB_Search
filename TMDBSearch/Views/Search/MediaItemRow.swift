@@ -6,6 +6,7 @@
 ////
 
 import SwiftUI
+import SFSymbol
 
 // MARK: - Media Item Row
 struct MediaItemRow: View {
@@ -129,6 +130,47 @@ struct MediaItemRow: View {
                 .help(Constants.App.Help.tapHelp)
 
             Spacer()
+            
+            contentRowFunctions(for: item)
+        }
+    }
+    
+    @ViewBuilder
+    private func contentRowFunctions(for item: TMDBMediaItem) -> some View {
+        HStack {
+            Spacer()
+            
+            HStack(spacing: 12) {
+                Button(action: {
+                    appModel.copyToClipboard(item)
+                }, label: {
+                    Image(symbol: SFSymbol6.LetterA.letterACircle)
+                })
+                .buttonStyle(PlainButtonStyle())
+                .font(.title2)
+                .help("Copy Plex Title Name")
+                
+                Button(action: {
+                    appModel.copyToClipboard(item, idOnly: true)
+                }, label: {
+                    Image(symbol: SFSymbol6.Number.numberCircle)
+                })
+                .buttonStyle(PlainButtonStyle())
+                .font(.title2)
+                .help("Copy TMDB-ID")
+                
+/*
+                Button(action: {
+                    // Action for updating Plex Server metadata
+                    // You'll need to implement this action
+                }, label: {
+                    Image(symbol: SFSymbol6.Film.filmCircle)
+                })
+                .buttonStyle(PlainButtonStyle())
+                .font(.title2)
+                .help("Update Plex Server metadata")
+*/
+            }
         }
     }
 }

@@ -131,7 +131,7 @@ struct AppInstructions: View {
                 InstructionRow(
                     symbol: SFSymbol6.Photo.photoFill.rawValue,
                     title: "Browse Images",
-                    description: "Click poster or artwork logo"
+                    description: "Click poster or backdrop"
                 )
             }
             .frame(maxWidth: 220, alignment: .leading)
