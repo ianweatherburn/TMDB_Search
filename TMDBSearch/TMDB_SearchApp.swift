@@ -10,11 +10,13 @@ import SwiftUI
 struct TMDBSearchApp: App {
     @State private var appModel = AppModel()
     @State private var showHelp = false
-    
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
         WindowGroup {
             Search(showHelp: $showHelp)
                 .environment(appModel)
+                .environmentObject(appDelegate.fileManager)
         }
         .commands {
             // Add to Edit menu
@@ -45,6 +47,7 @@ struct TMDBSearchApp: App {
         Settings {
             Configure()
                 .environment(appModel)
+                .environmentObject(appDelegate.fileManager)
         }
     }
     

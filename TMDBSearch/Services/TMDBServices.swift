@@ -12,7 +12,7 @@ import ImageIO
 import UniformTypeIdentifiers
 
 // MARK: - TMDB Service
-final class TMDBService {
+final class TMDBServices {
     private let baseURL = Constants.Services.TMDB.baseURL
     private let imageBaseURL = Constants.Services.TMDB.imageURL
 

@@ -24,11 +24,7 @@ final class AppModel {
     // Settings management through SettingsManager
     private(set) var settingsManager = SettingsManager()
 
-    private let tmdbService = TMDBService()
-
-    init() {
-        // Settings are now loaded through SettingsManager
-    }
+    private let tmdbService = TMDBServices()
 
     // MARK: - Settings Management
     func saveSettings() {
@@ -122,24 +118,9 @@ final class AppModel {
         var path = ""
 
         // Append the Plex-style foldername to the destination path
-        path = URL(fileURLWithPath: settingsManager.downloadPath.primary).appendingPathComponent(destPath).path
+        path = URL(fileURLWithPath: settingsManager.downloadPath).appendingPathComponent(destPath).path
         guard await tmdbService.downloadImage(path: sourcePath, to: path, filename: filename, flip: flip)
             else { return false }
-
-        // Check if there is a backup download required
-        guard let backupPath = settingsManager.downloadPath.backup, !backupPath.isEmpty else { return true }
-        path = URL(fileURLWithPath: backupPath).appendingPathComponent(destPath).path
-        guard await tmdbService.downloadImage(
-            path: sourcePath,
-            to: path,
-            filename: filename,
-            flip: flip) else { return false }
-//        guard await tmdbService.downloadImageWithShellHelper(
-//            path: sourcePath,
-//            to: path,
-//            filename: filename,
-//            flip: flip
-//        ) else { return false }
 
         return true
     }
@@ -180,106 +161,5 @@ final class AppModel {
     
     func toggleSearchHistoryFromMenu() {
         showHistoryFromMenu.toggle()
-    }
-}
-
-/* // swiftlint:disable identifier_name */
-enum MediaType: String, CaseIterable, Codable {
-    case tv
-    case movie
-    case collection
-
-    var displayInfo: (icon: String, title: String, default: Bool) {
-        switch self {
-        case .tv: return (SFSymbol6.Photo.photo.rawValue, "Shows", true)
-        case .movie: return (SFSymbol6.Movieclapper.movieclapper.rawValue, "Movies", false)
-        case .collection: return (SFSymbol6.Film.filmStack.rawValue, "Collections", false)
-        }
-    }
-
-}
-/* // swiftlint:enable identifier_name */
-
-// MARK: - Grid Size Enum
-enum GridSize: String, CaseIterable, Identifiable, Equatable {
-    case tiny
-    case small
-    case medium
-    case large
-
-    var id: String { rawValue }
-
-    var displayName: String {
-        switch self {
-        case .tiny:
-            return "Tiny"
-        case .small:
-            return "Small"
-        case .medium:
-            return "Medium"
-        case .large:
-            return "Large"
-        }
-    }
-
-    var helpText: String {
-        switch self {
-        case .tiny:
-            return "Show more items in a smaller grid layout"
-        case .small:
-            return "Show items in a medium-sized grid layout"
-        case .medium:
-            return "Show fewer items in a larger grid layout"
-        case .large:
-            return "Show items in the largest grid layou"
-        }
-    }
-
-    var keyboardShortcut: String {
-        switch self {
-        case .tiny:
-            return "1"
-        case .small:
-            return "2"
-        case .medium:
-            return "3"
-        case .large:
-            return "4"
-        }
-    }
-
-    func columnCount(for imageType: ImageType) -> Int {
-        switch imageType {
-        case .poster:
-            switch self {
-            case .tiny:  return Constants.Image.Poster.Gallery.Count.small
-            case .small: return Constants.Image.Poster.Gallery.Count.medium
-            case .medium:  return Constants.Image.Poster.Gallery.Count.large
-            case .large:   return Constants.Image.Poster.Gallery.Count.huge
-            }
-        case .backdrop:
-            switch self {
-            case .tiny:  return Constants.Image.Backdrop.Gallery.Count.small
-            case .small: return Constants.Image.Backdrop.Gallery.Count.medium
-            case .medium:  return Constants.Image.Backdrop.Gallery.Count.large
-            case .large:   return Constants.Image.Backdrop.Gallery.Count.huge
-            }
-        }
-    }
-
-}
-
-// MARK: - Search History Item
-struct SearchHistoryItem: Codable, Identifiable, Equatable {
-    let id: UUID
-    let searchText: String
-    let mediaType: MediaType
-    let timestamp: Date
-
-    init(searchText: String, mediaType: MediaType) {
-        self.id = UUID()
-        self.searchText = searchText
-        self.mediaType = mediaType
-        self.timestamp = Date()
     }
 }

@@ -94,6 +94,7 @@ extension Constants.Configure {
             static let maximum: Double = 50
         }
         static let gridSize: GridSize = .small
+        static let downloadPath = NSHomeDirectory() + "/Downloads/TMDB"
     }
 }
 

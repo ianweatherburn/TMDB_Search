@@ -11,9 +11,8 @@ import Security
 // MARK: - Settings Manager
 @Observable
 final class SettingsManager {
-    
     // MARK: - Properties
-    var downloadPath: DownloadPath = DownloadPath(primary: "", backup: nil)
+    var downloadPath: String = ""
     var gridSize: GridSize = Constants.Configure.Preferences.gridSize
     var maxHistoryItems: Int = Constants.Configure.Preferences.History.size
     var searchHistory: [SearchHistoryItem] = []
@@ -30,11 +29,6 @@ final class SettingsManager {
         static let gridSize = "GridSize"
         static let maxHistoryItems = "MaxHistoryItems"
         static let searchHistory = "SearchHistory"
-    }
-    
-    struct DownloadPath {
-        var primary: String = ""
-        var backup: String?
     }
     
     // MARK: - Initialization
@@ -57,16 +51,27 @@ final class SettingsManager {
         saveSearchHistory()
     }
     
+    // NEW: Method to update download path from UnifiedFileManager
+    func updateDownloadPath(from fileManager: UnifiedFileManager) {
+        if let selectedURL = fileManager.selectedDirectory {
+            downloadPath = selectedURL.path
+            saveDownloadPaths()
+        }
+    }
+    
+    // NEW: Method to get current directory info from UnifiedFileManager
+    func getCurrentDirectoryInfo(from fileManager: UnifiedFileManager) -> DirectoryInfo? {
+        return fileManager.getSelectedDirectoryInfo()
+    }
+    
     // MARK: - Download Paths
     private func loadDownloadPaths() {
-        downloadPath.primary = UserDefaults.standard.string(forKey: UserDefaultsKeys.downloadPath)
-            ?? NSHomeDirectory() + "/Downloads/TMDB"
-        downloadPath.backup = UserDefaults.standard.string(forKey: UserDefaultsKeys.downloadPathBackup)
+        downloadPath = UserDefaults.standard.string(forKey: UserDefaultsKeys.downloadPath) ??
+            Constants.Configure.Preferences.downloadPath
     }
     
     private func saveDownloadPaths() {
-        UserDefaults.standard.set(downloadPath.primary, forKey: UserDefaultsKeys.downloadPath)
-        UserDefaults.standard.set(downloadPath.backup, forKey: UserDefaultsKeys.downloadPathBackup)
+        UserDefaults.standard.set(downloadPath, forKey: UserDefaultsKeys.downloadPath)
     }
     
     // MARK: - Grid Size

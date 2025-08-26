@@ -13,7 +13,7 @@ struct Configure: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedSection: SettingsSection = .api
     @State private var tempApiKey = ""
-    @State private var tempDownloadPath = SettingsManager.DownloadPath(primary: "", backup: nil)
+    @State private var tempDownloadPath = ""
     @State private var tempDefaultGridSize: GridSize = Constants.Configure.Preferences.gridSize
     @State private var tempHistorySize = Constants.Configure.Preferences.History.size
 
@@ -61,8 +61,9 @@ struct Configure: View {
     // MARK: - Helper Properties & Methods
     private var hasChanges: Bool {
         tempApiKey != appModel.settingsManager.apiKey ||
-        tempDownloadPath.primary != appModel.settingsManager.downloadPath.primary ||
-        tempDownloadPath.backup != appModel.settingsManager.downloadPath.backup ||
+//        tempDownloadPath.primary != appModel.settingsManager.downloadPath.primary ||
+//        tempDownloadPath.backup != appModel.settingsManager.downloadPath.backup ||
+        tempDownloadPath != appModel.settingsManager.downloadPath ||
         tempDefaultGridSize != appModel.settingsManager.gridSize ||
         tempHistorySize != appModel.settingsManager.maxHistoryItems
     }

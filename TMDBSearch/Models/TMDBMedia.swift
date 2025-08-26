@@ -1,9 +1,28 @@
 //
-//  TMDBMediaItem.swift
+//  TMDBMedia.swift
 //  TMDB Search
 //
 //  Created by Ian Weatherburn on 2025/08/05.
 //
+
+import SFSymbol
+
+/* // swiftlint:disable identifier_name */
+enum MediaType: String, CaseIterable, Codable {
+    case tv
+    case movie
+    case collection
+
+    var displayInfo: (icon: String, title: String, default: Bool) {
+        switch self {
+        case .tv: return (SFSymbol6.Photo.photo.rawValue, "Shows", true)
+        case .movie: return (SFSymbol6.Movieclapper.movieclapper.rawValue, "Movies", false)
+        case .collection: return (SFSymbol6.Film.filmStack.rawValue, "Collections", false)
+        }
+    }
+
+}
+/* // swiftlint:enable identifier_name */
 
 struct TMDBMediaItem: Codable, Identifiable, Equatable {
     let id: Int
