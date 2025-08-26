@@ -17,7 +17,7 @@ struct MediaItemRow: View {
     @State private var showingPosterDialog = false
     @State private var showingBackdropDialog = false
     
-    var mediaPopover: String {
+    private var mediaPopover: String {
         let type = String(describing: type.displayInfo.title)
         return "\(String(type.dropLast()).lowercased()) '\(item.formattedTitle)'."
     }

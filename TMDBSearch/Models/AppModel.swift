@@ -149,7 +149,7 @@ final class AppModel {
         }
     }
     
-    func clearSearchFromMenu() {
+    func clearSearch() {
         searchText = ""
         searchResults = []
         errorMessage = nil
