@@ -33,7 +33,7 @@ import SFSymbol
 
 struct ConfigureDownload: View {
     @Binding var downloadPath: String
-    @EnvironmentObject var fileManager: UnifiedFileManager
+    @Environment(UnifiedFileManager.self) var fileManager: UnifiedFileManager
     @State private var directoryInfo: DirectoryInfo?
     
     var body: some View {

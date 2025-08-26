@@ -31,7 +31,7 @@ struct AppCommands: Commands {
             Button(Constants.App.Menu.help) {
                 appModel.showHelp = true
             }
-            .keyboardShortcut("?", modifiers: [.command])
+            .keyboardShortcut("/", modifiers: [.command])
         }
     }
 

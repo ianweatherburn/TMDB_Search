@@ -8,23 +8,19 @@
 import SwiftUI
 import SFSymbol
 
-// MARK: - Models and Data Structures
-
 // MARK: - App Model (Observable)
 @Observable
 final class AppModel {
-    var searchResults: [TMDBMediaItem] = []
-    var isLoading: Bool = false
-    var searchText: String = ""
-    var selectedMediaType: MediaType = Constants.App.defaultMediaType
-    var selectedLanguages: [String] = Constants.Services.TMDB.languages
     var errorMessage: String?
-    var showHistory = false
+    var isLoading: Bool = false
+    var searchResults: [TMDBMediaItem] = []
+    var searchText: String = ""
+    var selectedLanguages: [String] = Constants.Services.TMDB.languages
+    var selectedMediaType: MediaType = Constants.App.defaultMediaType
     var showHelp = false
+    var showHistory = false
     
-    // Settings management through SettingsManager
     private(set) var settingsManager = SettingsManager()
-
     private let tmdbService = TMDBServices()
 
     // MARK: - Settings Management
@@ -128,7 +124,7 @@ final class AppModel {
 
     func updateAppTitle(with searchText: String = "", showing type: String = "") {
         if let window = NSApplication.shared.windows.first {
-            let windowTitle = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "TMDB Search"
+            let windowTitle = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? Constants.App.name
             if searchText.isEmpty {
                 window.title = windowTitle
             } else {

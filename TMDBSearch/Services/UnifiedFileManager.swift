@@ -8,9 +8,13 @@
 import Foundation
 import AppKit
 
-class UnifiedFileManager: ObservableObject {
-    @Published var selectedDirectory: URL?
-    @Published var hasDirectoryAccess = false
+// class UnifiedFileManager: ObservableObject {
+//    @Published var selectedDirectory: URL?
+//    @Published var hasDirectoryAccess = false
+@Observable
+final class UnifiedFileManager {
+    var selectedDirectory: URL?
+    var hasDirectoryAccess = false
     private let bookmarkKey = "SelectedDirectoryBookmark"
     
     init() {

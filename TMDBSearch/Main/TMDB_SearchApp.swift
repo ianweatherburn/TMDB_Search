@@ -9,7 +9,6 @@ import SwiftUI
 @main
 struct TMDBSearchApp: App {
     @State private var appModel = AppModel()
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
         // Main Window
@@ -17,6 +16,5 @@ struct TMDBSearchApp: App {
 
         // Settings
         SettingsScene(appModel: appModel)
-            .environmentObject(appDelegate.fileManager)
     }
 }

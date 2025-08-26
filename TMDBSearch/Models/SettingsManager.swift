@@ -51,7 +51,6 @@ final class SettingsManager {
         saveSearchHistory()
     }
     
-    // NEW: Method to update download path from UnifiedFileManager
     func updateDownloadPath(from fileManager: UnifiedFileManager) {
         if let selectedURL = fileManager.selectedDirectory {
             downloadPath = selectedURL.path
@@ -59,7 +58,6 @@ final class SettingsManager {
         }
     }
     
-    // NEW: Method to get current directory info from UnifiedFileManager
     func getCurrentDirectoryInfo(from fileManager: UnifiedFileManager) -> DirectoryInfo? {
         return fileManager.getSelectedDirectoryInfo()
     }

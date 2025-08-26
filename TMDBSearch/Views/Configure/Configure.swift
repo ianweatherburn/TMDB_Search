@@ -10,6 +10,7 @@ import SFSymbol
 
 struct Configure: View {
     @Environment(AppModel.self) private var appModel
+    @Environment(UnifiedFileManager.self) var fileManager: UnifiedFileManager
     @Environment(\.dismiss) private var dismiss
     @State private var selectedSection: SettingsSection = .api
     @State private var tempApiKey = ""
@@ -61,8 +62,6 @@ struct Configure: View {
     // MARK: - Helper Properties & Methods
     private var hasChanges: Bool {
         tempApiKey != appModel.settingsManager.apiKey ||
-//        tempDownloadPath.primary != appModel.settingsManager.downloadPath.primary ||
-//        tempDownloadPath.backup != appModel.settingsManager.downloadPath.backup ||
         tempDownloadPath != appModel.settingsManager.downloadPath ||
         tempDefaultGridSize != appModel.settingsManager.gridSize ||
         tempHistorySize != appModel.settingsManager.maxHistoryItems
