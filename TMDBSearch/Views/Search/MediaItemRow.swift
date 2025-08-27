@@ -142,13 +142,20 @@ struct MediaItemRow: View {
             
             HStack(spacing: 12) {
                 Button(action: {
-                    appModel.copyToClipboard(item)
+                    appModel.copyToClipboard(item, nameOnly: true)
                 }, label: {
-                    Image(symbol: SFSymbol6.LetterA.letterACircle)
+                    Image(symbol: SFSymbol6.Pencil.pencilCircle)
                 })
                 .buttonStyle(PlainButtonStyle())
-                .font(.title2)
-                .help("Copy Plex Title Name")
+                .help("Copy Title")
+                
+                Button(action: {
+                    appModel.copyToClipboard(item)
+                }, label: {
+                    Image(symbol: SFSymbol6.Folder.folderCircle)
+                })
+                .buttonStyle(PlainButtonStyle())
+                .help("Copy Asset Folder")
                 
                 Button(action: {
                     appModel.copyToClipboard(item, idOnly: true)
@@ -156,9 +163,7 @@ struct MediaItemRow: View {
                     Image(symbol: SFSymbol6.Number.numberCircle)
                 })
                 .buttonStyle(PlainButtonStyle())
-                .font(.title2)
                 .help("Copy TMDB-ID")
-                
 /*
                 Button(action: {
                     // Action for updating Plex Server metadata
@@ -167,10 +172,11 @@ struct MediaItemRow: View {
                     Image(symbol: SFSymbol6.Film.filmCircle)
                 })
                 .buttonStyle(PlainButtonStyle())
-                .font(.title2)
-                .help("Update Plex Server metadata")
-*/
+                .help("Update Plex Poster and Backdrop")
+ */
             }
+            .font(.title)
+
         }
     }
 }

@@ -14,6 +14,9 @@ struct Configure: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedSection: SettingsSection = .api
     @State private var tempApiKey = ""
+    @State private var tempPlexServer = ""
+    @State private var tempPlexToken = ""
+    @State private var tempPlexServerAssetPath = ""
     @State private var tempDownloadPath = ""
     @State private var tempDefaultGridSize: GridSize = Constants.Configure.Preferences.gridSize
     @State private var tempHistorySize = Constants.Configure.Preferences.History.size
@@ -32,7 +35,12 @@ struct Configure: View {
                             Group {
                                 switch selectedSection {
                                 case .api:
-                                    ConfigureAPI(apiKey: $tempApiKey)
+                                    ConfigureAPI(
+                                        apiKey: $tempApiKey,
+                                        plexServer: $tempPlexServer,
+                                        plexToken: $tempPlexToken,
+                                        plexServerAssetPath: $tempPlexServerAssetPath,
+                                    )
                                 case .preferences:
                                     ConfigurePreferences(
                                         gridSize: $tempDefaultGridSize,
@@ -62,6 +70,9 @@ struct Configure: View {
     // MARK: - Helper Properties & Methods
     private var hasChanges: Bool {
         tempApiKey != appModel.settingsManager.apiKey ||
+        tempPlexServer != appModel.settingsManager.plexServer ||
+        tempPlexToken != appModel.settingsManager.plexToken ||
+        tempPlexServerAssetPath != appModel.settingsManager.plexServerAssetPath ||
         tempDownloadPath != appModel.settingsManager.downloadPath ||
         tempDefaultGridSize != appModel.settingsManager.gridSize ||
         tempHistorySize != appModel.settingsManager.maxHistoryItems
@@ -69,6 +80,9 @@ struct Configure: View {
 
     private func loadCurrentSettings() {
         tempApiKey = appModel.settingsManager.apiKey
+        tempPlexServer = appModel.settingsManager.plexServer
+        tempPlexToken = appModel.settingsManager.plexToken
+        tempPlexServerAssetPath = appModel.settingsManager.plexServerAssetPath
         tempDownloadPath = appModel.settingsManager.downloadPath
         tempDefaultGridSize = appModel.settingsManager.gridSize
         tempHistorySize = appModel.settingsManager.maxHistoryItems
@@ -76,6 +90,9 @@ struct Configure: View {
 
     private func resetToOriginalValues() {
         tempApiKey = appModel.settingsManager.apiKey
+        tempPlexServer = appModel.settingsManager.plexServer
+        tempPlexToken = appModel.settingsManager.plexToken
+        tempPlexServerAssetPath = appModel.settingsManager.plexServerAssetPath
         tempDownloadPath = appModel.settingsManager.downloadPath
         tempDefaultGridSize = appModel.settingsManager.gridSize
         tempHistorySize = appModel.settingsManager.maxHistoryItems
@@ -83,6 +100,9 @@ struct Configure: View {
 
     private func saveSettings() {
         appModel.settingsManager.apiKey = tempApiKey
+        appModel.settingsManager.plexServer = tempPlexServer
+        appModel.settingsManager.plexToken = tempPlexToken
+        appModel.settingsManager.plexServerAssetPath = tempPlexServerAssetPath
         appModel.settingsManager.downloadPath = tempDownloadPath
         appModel.settingsManager.gridSize = tempDefaultGridSize
         appModel.settingsManager.maxHistoryItems = tempHistorySize

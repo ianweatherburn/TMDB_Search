@@ -15,19 +15,23 @@ final class SettingsManager {
     var downloadPath: String = ""
     var gridSize: GridSize = Constants.Configure.Preferences.gridSize
     var maxHistoryItems: Int = Constants.Configure.Preferences.History.size
+    var plexServer: String = ""
+    var plexServerAssetPath: String = ""
     var searchHistory: [SearchHistoryItem] = []
     
     // MARK: - Keychain Keys
     private enum KeychainKeys {
         static let tmdbAPIKey = "com.tmdbsearch.apikey"
+        static let plexToken = "com.tmdbsearch.plex.token"
     }
     
     // MARK: - UserDefaults Keys
     private enum UserDefaultsKeys {
         static let downloadPath = "DownloadPath"
-        static let downloadPathBackup = "DownloadPathBackup"
         static let gridSize = "GridSize"
         static let maxHistoryItems = "MaxHistoryItems"
+        static let plexServer = "PlexServer"
+        static let plexServerAssetPath = "PlexServerAssetPath"
         static let searchHistory = "SearchHistory"
     }
     
@@ -41,6 +45,7 @@ final class SettingsManager {
         loadDownloadPaths()
         loadGridSize()
         loadMaxHistoryItems()
+        loadPlexServer()
         loadSearchHistory()
     }
     
@@ -48,16 +53,17 @@ final class SettingsManager {
         saveDownloadPaths()
         saveGridSize()
         saveMaxHistoryItems()
+        savePlexServer()
         saveSearchHistory()
     }
-    
+
     func updateDownloadPath(from fileManager: UnifiedFileManager) {
         if let selectedURL = fileManager.selectedDirectory {
             downloadPath = selectedURL.path
             saveDownloadPaths()
         }
     }
-    
+
     func getCurrentDirectoryInfo(from fileManager: UnifiedFileManager) -> DirectoryInfo? {
         return fileManager.getSelectedDirectoryInfo()
     }
@@ -94,6 +100,21 @@ final class SettingsManager {
     
     private func saveMaxHistoryItems() {
         UserDefaults.standard.set(maxHistoryItems, forKey: UserDefaultsKeys.maxHistoryItems)
+    }
+    
+    // MARK: - Plex Server
+    private func loadPlexServer() {
+        if let plexServerRaw = UserDefaults.standard.string(forKey: UserDefaultsKeys.plexServer) {
+            self.plexServer = plexServerRaw
+        }
+        if let plexServerAssetPathRaw = UserDefaults.standard.string(forKey: UserDefaultsKeys.plexServerAssetPath) {
+            self.plexServerAssetPath = plexServerAssetPathRaw
+        }
+    }
+    
+    private func savePlexServer() {
+        UserDefaults.standard.set(plexServer, forKey: UserDefaultsKeys.plexServer)
+        UserDefaults.standard.set(plexServerAssetPath, forKey: UserDefaultsKeys.plexServerAssetPath)
     }
     
     // MARK: - Search History Management
@@ -149,6 +170,19 @@ final class SettingsManager {
                 deleteKeychainValue(for: KeychainKeys.tmdbAPIKey)
             } else {
                 setKeychainValue(newValue, for: KeychainKeys.tmdbAPIKey)
+            }
+        }
+    }
+    
+    var plexToken: String {
+        get {
+            return getKeychainValue(for: KeychainKeys.plexToken) ?? ""
+        }
+        set {
+            if newValue.isEmpty {
+                deleteKeychainValue(for: KeychainKeys.plexToken)
+            } else {
+                setKeychainValue(newValue, for: KeychainKeys.plexToken)
             }
         }
     }
