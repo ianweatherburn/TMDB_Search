@@ -21,7 +21,7 @@ struct SearchHistoryDropdown: View {
                         .font(.headline)
                         .padding(.top, 8)
                    
-                    Text(appModel.settingsManager.searchHistory.count.inflect("item"))
+                    Text(appModel.settingsManager.searchHistory.count.pluralize("item"))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

@@ -43,7 +43,7 @@ struct ResultsHeader: View {
                 Text(mediaType.displayInfo.title)
                     .font(.system(size: 16, weight: .semibold))
                 
-                Text(count.inflect("result"))
+                Text(count.pluralize("result"))
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }

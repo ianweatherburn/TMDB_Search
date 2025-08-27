@@ -36,7 +36,7 @@ struct ImageGallery: View {
                             
                             if !isLoading && !images.isEmpty {
                                 HStack(spacing: 0) {
-                                    Text(images.count.inflect("image"))
+                                    Text(images.count.pluralize("image"))
                                     Text(" available")
                                 }
                                 .font(.caption)

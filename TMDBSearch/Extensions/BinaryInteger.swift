@@ -8,8 +8,9 @@
 import SwiftUI
 
 extension BinaryInteger {
-    func inflect(_ word: String) -> LocalizedStringKey {
-        let value = Int(self)           // <- concrete type for interpolation
-        return "^[\(value) \(word)](inflect: true)"
+    func pluralize(_ word: String, inflect: Bool = true) -> LocalizedStringKey {
+        return inflect ?
+            "^[\(Int(self)) \(word)](inflect: true)" :
+            "^[\(Int(self)) \(word)](inflect: false)"
     }
 }
