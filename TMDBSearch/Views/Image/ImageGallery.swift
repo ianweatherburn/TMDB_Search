@@ -35,9 +35,12 @@ struct ImageGallery: View {
                                 .fontWeight(.semibold)
                             
                             if !isLoading && !images.isEmpty {
-                                Text("\(images.count) images available")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                HStack(spacing: 0) {
+                                    Text(images.count.inflect("image"))
+                                    Text(" available")
+                                }
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                             }
                         }
                         

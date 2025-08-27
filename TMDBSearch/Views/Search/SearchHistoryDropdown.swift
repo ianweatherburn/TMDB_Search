@@ -16,10 +16,16 @@ struct SearchHistoryDropdown: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
-                Text("Search History")
-                    .font(.headline)
-                    .padding(.horizontal, 12)
-                    .padding(.top, 8)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Search History")
+                        .font(.headline)
+                        .padding(.top, 8)
+                   
+                    Text(appModel.settingsManager.searchHistory.count.inflect("item"))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 12)
                 
                 Spacer()
                 
