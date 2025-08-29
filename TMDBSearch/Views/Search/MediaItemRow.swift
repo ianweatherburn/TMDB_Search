@@ -114,12 +114,14 @@ struct MediaItemRow: View {
                 
                 Spacer()
                 
-                Text("\(item.id)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .textSelection(.enabled)
-                    .padding(.leading, 8)
-                    .help("TMDB-ID")
+                if appModel.settingsManager.showTMDBID {
+                    Text("\(item.id)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .textSelection(.enabled)
+                        .padding(.leading, 8)
+                        .help("TMDB-ID")
+                }
             }
 
             Text(item.overview)

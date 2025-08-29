@@ -18,6 +18,7 @@ final class SettingsManager {
     var plexServer: String = ""
     var plexServerAssetPath: String = ""
     var searchHistory: [SearchHistoryItem] = []
+    var showTMDBID: Bool = false
     
     // MARK: - Keychain Keys
     private enum KeychainKeys {
@@ -33,6 +34,7 @@ final class SettingsManager {
         static let plexServer = "PlexServer"
         static let plexServerAssetPath = "PlexServerAssetPath"
         static let searchHistory = "SearchHistory"
+        static let showTMDBID = "ShowTMDBID"
     }
     
     // MARK: - Initialization
@@ -42,6 +44,7 @@ final class SettingsManager {
     
     // MARK: - Settings Management
     func loadSettings() {
+        loadGeneralSettings()
         loadDownloadPaths()
         loadGridSize()
         loadMaxHistoryItems()
@@ -50,6 +53,7 @@ final class SettingsManager {
     }
     
     func saveSettings() {
+        saveGeneralSettings()
         saveDownloadPaths()
         saveGridSize()
         saveMaxHistoryItems()
@@ -66,6 +70,15 @@ final class SettingsManager {
 
     func getCurrentDirectoryInfo(from fileManager: UnifiedFileManager) -> DirectoryInfo? {
         return fileManager.getSelectedDirectoryInfo()
+    }
+    
+    // MARK: - General Settings
+    private func loadGeneralSettings() {
+        showTMDBID = UserDefaults.standard.bool(forKey: UserDefaultsKeys.showTMDBID)
+    }
+    
+    private func saveGeneralSettings() {
+        UserDefaults.standard.set(showTMDBID, forKey: UserDefaultsKeys.showTMDBID)
     }
     
     // MARK: - Download Paths

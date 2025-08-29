@@ -20,6 +20,7 @@ struct Configure: View {
     @State private var tempDownloadPath = ""
     @State private var tempDefaultGridSize: GridSize = Constants.Configure.Preferences.gridSize
     @State private var tempHistorySize = Constants.Configure.Preferences.History.size
+    @State private var tempshowTMDBID = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -44,7 +45,8 @@ struct Configure: View {
                                 case .preferences:
                                     ConfigurePreferences(
                                         gridSize: $tempDefaultGridSize,
-                                        historySize: $tempHistorySize
+                                        historySize: $tempHistorySize,
+                                        showTMDBID: $tempshowTMDBID
                                     )
                                 case .download:
                                     ConfigureDownload(downloadPath: $tempDownloadPath)
@@ -75,7 +77,8 @@ struct Configure: View {
         tempPlexServerAssetPath != appModel.settingsManager.plexServerAssetPath ||
         tempDownloadPath != appModel.settingsManager.downloadPath ||
         tempDefaultGridSize != appModel.settingsManager.gridSize ||
-        tempHistorySize != appModel.settingsManager.maxHistoryItems
+        tempHistorySize != appModel.settingsManager.maxHistoryItems ||
+        tempshowTMDBID != appModel.settingsManager.showTMDBID
     }
 
     private func loadCurrentSettings() {
@@ -86,6 +89,7 @@ struct Configure: View {
         tempDownloadPath = appModel.settingsManager.downloadPath
         tempDefaultGridSize = appModel.settingsManager.gridSize
         tempHistorySize = appModel.settingsManager.maxHistoryItems
+        tempshowTMDBID = appModel.settingsManager.showTMDBID
     }
 
     private func resetToOriginalValues() {
@@ -96,6 +100,7 @@ struct Configure: View {
         tempDownloadPath = appModel.settingsManager.downloadPath
         tempDefaultGridSize = appModel.settingsManager.gridSize
         tempHistorySize = appModel.settingsManager.maxHistoryItems
+        tempshowTMDBID = appModel.settingsManager.showTMDBID
     }
 
     private func saveSettings() {
@@ -106,6 +111,7 @@ struct Configure: View {
         appModel.settingsManager.downloadPath = tempDownloadPath
         appModel.settingsManager.gridSize = tempDefaultGridSize
         appModel.settingsManager.maxHistoryItems = tempHistorySize
+        appModel.settingsManager.showTMDBID = tempshowTMDBID
         appModel.saveSettings()
     }
 
