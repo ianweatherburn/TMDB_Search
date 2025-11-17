@@ -1,4 +1,4 @@
-![TMDB Search App Icon](https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-About.png)
+![TMDB Search App](https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-About.png)
 
 ![Release](https://img.shields.io/github/v/release/ianweatherburn/TMDB_Search.svg?label=Release)
 ![Swift](https://img.shields.io/badge/Swift-6.0-blue.svg)
@@ -31,10 +31,11 @@ TMDB Search is a macOS application that enables users to search and browse The M
 
 ## Screenshots
 
-| Movies | TV Shows | Posters | Backdrops |
-|--------|----------|---------|-----------|
-| <img src="https://github.com/ianweatherburn/TMDB_Search/raw/main/resources/screenshots/TMDB-Search-Movies.png" alt="Movies" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/raw/main/resources/screenshots/TMDB-Search-Shows.png" alt="TV Shows" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/raw/main/resources/screenshots/TMDB-Search-Posters.png" alt="Posters" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/raw/main/resources/screenshots/TMDB-Search-Backdrops.png" alt="Backdrops" width="320"/> |
-| Movies | TV Shows | Posters | Backdrops |
+| Movies | TV Shows |
+|--------|----------|
+| <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Movies.png" alt="Movies" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Shows.png" alt="TV Shows" width="320"/>
+| Posters | Backdrops |
+| <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Posters.png" alt="Posters" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Backdrops.png" alt="Backdrops" width="320"/>
 
 ## Requirements
 | Platform        | Minimum Swift Version | Xcode       | Required Packages                   |
