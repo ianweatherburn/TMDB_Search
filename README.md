@@ -35,6 +35,7 @@ TMDB Search is a macOS application that enables users to search and browse The M
 |--------|----------|
 | <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Movies.png" alt="Movies" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Shows.png" alt="TV Shows" width="320"/>
 | Posters | Backdrops |
+|---------|-----------|
 | <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Posters.png" alt="Posters" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Backdrops.png" alt="Backdrops" width="320"/>
 
 ## Requirements
@@ -46,5 +47,5 @@ TMDB Search is a macOS application that enables users to search and browse The M
 
 1. Clone this repository to your local machine:
    ```sh
-   git clone <repository_url>
+   git clone TMDB_Search
 
