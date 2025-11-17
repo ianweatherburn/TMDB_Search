@@ -20,8 +20,4 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             print("ℹ️ No previous directory access found")
         }
     }
-    
-//    func applicationWillTerminate(_ notification: Notification) {
-//        // Any cleanup if needed
-//    }
 }

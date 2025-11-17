@@ -12,7 +12,7 @@ struct MainWindowScene: Scene {
     let appModel: AppModel
 
     var body: some Scene {
-        Window(Constants.App.name, id: "main") {
+        Window(Constants.App.name, id: Constants.App.name) {
             Search()
                 .environment(appModel)
         }

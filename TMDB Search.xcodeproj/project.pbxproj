@@ -9,11 +9,13 @@
 /* Begin PBXBuildFile section */
 		3C31C6A72E586406009BDBDF /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 3C31C6A62E586406009BDBDF /* .swiftlint.yml */; };
 		3CEDCB4F2E54A709000BE2E0 /* SFSymbol in Frameworks */ = {isa = PBXBuildFile; productRef = 3CEDCB4E2E54A709000BE2E0 /* SFSymbol */; };
+		3CFA97532ECB4FBE00209C4B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 3CFA97522ECB4FBE00209C4B /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3C2A229E2E42017500ADB004 /* TMDB Search.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TMDB Search.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C31C6A62E586406009BDBDF /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
+		3CFA97522ECB4FBE00209C4B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -39,6 +41,7 @@
 		3C2A22952E42017500ADB004 = {
 			isa = PBXGroup;
 			children = (
+				3CFA97522ECB4FBE00209C4B /* README.md */,
 				3C31C6A62E586406009BDBDF /* .swiftlint.yml */,
 				3C2A22A02E42017500ADB004 /* TMDBSearch */,
 				3C2A229F2E42017500ADB004 /* Products */,
@@ -123,6 +126,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CFA97532ECB4FBE00209C4B /* README.md in Resources */,
 				3C31C6A72E586406009BDBDF /* .swiftlint.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -181,7 +185,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 243;
+				CURRENT_PROJECT_VERSION = 257;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 698M9J99J2;
@@ -250,7 +254,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 243;
+				CURRENT_PROJECT_VERSION = 257;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 698M9J99J2;
@@ -286,7 +290,7 @@
 				CODE_SIGN_ENTITLEMENTS = TMDBSearch/Resources/TMDB_Search.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 243;
+				CURRENT_PROJECT_VERSION = 257;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 698M9J99J2;
 				ENABLE_APP_SANDBOX = YES;
@@ -323,7 +327,7 @@
 				CODE_SIGN_ENTITLEMENTS = TMDBSearch/Resources/TMDB_Search.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 243;
+				CURRENT_PROJECT_VERSION = 257;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 698M9J99J2;
 				ENABLE_APP_SANDBOX = YES;
