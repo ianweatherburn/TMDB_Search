@@ -1,5 +1,4 @@
-![TMDB Search App Icon](assets/app-icon.png)
-<!-- Replace with your actual icon path -->
+![TMDB Search App Icon](https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-About.png)
 
 ![Release](https://img.shields.io/github/v/release/<your-username>/<your-repo>.svg?label=Release)
 ![Swift](https://img.shields.io/badge/Swift-6.0-blue.svg)
