@@ -1,6 +1,6 @@
 ![TMDB Search App Icon](https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-About.png)
 
-![Release](https://img.shields.io/github/v/release/<your-username>/<your-repo>.svg?label=Release)
+![Release](https://img.shields.io/github/v/release/ianweatherburn/TMDB_Search.svg?label=Release)
 ![Swift](https://img.shields.io/badge/Swift-6.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-macOS%2010.12%2B-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -29,6 +29,13 @@ TMDB Search is a macOS application that enables users to search and browse The M
 - Exporting TMDB-IDs for use in batch renaming or automation tools like Filebot.
 - Researching metadata details for movies, shows, or collections.
 
+## Screenshots
+
+| Movies | TV Shows | Posters | Backdrops |
+|--------|----------|---------|-----------|
+| <img src="https://github.com/ianweatherburn/TMDB_Search/raw/main/resources/screenshots/TMDB-Search-Movies.png" alt="Movies" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/raw/main/resources/screenshots/TMDB-Search-Shows.png" alt="TV Shows" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/raw/main/resources/screenshots/TMDB-Search-Posters.png" alt="Posters" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/raw/main/resources/screenshots/TMDB-Search-Backdrops.png" alt="Backdrops" width="320"/> |
+| Movies | TV Shows | Posters | Backdrops |
+
 ## Requirements
 | Platform        | Minimum Swift Version | Xcode       | Required Packages                   |
 |----------------|----------------------|-------------|-------------------------------------|
@@ -39,3 +46,4 @@ TMDB Search is a macOS application that enables users to search and browse The M
 1. Clone this repository to your local machine:
    ```sh
    git clone <repository_url>
+
