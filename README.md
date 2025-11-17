@@ -31,9 +31,12 @@ TMDB Search is a macOS application that enables users to search and browse The M
 
 ## Screenshots
 
+### Searching
 | Movies | TV Shows |
 |--------|----------|
 | <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Movies.png" alt="Movies" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Shows.png" alt="TV Shows" width="320"/>
+
+### Assets
 | Posters | Backdrops |
 |---------|-----------|
 | <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Posters.png" alt="Posters" width="320"/> | <img src="https://github.com/ianweatherburn/TMDB_Search/blob/main/TMDBSearch/Resources/Screenshots/TMDB-Search-Backdrops.png" alt="Backdrops" width="320"/>
