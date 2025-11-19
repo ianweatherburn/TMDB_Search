@@ -31,22 +31,33 @@ TMDB Search is a macOS application that enables users to search and browse The M
 
 ## Shortcuts
 
+### Searching
+Keyboard shortcuts for search categories, or use the Search buttons.
+
+| Shortcut | Keyboard | Feature |
+|----------|----------|---------|
+| ↵ | Return | Search for Shows |
+| ⇧↵ | Shift+Return | Search for Movies |
+| ⌥↵ | Option+Return | Search for Collections |
+| ⌘⇧H | Command+Shift+H | Show Search History |
+| ⌘⌫ | Command+Backspace | Clear Search |
+
 ### Search Result Shortcuts
-Keyboard shortcuts for each search result row-item, or use the control button. _Tap refers to a left-mouse click on the row_.
+Keyboard shortcuts for each search result row-item, or use the control button.
 
-| Shortcut | Feature |
-|----------|---------|
-| Tap      | Copy the media name, followed by the year (ie, "The Matrix (1999)")) |
-| ⌘+Tap    | Copy the media name only without the year (ie, "The Matrix") |
-| ⌥+Tap    | Copy the media TMDB-ID (ie, 603) |
-| ⌃+Tap    | Copy the update-poster script command (ie, upp "The Matrix (1999)" -l movies")
+| Shortcut | Keyboard | Feature |
+|----------|----------|---------|
+| Tap      | Left-Click | Copy the media name, followed by the year (ie, "The Matrix (1999)")) |
+| ⌘+Tap    | Command+Left-Click | Copy the media name only without the year (ie, "The Matrix") |
+| ⌥+Tap    | Option+Left-Click | Copy the media TMDB-ID (ie, 603) |
+| ⌃+Tap    | Control+Left-Click | Copy the update-poster script command (ie, upp "The Matrix (1999)" -l movies")
 
-### Poster and Backdrop Shortcuts
+### Poster and Backdrop Image Shortcuts
 
-| Shortcut | Feature |
-|----------|---------|
-| Tap      | Save the image to the file-system |
-| ⌥+Tap    | Flip the image horizontally first, before saving to the file-system |
+| Shortcut | Keyboard | Feature |
+|----------|----------|---------|
+| Tap      | Left-Click | Save the image to the file-system |
+| ⌥+Tap    | Option+Left-Click | Flip the image horizontally first, before saving to the file-system |
                 
 ## Screenshots
 
