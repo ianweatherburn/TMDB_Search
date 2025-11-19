@@ -59,7 +59,7 @@ struct TMDBMediaItem: Codable, Identifiable, Equatable {
         let year = displayYear.isEmpty ? "" : " (\(displayYear))"
         return "\(displayTitle)\(year)"
     }
-
+    
     var plexTitle: String {
         let year = displayYear.isEmpty ? "" : " (\(displayYear))"
         return "\(displayTitle)\(year) {tmdb-\(id)}"

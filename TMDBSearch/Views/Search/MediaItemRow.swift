@@ -46,8 +46,8 @@ struct MediaItemRow: View {
             .help("Show all posters for the \(mediaPopover)")
             
             // Content
-            contentRow(for: item)
-            
+            contentRow(for: item, type: type)
+
             Spacer()
             
             // Backdrop Thumbnail
@@ -77,8 +77,22 @@ struct MediaItemRow: View {
         .background(
             Color.clear
                 .contentShape(Rectangle()) // make the whole row tappable
+                //
+                // Tap: Copy the media name followed by the year (ie "The Matrix (1999)"
+                // Cmd+Click: Copy the media name only (ie "The Matrix)
+                // Opt+Click: Copy the media TMDB-ID (ie 603)
+                // Ctrl+Click: Copy the full update-poster script command
+                //
                 .onTapGesture {
-                    appModel.copyToClipboard(item, idOnly: NSEvent.modifierFlags.contains(.option))
+                    if NSEvent.modifierFlags.contains(.option) {
+                        appModel.copyToClipboard(item, element: .id, type: type)
+                    } else if NSEvent.modifierFlags.contains(.control) {
+                        appModel.copyToClipboard(item, element: .updatePoster, type: type)
+                    } else if NSEvent.modifierFlags.contains(.command) {
+                        appModel.copyToClipboard(item, element: .name, type: type)
+                    } else {
+                        appModel.copyToClipboard(item, element: .folder, type: type)
+                    }
                 }
         )
         .padding(.horizontal, 20)
@@ -103,7 +117,7 @@ struct MediaItemRow: View {
     }
     
     @ViewBuilder
-    private func contentRow(for item: TMDBMediaItem) -> some View {
+    private func contentRow(for item: TMDBMediaItem, type: MediaType) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(item.formattedTitle.replacingColonsWithDashes)
@@ -133,39 +147,48 @@ struct MediaItemRow: View {
 
             Spacer()
             
-            contentRowFunctions(for: item)
+            contentRowFunctions(for: item, type: type)
         }
     }
     
     @ViewBuilder
-    private func contentRowFunctions(for item: TMDBMediaItem) -> some View {
+    private func contentRowFunctions(for item: TMDBMediaItem, type: MediaType) -> some View {
         HStack {
             Spacer()
             
             HStack(spacing: 12) {
                 Button(action: {
-                    appModel.copyToClipboard(item, nameOnly: true)
+                    appModel.copyToClipboard(item, element: .name, type: type)
                 }, label: {
                     Image(symbol: SFSymbol6.Pencil.pencilCircle)
                 })
                 .buttonStyle(PlainButtonStyle())
-                .help("Copy Title")
+                .help(Constants.Media.Actions.Tooltip.name)
                 
                 Button(action: {
-                    appModel.copyToClipboard(item)
+                    appModel.copyToClipboard(item, element: .folder)
                 }, label: {
                     Image(symbol: SFSymbol6.Folder.folderCircle)
                 })
                 .buttonStyle(PlainButtonStyle())
-                .help("Copy Asset Folder")
+                .help(Constants.Media.Actions.Tooltip.folder)
                 
                 Button(action: {
-                    appModel.copyToClipboard(item, idOnly: true)
+                    appModel.copyToClipboard(item, element: .id)
                 }, label: {
                     Image(symbol: SFSymbol6.Number.numberCircle)
                 })
                 .buttonStyle(PlainButtonStyle())
-                .help("Copy TMDB-ID")
+                .help(Constants.Media.Actions.Tooltip.id)
+                
+                Button(action: {
+                    appModel.copyToClipboard(item, element: .updatePoster, type: type)
+                }, label: {
+                    Image(symbol: SFSymbol6.Figure.figureRunCircle)
+                })
+                .buttonStyle(PlainButtonStyle())
+                .help(Constants.Media.Actions.Tooltip.updatePoster)
+
 /*
                 Button(action: {
                     // Action for updating Plex Server metadata
@@ -174,7 +197,7 @@ struct MediaItemRow: View {
                     Image(symbol: SFSymbol6.Film.filmCircle)
                 })
                 .buttonStyle(PlainButtonStyle())
-                .help("Update Plex Poster and Backdrop")
+                .help(Constants.Media.Action.Tooltip.updatePlex)
  */
             }
             .font(.title)

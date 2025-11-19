@@ -7,24 +7,52 @@
 
 import AppKit // Required for NSPasteboard and NSSound
 
+enum CopyParts {
+    case folder
+    case id
+    case name
+    case updatePoster
+}
+
 // MARK: - Clipboard Functionality
 extension AppModel {
-    func copyToClipboard(_ item: TMDBMediaItem, idOnly: Bool = false, nameOnly: Bool = false) {
+    func copyToClipboard(_ item: TMDBMediaItem, element: CopyParts = .folder, type: MediaType = .tv) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-
-        if idOnly {
-            // Copy TMDB ID only
-            pasteboard.setString(String(item.id), forType: .string)
-            _ = NSSound(named: NSSound.Name(Constants.App.Sounds.idCopy))?.play()
-        } else if nameOnly {
-            // Copy Name only
-            pasteboard.setString(String(item.formattedTitle), forType: .string)
-            _ = NSSound(named: NSSound.Name(Constants.App.Sounds.nameCopy))?.play()
-        } else {
-            // Copy Plex formatted name with title and tmdb-id
+        
+        switch element {
+        case .folder:
             pasteboard.setString("\(item.plexTitle.replacingColonsWithDashes)", forType: .string)
             _ = NSSound(named: NSSound.Name(Constants.App.Sounds.nameCopy))?.play()
+        case .id:
+            pasteboard.setString(String(item.id), forType: .string)
+            _ = NSSound(named: NSSound.Name(Constants.App.Sounds.idCopy))?.play()
+        case .name:
+            pasteboard.setString(String(item.displayTitle), forType: .string)
+            _ = NSSound(named: NSSound.Name(Constants.App.Sounds.nameCopy))?.play()
+        case .updatePoster:
+            pasteboard.setString(updatePoster(for: item, type: type), forType: .string)
+            _ = NSSound(named: NSSound.Name(Constants.App.Sounds.idCopy))?.play()
         }
     }
+    
+    private func updatePoster(for item: TMDBMediaItem, type: MediaType) -> String {
+        var library = ""
+        
+        switch type {
+        case .tv:
+            library = Constants.Media.Types.shows
+        case .movie:
+            library = Constants.Media.Types.movies
+        case .collection:
+            library = Constants.Media.Types.movies
+        }
+        
+        return """
+        \(Constants.Media.UpdatePoster.script) "\(item.plexTitle.replacingColonsWithDashes)" \
+        \(Constants.Media.UpdatePoster.library) \(library) \
+        \(type == .collection ? " \(Constants.Media.UpdatePoster.collection)" : "")
+        """
+    }
+
 }
