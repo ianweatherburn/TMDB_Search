@@ -35,7 +35,7 @@ Keyboard shortcuts for each search result row-item, or use the control button. _
 | Shortcut | Feature |
 |----------|---------|
 | Tap      | Copy the media name, followed by the year (ie, "The Matrix (1999)")) |
-| ⌘+Tap    | Copy the media name only without th year (ie, "The Matrix") |
+| ⌘+Tap    | Copy the media name only without the year (ie, "The Matrix") |
 | ⌥+Tap    | Copy the media TMDB-ID (ie, 603) |
 | ⌃+Tap    | Copy the update-poster script command (ie, upp "The Matrix (1999)" -l movies")
                 

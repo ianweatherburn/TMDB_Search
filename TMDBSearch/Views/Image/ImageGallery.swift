@@ -46,35 +46,43 @@ struct ImageGallery: View {
                         
                         Spacer()
                         
-                        // View controls
-                        HStack(spacing: 12) {
-                            // Grid size control
-                            if !images.isEmpty {
-                                Menu {
-                                    ForEach(GridSize.allCases) { gridSize in
-                                        Button(gridSize.displayName) {
-                                            setGridSize(gridSize)
+                        VStack(spacing: 4) {
+                            // View controls
+                            HStack(spacing: 12) {
+                                
+                                Spacer()
+                                
+                                // Grid size control
+                                if !images.isEmpty {
+                                    Menu {
+                                        ForEach(GridSize.allCases) { gridSize in
+                                            Button(gridSize.displayName) {
+                                                setGridSize(gridSize)
+                                            }
+                                            .keyboardShortcut(KeyEquivalent(Character(gridSize.keyboardShortcut)),
+                                                              modifiers: .control)
+                                            .help(gridSize.helpText)
                                         }
-                                        .keyboardShortcut(KeyEquivalent(Character(gridSize.keyboardShortcut)),
-                                                          modifiers: .control)
-                                        .help(gridSize.helpText)
+                                    } label: {
+                                        //                                    Image(systemName: "square.grid.3x3")
+                                        Image(symbol: SFSymbol6.Square.squareGrid3x3)
+                                            .font(.system(size: 16))
                                     }
-                                } label: {
-//                                    Image(systemName: "square.grid.3x3")
-                                    Image(symbol: SFSymbol6.Square.squareGrid3x3)
-                                        .font(.system(size: 16))
+                                    .menuStyle(.borderlessButton)
+                                    .fixedSize()
+                                    .help("Change grid size")
                                 }
-                                .menuStyle(.borderlessButton)
-                                .fixedSize()
-                                .help("Change grid size")
+                                
+                                // Close button
+                                Button("Done") {
+                                    dismiss()
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .controlSize(.small)
                             }
+                            .padding(.horizontal, 0)
                             
-                            // Close button
-                            Button("Done") {
-                                dismiss()
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .controlSize(.small)
+                            saveInstructionText
                         }
                     }
                     .background {
@@ -212,5 +220,19 @@ struct ImageGallery: View {
     
     private func setGridSize(_ size: GridSize) {
         gridColumns = size.columnCount(for: imageType)
+    }
+    
+    @ViewBuilder
+    private var saveInstructionText: some View {
+        let tapIcon = Text(Image(systemName: "hand.tap.fill"))
+        let optionIcon = Text(Image(systemName: "option"))
+        
+        let save = tapIcon + Text(" to save •")
+        let optionSave = optionIcon + tapIcon + Text(" to flip and save")
+        
+        (save + optionSave)
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .trailing)
     }
 }
