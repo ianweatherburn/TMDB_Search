@@ -30,6 +30,8 @@ TMDB Search is a macOS application that enables users to search and browse The M
 - Researching metadata details for movies, shows, or collections.
 
 ## Shortcuts
+
+### Search Result Shortcuts
 Keyboard shortcuts for each search result row-item, or use the control button. _Tap refers to a left-mouse click on the row_.
 
 | Shortcut | Feature |
@@ -38,6 +40,13 @@ Keyboard shortcuts for each search result row-item, or use the control button. _
 | ⌘+Tap    | Copy the media name only without the year (ie, "The Matrix") |
 | ⌥+Tap    | Copy the media TMDB-ID (ie, 603) |
 | ⌃+Tap    | Copy the update-poster script command (ie, upp "The Matrix (1999)" -l movies")
+
+### Poster and Backdrop Shortcuts
+
+| Shortcut | Feature |
+|----------|---------|
+| Tap      | Save the image to the file-system |
+| ⌥+Tap    | Flip the image horizontally first, before saving to the file-system |
                 
 ## Screenshots
 
