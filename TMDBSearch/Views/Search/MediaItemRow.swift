@@ -182,7 +182,11 @@ struct MediaItemRow: View {
                 .help(Constants.Media.Actions.Tooltip.id)
                 
                 Button(action: {
-                    appModel.copyToClipboard(item, element: .updatePoster, type: type)
+                    if NSEvent.modifierFlags.contains(.option) {
+                        appModel.copyToClipboard(item, element: .updatePoster, type: type, uhd: true)
+                    } else {
+                        appModel.copyToClipboard(item, element: .updatePoster, type: type)
+                    }
                 }, label: {
                     Image(symbol: SFSymbol6.Figure.figureRunCircle)
                 })

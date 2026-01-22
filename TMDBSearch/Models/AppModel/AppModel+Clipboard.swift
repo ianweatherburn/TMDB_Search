@@ -16,7 +16,12 @@ enum CopyParts {
 
 // MARK: - Clipboard Functionality
 extension AppModel {
-    func copyToClipboard(_ item: TMDBMediaItem, element: CopyParts = .folder, type: MediaType = .tv) {
+    func copyToClipboard(
+      _ item: TMDBMediaItem,
+      element: CopyParts = .folder,
+      type: MediaType = .tv,
+      uhd: Bool = false
+    ) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         
@@ -31,12 +36,16 @@ extension AppModel {
             pasteboard.setString(String(item.displayTitle), forType: .string)
             _ = NSSound(named: NSSound.Name(Constants.App.Sounds.nameCopy))?.play()
         case .updatePoster:
-            pasteboard.setString(updatePoster(for: item, type: type), forType: .string)
+          pasteboard.setString(updatePoster(for: item, type: type, uhd: uhd), forType: .string)
             _ = NSSound(named: NSSound.Name(Constants.App.Sounds.idCopy))?.play()
         }
     }
     
-    private func updatePoster(for item: TMDBMediaItem, type: MediaType) -> String {
+    private func updatePoster(
+      for item: TMDBMediaItem,
+      type: MediaType,
+      uhd: Bool
+    ) -> String {
         var library = ""
         
         switch type {
@@ -50,7 +59,7 @@ extension AppModel {
         
         return """
         \(Constants.Media.UpdatePoster.script) "\(item.plexTitle.replacingColonsWithDashes)" \
-        \(Constants.Media.UpdatePoster.library) \(library) \
+        \(Constants.Media.UpdatePoster.library) \(library)\(uhd ? "4k" : "")\
         \(type == .collection ? " \(Constants.Media.UpdatePoster.collection)" : "")
         """
     }
