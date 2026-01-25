@@ -11,15 +11,27 @@ import SFSymbol
 struct ShowHelp: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
+    @State private var isAnimating = false
     
     var body: some View {
         VStack(spacing: 32) {
             AppInfo()
+                .opacity(isAnimating ? 1 : 0)
+                .offset(y: isAnimating ? 0 : -20)
+            
             AppInstructions()
+                .opacity(isAnimating ? 1 : 0)
+                .offset(y: isAnimating ? 0 : 20)
+            
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.top, 60)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.6).delay(0.1)) {
+                isAnimating = true
+            }
+        }
     }
 }
 
