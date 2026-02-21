@@ -27,7 +27,7 @@ extension Constants.Media {
             static let folder = "Copy Asset Folder (Click)"
             static let id = "Copy TMDB-ID (⌥+Click)"
             static let updatePoster = "Copy Update Plex Poster Command (⌃+Click) (⌥⌃+Click for UHD)"
-            static let updatePlex = "Update Plex Posters"
+            static let updatePlexMetadata = "Update Plex Metadata (Click) (⌥+Click for 4K)"
         }
     }
 }

@@ -13,6 +13,7 @@ import SFSymbol
 final class AppModel {
     // MARK: - State Properties
     var errorMessage: String?
+    var statusMessage: String?
     var isLoading: Bool = false
     var searchResults: [TMDBMediaItem] = []
     var searchText: String = ""
@@ -23,10 +24,28 @@ final class AppModel {
     
     // MARK: - Managers and Services
     let tmdbService = TMDBServices()
+    let plexService = PlexServices()
     private(set) var settingsManager = SettingsManager()
     let fileManager: UnifiedFileManager
     
     init(fileManager: UnifiedFileManager = AppDelegate.shared.fileManager) {
         self.fileManager = fileManager
+    }
+    
+    // MARK: - Plex Library Fetching
+    @MainActor
+    func fetchPlexLibraries() async throws -> [PlexLibrary] {
+        guard !settingsManager.plexServer.isEmpty else {
+            throw URLError(.badURL)
+        }
+        
+        guard !settingsManager.plexToken.isEmpty else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        return try await plexService.fetchLibraries(
+            server: settingsManager.plexServer,
+            token: settingsManager.plexToken
+        )
     }
 }

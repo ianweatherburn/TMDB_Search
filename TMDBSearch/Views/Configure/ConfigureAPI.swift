@@ -13,79 +13,35 @@ struct ConfigureAPI: View {
     @Binding var plexServer: String
     @Binding var plexToken: String
     @Binding var plexServerAssetPath: String
-    @Environment(UnifiedFileManager.self) var fileManager: UnifiedFileManager
-    @State private var directoryInfo: DirectoryInfo?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("API Key")
-                    .font(.headline)
-                    .fontWeight(.medium)
-                SecureField("Enter your TMDB API key", text: $apiKey)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(.body, design: .monospaced))
-                HStack(spacing: 2) {
-                    Text("Get your API key from")
-                    Link(destination: URL(string: "https://www.themoviedb.org")!) {
-                        HStack(spacing: 2) {
-                            Image(symbol: SFSymbol6.Network.network)
-                                .imageScale(.medium)
-                            Text("The Movie Database")
-                        }
-                    }
-                    .tint(.accentColor)
-                }
+        Section {
+            SecureField("API Key", text: $apiKey, prompt: Text("Enter your TMDB API key"))
+                .font(.system(.body, design: .monospaced))
+        } header: {
+            Text("TMDB API Configuration")
+        } footer: {
+            HStack(spacing: 4) {
+                Text("Get your API key from")
+                Link("The Movie Database", destination: URL(string: "https://www.themoviedb.org")!)
+            }
+            .font(.caption)
+        }
+        
+        Section {
+            TextField("Server Address", text: $plexServer, prompt: Text("192.168.1.100:32400"))
+                .font(.system(.body, design: .monospaced))
+            
+            SecureField("Token", text: $plexToken, prompt: Text("Enter your Plex Token"))
+                .font(.system(.body, design: .monospaced))
+            
+            TextField("Asset Path", text: $plexServerAssetPath, prompt: Text("/path/to/assets"))
+                .font(.system(.body, design: .monospaced))
+        } header: {
+            Text("Plex Server (Optional)")
+        } footer: {
+            Text("Server address should include http:// or https:// prefix (e.g., http://192.168.1.100:32400). Asset path is the server-side path where Plex can access metadata files.")
                 .font(.caption)
-            }
-        }
-        
-        VStack(alignment: .leading, spacing: 24) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Plex Server")
-                    .font(.headline)
-                    .fontWeight(.medium)
-                TextField("Enter your Plex hostname or IP Address and Port", text: $plexServer)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(.body, design: .monospaced))
-                Text("Plex Token")
-                    .font(.headline)
-                    .fontWeight(.medium)
-                SecureField("Enter your Plex Token", text: $plexToken)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(.body, design: .monospaced))
-                Text("Plex Asset Path")
-                    .font(.headline)
-                    .fontWeight(.medium)
-                TextField("Enter your Plex path where assets can be found", text: $plexServerAssetPath)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(.body, design: .monospaced))
-            }
-        }
-    }
-    
-    private func selectPlexAssetFolder() {
-        if fileManager.requestDirectoryAccess() {
-            // Update the download path in settings
-            if let selectedURL = fileManager.selectedDirectory {
-                plexServerAssetPath = selectedURL.path
-                updateDirectoryInfoforPlexAssetFolder()
-            }
-        }
-    }
-    
-    private func clearPlexAssetFolder() {
-        fileManager.clearDirectoryAccess()
-        plexServerAssetPath = NSHomeDirectory() + "/Downloads/TMDB" // Reset to default
-        directoryInfo = nil
-    }
-    
-    private func updateDirectoryInfoforPlexAssetFolder() {
-        directoryInfo = fileManager.getSelectedDirectoryInfo()
-        
-        // Sync with the binding if we have directory access
-        if let selectedURL = fileManager.selectedDirectory {
-            plexServerAssetPath = selectedURL.path
         }
     }
 }

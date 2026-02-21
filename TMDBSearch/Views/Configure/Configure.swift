@@ -11,8 +11,7 @@ import SFSymbol
 struct Configure: View {
     @Environment(AppModel.self) private var appModel
     @Environment(UnifiedFileManager.self) var fileManager: UnifiedFileManager
-    @Environment(\.dismiss) private var dismiss
-    @State private var selectedSection: SettingsSection = .api
+    @State private var selectedTab: SettingsTab = .api
     @State private var tempApiKey = ""
     @State private var tempPlexServer = ""
     @State private var tempPlexToken = ""
@@ -21,66 +20,89 @@ struct Configure: View {
     @State private var tempDefaultGridSize: GridSize = Constants.Configure.Preferences.gridSize
     @State private var tempHistorySize = Constants.Configure.Preferences.History.size
     @State private var tempshowTMDBID = false
+    
+    // Plex Library Settings
+    @State private var tempPlexShowsLibrary = ""
+    @State private var tempPlexShowsLibraryId = ""
+    @State private var tempPlexShows4KLibrary = ""
+    @State private var tempPlexShows4KLibraryId = ""
+    @State private var tempPlexMoviesLibrary = ""
+    @State private var tempPlexMoviesLibraryId = ""
+    @State private var tempPlexMovies4KLibrary = ""
+    @State private var tempPlexMovies4KLibraryId = ""
 
     var body: some View {
-        GeometryReader { geometry in
-            HStack(spacing: 0) {
-                ConfigureSidebar(selectedSection: $selectedSection)
-                Rectangle()
-                    .fill(Color(NSColor.separatorColor))
-                    .frame(width: 1)
-                VStack(spacing: 0) {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 0) {
-                            ConfigureSectionHeader(section: selectedSection)
-                            Group {
-                                switch selectedSection {
-                                case .api:
-                                    ConfigureAPI(
-                                        apiKey: $tempApiKey,
-                                        plexServer: $tempPlexServer,
-                                        plexToken: $tempPlexToken,
-                                        plexServerAssetPath: $tempPlexServerAssetPath,
-                                    )
-                                case .preferences:
-                                    ConfigurePreferences(
-                                        gridSize: $tempDefaultGridSize,
-                                        historySize: $tempHistorySize,
-                                        showTMDBID: $tempshowTMDBID
-                                    )
-                                case .download:
-                                    ConfigureDownload(downloadPath: $tempDownloadPath)
-                                }
-                            }
-                            .padding(.horizontal, 32)
-                            .padding(.bottom, 16)
-                        }
-                    }
-                    .frame(maxHeight: geometry.size.height * Constants.Configure.Window.multiplier)
-                    BottomButtons(
-                        hasChanges: hasChanges,
-                        onSave: saveSettings,
-                        onCancel: { resetToOriginalValues(); dismiss() }
+        TabView(selection: $selectedTab) {
+            Tab("API", systemImage: SFSymbol6.Key.keyFill.rawValue, value: .api) {
+                Form {
+                    ConfigureAPI(
+                        apiKey: $tempApiKey,
+                        plexServer: $tempPlexServer,
+                        plexToken: $tempPlexToken,
+                        plexServerAssetPath: $tempPlexServerAssetPath
+                    )
+                    
+                    makePlexLibraryView()
+                }
+                .formStyle(.grouped)
+            }
+            
+            Tab("Preferences", systemImage: SFSymbol6.Gearshape.gearshapeFill.rawValue, value: .preferences) {
+                Form {
+                    ConfigurePreferences(
+                        gridSize: $tempDefaultGridSize,
+                        historySize: $tempHistorySize,
+                        showTMDBID: $tempshowTMDBID
                     )
                 }
+                .formStyle(.grouped)
+            }
+            
+            Tab("Download", systemImage: SFSymbol6.Folder.folderFill.rawValue, value: .download) {
+                Form {
+                    ConfigureDownload(downloadPath: $tempDownloadPath)
+                }
+                .formStyle(.grouped)
             }
         }
-        .background(Color(NSColor.windowBackgroundColor))
-        .onAppear { loadCurrentSettings() }
+        .tabViewStyle(.automatic)
+        .formStyle(.grouped)
+        .frame(width: 600, height: 500)
+        .onAppear(perform: loadCurrentSettings)
+        .onChange(of: tempApiKey, checkForChanges)
+        .onChange(of: tempPlexServer, checkForChanges)
+        .onChange(of: tempPlexToken, checkForChanges)
+        .onChange(of: tempPlexServerAssetPath, checkForChanges)
+        .onChange(of: tempDownloadPath, checkForChanges)
+        .onChange(of: tempDefaultGridSize, checkForChanges)
+        .onChange(of: tempHistorySize, checkForChanges)
+        .onChange(of: tempshowTMDBID, checkForChanges)
+        .onChange(of: tempPlexShowsLibrary, checkForChanges)
+        .onChange(of: tempPlexShowsLibraryId, checkForChanges)
+        .onChange(of: tempPlexShows4KLibrary, checkForChanges)
+        .onChange(of: tempPlexShows4KLibraryId, checkForChanges)
+        .onChange(of: tempPlexMoviesLibrary, checkForChanges)
+        .onChange(of: tempPlexMoviesLibraryId, checkForChanges)
+        .onChange(of: tempPlexMovies4KLibrary, checkForChanges)
+        .onChange(of: tempPlexMovies4KLibraryId, checkForChanges)
+    }
+    
+    // MARK: - View Components
+    @ViewBuilder
+    private func makePlexLibraryView() -> some View {
+        ConfigurePlex(
+            showsLibrary: $tempPlexShowsLibrary,
+            showsLibraryId: $tempPlexShowsLibraryId,
+            shows4KLibrary: $tempPlexShows4KLibrary,
+            shows4KLibraryId: $tempPlexShows4KLibraryId,
+            moviesLibrary: $tempPlexMoviesLibrary,
+            moviesLibraryId: $tempPlexMoviesLibraryId,
+            movies4KLibrary: $tempPlexMovies4KLibrary,
+            movies4KLibraryId: $tempPlexMovies4KLibraryId
+        )
     }
 
-    // MARK: - Helper Properties & Methods
-    private var hasChanges: Bool {
-        tempApiKey != appModel.settingsManager.apiKey ||
-        tempPlexServer != appModel.settingsManager.plexServer ||
-        tempPlexToken != appModel.settingsManager.plexToken ||
-        tempPlexServerAssetPath != appModel.settingsManager.plexServerAssetPath ||
-        tempDownloadPath != appModel.settingsManager.downloadPath ||
-        tempDefaultGridSize != appModel.settingsManager.gridSize ||
-        tempHistorySize != appModel.settingsManager.maxHistoryItems ||
-        tempshowTMDBID != appModel.settingsManager.showTMDBID
-    }
-
+    // MARK: - Helper Methods
     private func loadCurrentSettings() {
         tempApiKey = appModel.settingsManager.apiKey
         tempPlexServer = appModel.settingsManager.plexServer
@@ -90,20 +112,20 @@ struct Configure: View {
         tempDefaultGridSize = appModel.settingsManager.gridSize
         tempHistorySize = appModel.settingsManager.maxHistoryItems
         tempshowTMDBID = appModel.settingsManager.showTMDBID
+        
+        // Load Plex Library Settings
+        tempPlexShowsLibrary = appModel.settingsManager.plexShowsLibrary
+        tempPlexShowsLibraryId = appModel.settingsManager.plexShowsLibraryId
+        tempPlexShows4KLibrary = appModel.settingsManager.plexShows4KLibrary
+        tempPlexShows4KLibraryId = appModel.settingsManager.plexShows4KLibraryId
+        tempPlexMoviesLibrary = appModel.settingsManager.plexMoviesLibrary
+        tempPlexMoviesLibraryId = appModel.settingsManager.plexMoviesLibraryId
+        tempPlexMovies4KLibrary = appModel.settingsManager.plexMovies4KLibrary
+        tempPlexMovies4KLibraryId = appModel.settingsManager.plexMovies4KLibraryId
     }
 
-    private func resetToOriginalValues() {
-        tempApiKey = appModel.settingsManager.apiKey
-        tempPlexServer = appModel.settingsManager.plexServer
-        tempPlexToken = appModel.settingsManager.plexToken
-        tempPlexServerAssetPath = appModel.settingsManager.plexServerAssetPath
-        tempDownloadPath = appModel.settingsManager.downloadPath
-        tempDefaultGridSize = appModel.settingsManager.gridSize
-        tempHistorySize = appModel.settingsManager.maxHistoryItems
-        tempshowTMDBID = appModel.settingsManager.showTMDBID
-    }
-
-    private func saveSettings() {
+    private func checkForChanges() {
+        // Auto-save on change for macOS Settings pattern
         appModel.settingsManager.apiKey = tempApiKey
         appModel.settingsManager.plexServer = tempPlexServer
         appModel.settingsManager.plexToken = tempPlexToken
@@ -112,40 +134,29 @@ struct Configure: View {
         appModel.settingsManager.gridSize = tempDefaultGridSize
         appModel.settingsManager.maxHistoryItems = tempHistorySize
         appModel.settingsManager.showTMDBID = tempshowTMDBID
+        
+        // Save Plex Library Settings
+        appModel.settingsManager.plexShowsLibrary = tempPlexShowsLibrary
+        appModel.settingsManager.plexShowsLibraryId = tempPlexShowsLibraryId
+        appModel.settingsManager.plexShows4KLibrary = tempPlexShows4KLibrary
+        appModel.settingsManager.plexShows4KLibraryId = tempPlexShows4KLibraryId
+        appModel.settingsManager.plexMoviesLibrary = tempPlexMoviesLibrary
+        appModel.settingsManager.plexMoviesLibraryId = tempPlexMoviesLibraryId
+        appModel.settingsManager.plexMovies4KLibrary = tempPlexMovies4KLibrary
+        appModel.settingsManager.plexMovies4KLibraryId = tempPlexMovies4KLibraryId
+        
         appModel.saveSettings()
     }
 
-    enum SettingsSection: String, CaseIterable {
-        case api = "API", preferences = "Preferences", download = "Download"
-
-        var title: String {
-            switch self {
-            case .api: return "API Configuration"
-            case .preferences: return "Preferences"
-            case .download: return "Download Locations"
-            }
-        }
-
-        var symbol: String {
-            switch self {
-            case .api: return SFSymbol6.Key.keyFill.rawValue
-            case .preferences: return SFSymbol6.Gearshape.gearshapeFill.rawValue
-            case .download: return SFSymbol6.Folder.folderFill.rawValue
-            }
-        }
-
-        var description: String {
-            switch self {
-            case .api: return "Configure your TMDB API settings"
-            case .preferences: return "Customize display and behavior settings"
-            case .download: return "Set up download and backup locations"
-            }
-        }
+    enum SettingsTab: Hashable {
+        case api
+        case preferences
+        case download
     }
 }
 
-#Preview {
+#Preview("Settings") {
     Configure()
         .environment(AppModel())
-        .frame(width: 800, height: 600)
+        .environment(AppDelegate.shared.fileManager)
 }

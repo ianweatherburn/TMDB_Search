@@ -20,6 +20,16 @@ final class SettingsManager {
     var searchHistory: [SearchHistoryItem] = []
     var showTMDBID: Bool = false
     
+    // Plex Library Mappings
+    var plexShowsLibrary: String = ""
+    var plexShowsLibraryId: String = ""
+    var plexShows4KLibrary: String = ""
+    var plexShows4KLibraryId: String = ""
+    var plexMoviesLibrary: String = ""
+    var plexMoviesLibraryId: String = ""
+    var plexMovies4KLibrary: String = ""
+    var plexMovies4KLibraryId: String = ""
+    
     // MARK: - Keychain Keys
     private enum KeychainKeys {
         static let tmdbAPIKey = "com.tmdbsearch.apikey"
@@ -35,6 +45,16 @@ final class SettingsManager {
         static let plexServerAssetPath = "PlexServerAssetPath"
         static let searchHistory = "SearchHistory"
         static let showTMDBID = "ShowTMDBID"
+        
+        // Plex Library Keys
+        static let plexShowsLibrary = "PlexShowsLibrary"
+        static let plexShowsLibraryId = "PlexShowsLibraryId"
+        static let plexShows4KLibrary = "PlexShows4KLibrary"
+        static let plexShows4KLibraryId = "PlexShows4KLibraryId"
+        static let plexMoviesLibrary = "PlexMoviesLibrary"
+        static let plexMoviesLibraryId = "PlexMoviesLibraryId"
+        static let plexMovies4KLibrary = "PlexMovies4KLibrary"
+        static let plexMovies4KLibraryId = "PlexMovies4KLibraryId"
     }
     
     // MARK: - Initialization
@@ -49,6 +69,7 @@ final class SettingsManager {
         loadGridSize()
         loadMaxHistoryItems()
         loadPlexServer()
+        loadPlexLibrarySettings()
         loadSearchHistory()
     }
     
@@ -58,6 +79,7 @@ final class SettingsManager {
         saveGridSize()
         saveMaxHistoryItems()
         savePlexServer()
+        savePlexLibrarySettings()
         saveSearchHistory()
     }
 
@@ -128,6 +150,47 @@ final class SettingsManager {
     private func savePlexServer() {
         UserDefaults.standard.set(plexServer, forKey: UserDefaultsKeys.plexServer)
         UserDefaults.standard.set(plexServerAssetPath, forKey: UserDefaultsKeys.plexServerAssetPath)
+    }
+    
+    // MARK: - Plex Library Settings
+    private func loadPlexLibrarySettings() {
+        plexShowsLibrary = UserDefaults.standard.string(forKey: UserDefaultsKeys.plexShowsLibrary) ?? ""
+        plexShowsLibraryId = UserDefaults.standard.string(forKey: UserDefaultsKeys.plexShowsLibraryId) ?? ""
+        plexShows4KLibrary = UserDefaults.standard.string(forKey: UserDefaultsKeys.plexShows4KLibrary) ?? ""
+        plexShows4KLibraryId = UserDefaults.standard.string(forKey: UserDefaultsKeys.plexShows4KLibraryId) ?? ""
+        plexMoviesLibrary = UserDefaults.standard.string(forKey: UserDefaultsKeys.plexMoviesLibrary) ?? ""
+        plexMoviesLibraryId = UserDefaults.standard.string(forKey: UserDefaultsKeys.plexMoviesLibraryId) ?? ""
+        plexMovies4KLibrary = UserDefaults.standard.string(forKey: UserDefaultsKeys.plexMovies4KLibrary) ?? ""
+        plexMovies4KLibraryId = UserDefaults.standard.string(forKey: UserDefaultsKeys.plexMovies4KLibraryId) ?? ""
+    }
+    
+    private func savePlexLibrarySettings() {
+        UserDefaults.standard.set(plexShowsLibrary, forKey: UserDefaultsKeys.plexShowsLibrary)
+        UserDefaults.standard.set(plexShowsLibraryId, forKey: UserDefaultsKeys.plexShowsLibraryId)
+        UserDefaults.standard.set(plexShows4KLibrary, forKey: UserDefaultsKeys.plexShows4KLibrary)
+        UserDefaults.standard.set(plexShows4KLibraryId, forKey: UserDefaultsKeys.plexShows4KLibraryId)
+        UserDefaults.standard.set(plexMoviesLibrary, forKey: UserDefaultsKeys.plexMoviesLibrary)
+        UserDefaults.standard.set(plexMoviesLibraryId, forKey: UserDefaultsKeys.plexMoviesLibraryId)
+        UserDefaults.standard.set(plexMovies4KLibrary, forKey: UserDefaultsKeys.plexMovies4KLibrary)
+        UserDefaults.standard.set(plexMovies4KLibraryId, forKey: UserDefaultsKeys.plexMovies4KLibraryId)
+    }
+    
+    func updatePlexLibrary(type: MediaType, uhd: Bool, library: PlexLibrary) {
+        switch (type, uhd) {
+        case (.tv, false):
+            plexShowsLibrary = library.title
+            plexShowsLibraryId = library.key
+        case (.tv, true):
+            plexShows4KLibrary = library.title
+            plexShows4KLibraryId = library.key
+        case (.movie, false), (.collection, false):
+            plexMoviesLibrary = library.title
+            plexMoviesLibraryId = library.key
+        case (.movie, true), (.collection, true):
+            plexMovies4KLibrary = library.title
+            plexMovies4KLibraryId = library.key
+        }
+        savePlexLibrarySettings()
     }
     
     // MARK: - Search History Management

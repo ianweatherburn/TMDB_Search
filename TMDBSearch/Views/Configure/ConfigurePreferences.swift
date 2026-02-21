@@ -13,19 +13,47 @@ struct ConfigurePreferences: View {
     @Binding var showTMDBID: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 32) {
-            GridSizeSection(gridSize: $gridSize)
-            HistorySizeSection(historySize: $historySize)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text("TMDB-ID")
-                    .font(.headline)
-                    .fontWeight(.medium)
-
-                Toggle("Show TMDB ID", isOn: $showTMDBID)
-                    .toggleStyle(.switch) // or .button for a button-style toggle
+        Section {
+            Picker("Grid Size", selection: $gridSize) {
+                ForEach(GridSize.allCases) { size in
+                    Text(size.displayName).tag(size)
+                }
             }
+            .pickerStyle(.segmented)
+        } header: {
+            Text("Image Gallery")
+        } footer: {
+            Text("Default grid size for displaying images.")
         }
-        .padding()
+        
+        Section {
+            HStack {
+                Text("History Size")
+                Spacer()
+                Text("\(historySize)")
+                    .foregroundStyle(.secondary)
+            }
+            
+            Slider(
+                value: Binding(
+                    get: { Double(historySize) },
+                    set: { historySize = Int($0) }
+                ),
+                in: Constants.Configure.Preferences.History.minimum...Constants.Configure.Preferences.History.maximum,
+                step: 1
+            )
+        } header: {
+            Text("Search History")
+        } footer: {
+            Text("Number of recent searches to remember (\(Int(Constants.Configure.Preferences.History.minimum))-\(Int(Constants.Configure.Preferences.History.maximum))).")
+        }
+        
+        Section {
+            Toggle("Show TMDB ID", isOn: $showTMDBID)
+        } header: {
+            Text("Display Options")
+        } footer: {
+            Text("Display the TMDB ID alongside media information.")
+        }
     }
 }

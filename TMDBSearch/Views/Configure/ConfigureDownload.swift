@@ -30,82 +30,72 @@
 
 import SwiftUI
 import SFSymbol
+import AppKit
 
 struct ConfigureDownload: View {
     @Binding var downloadPath: String
     @Environment(UnifiedFileManager.self) var fileManager: UnifiedFileManager
     @State private var directoryInfo: DirectoryInfo?
+    @State private var hostingWindow: NSWindow?
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 32) {
-            // Primary Download Folder Section
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Download Folder")
-                    .font(.headline)
-                    .fontWeight(.medium)
+        Section {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    if let info = directoryInfo {
+                        HStack(spacing: 6) {
+                            Image(systemName: info.isNetwork ? 
+                                  SFSymbol6.Network.network.rawValue : 
+                                  SFSymbol6.Folder.folder.rawValue)
+                                .foregroundStyle(.secondary)
+                            Text(info.displayName)
+                                .font(.body)
+                        }
+                        
+                        HStack(spacing: 12) {
+                            Label(info.isNetwork ? "Network" : "Local",
+                                  systemImage: info.isNetwork ?
+                                  SFSymbol6.Externaldrive.externaldriveConnectedToLineBelow.rawValue :
+                                  SFSymbol6.Internaldrive.internaldrive.rawValue)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            
+                            Label(info.isWritable ? "Writable" : "Read-only",
+                                  systemImage: info.isWritable ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(info.isWritable ? .green : .red)
+                        }
+                    } else {
+                        Text("No folder selected")
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 
-                HStack(spacing: 12) {
-                    TextField("Select folder", text: $downloadPath)
-                        .textFieldStyle(.roundedBorder)
-                        .disabled(true) // Make read-only since we use the file manager
-                    
+                Spacer()
+                
+                HStack(spacing: 8) {
                     Button("Choose...") {
                         selectDownloadFolder()
                     }
-                    .buttonStyle(.bordered)
                     
                     if fileManager.hasDirectoryAccess {
                         Button("Clear") {
                             clearDownloadFolder()
                         }
-                        .buttonStyle(.bordered)
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                     }
                 }
-                
-                // Show current directory info
-                if let info = directoryInfo {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Label(info.path,
-                              systemImage: info.isNetwork ?
-                              SFSymbol6.Network.network.rawValue :
-                              SFSymbol6.Folder.folder.rawValue)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                        
-                        HStack {
-                            Label(info.isNetwork ? "Network Share" : "Local Folder",
-                                  systemImage: info.isNetwork ?
-                                  SFSymbol6.Externaldrive.externaldriveConnectedToLineBelow.rawValue :
-                                  SFSymbol6.Internaldrive.internaldrive.rawValue)
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            
-                            Spacer()
-                            
-                            Label(info.isWritable ? "Writable" : "Read-only",
-                                  systemImage: info.isWritable ? "checkmark.circle" : "xmark.circle")
-                                .font(.caption2)
-                                .foregroundColor(info.isWritable ? .green : .red)
-                        }
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color(NSColor.controlBackgroundColor))
-                    .cornerRadius(6)
-                } else if !downloadPath.isEmpty {
-                    Label(downloadPath, systemImage: "folder")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                }
-                
-                Text("Location where downloaded images will be saved. Supports both local folders and network shares.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            }
+        } header: {
+            Text("Download Location")
+        } footer: {
+            if let info = directoryInfo {
+                Text(info.path)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+            } else {
+                Text("Choose where to save downloaded images. Supports local folders and network shares.")
             }
         }
         .onAppear {
@@ -114,14 +104,32 @@ struct ConfigureDownload: View {
         .onChange(of: fileManager.selectedDirectory) { _, _ in
             updateDirectoryInfo()
         }
+        .background(WindowAccessor(window: $hostingWindow))
     }
     
     private func selectDownloadFolder() {
-        if fileManager.requestDirectoryAccess() {
-            // Update the download path in settings
-            if let selectedURL = fileManager.selectedDirectory {
-                downloadPath = selectedURL.path
-                updateDirectoryInfo()
+        // Try to get the window from multiple sources
+        let window = hostingWindow ?? NSApp.windows.first(where: { 
+            $0.isKeyWindow || $0.title.contains("Settings") || $0.isVisible 
+        })
+        
+        if let settingsWindow = window {
+            print("✅ Using window: \(settingsWindow.title) (sheet modal)")
+            // Use async callback-based approach with sheet modal
+            fileManager.requestDirectoryAccessAsync(from: settingsWindow) { success in
+                if success, let selectedURL = fileManager.selectedDirectory {
+                    downloadPath = selectedURL.path
+                    updateDirectoryInfo()
+                }
+            }
+        } else {
+            print("⚠️ No window found, using standalone modal")
+            // Fallback to sync version with standalone modal
+            if fileManager.requestDirectoryAccess() {
+                if let selectedURL = fileManager.selectedDirectory {
+                    downloadPath = selectedURL.path
+                    updateDirectoryInfo()
+                }
             }
         }
     }
@@ -138,6 +146,25 @@ struct ConfigureDownload: View {
         // Sync with the binding if we have directory access
         if let selectedURL = fileManager.selectedDirectory {
             downloadPath = selectedURL.path
+        }
+    }
+}
+
+// MARK: - Window Accessor Helper
+private struct WindowAccessor: NSViewRepresentable {
+    @Binding var window: NSWindow?
+    
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            self.window = view.window
+        }
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async {
+            self.window = nsView.window
         }
     }
 }

@@ -193,16 +193,27 @@ struct MediaItemRow: View {
                 .buttonStyle(PlainButtonStyle())
                 .help(Constants.Media.Actions.Tooltip.updatePoster)
 
-/*
                 Button(action: {
-                    // Action for updating Plex Server metadata
-                    // You'll need to implement this action
+                    Task {
+                        let isUHD = NSEvent.modifierFlags.contains(.option)
+                        print("=== PLEX UPDATE BUTTON CLICKED ===")
+                        print("Item: \(item.formattedTitle)")
+                        print("Type: \(type)")
+                        print("UHD Mode: \(isUHD)")
+                        print("Plex Title: \(item.plexTitle)")
+                        print("Folder Name: \(item.plexTitle.replacingColonsWithDashes)")
+                        
+                        if isUHD {
+                            await appModel.updatePlexMetadata(for: item, type: type, uhd: true)
+                        } else {
+                            await appModel.updatePlexMetadata(for: item, type: type, uhd: false)
+                        }
+                    }
                 }, label: {
                     Image(symbol: SFSymbol6.Film.filmCircle)
                 })
                 .buttonStyle(PlainButtonStyle())
-                .help(Constants.Media.Action.Tooltip.updatePlex)
- */
+                .help(Constants.Media.Actions.Tooltip.updatePlexMetadata)
             }
             .font(.title)
 

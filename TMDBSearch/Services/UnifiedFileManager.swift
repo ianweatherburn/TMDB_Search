@@ -22,7 +22,9 @@ final class UnifiedFileManager {
     }
     
     // MARK: - Directory Selection
-    func requestDirectoryAccess() -> Bool {
+    
+    /// Async version using sheet modal - prevents window ordering issues
+    func requestDirectoryAccessAsync(from window: NSWindow, completion: @escaping (Bool) -> Void) {
         let openPanel = NSOpenPanel()
         openPanel.canChooseDirectories = true
         openPanel.canChooseFiles = false
@@ -33,9 +35,55 @@ final class UnifiedFileManager {
         openPanel.prompt = "Select"
         openPanel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
         
-        if openPanel.runModal() == .OK, let selectedURL = openPanel.url {
+        // Present as sheet - this maintains proper window hierarchy
+        openPanel.beginSheetModal(for: window) { [weak self] response in
+            guard let self = self else {
+                completion(false)
+                return
+            }
+            
+            if response == .OK, let selectedURL = openPanel.url {
+                let success = self.setSelectedDirectory(selectedURL)
+                
+                // Ensure settings window stays key
+                DispatchQueue.main.async {
+                    window.makeKey()
+                }
+                
+                completion(success)
+            } else {
+                completion(false)
+            }
+        }
+    }
+    
+    /// Synchronous version - for backward compatibility
+    func requestDirectoryAccess(from window: NSWindow? = nil) -> Bool {
+        let openPanel = NSOpenPanel()
+        openPanel.canChooseDirectories = true
+        openPanel.canChooseFiles = false
+        openPanel.allowsMultipleSelection = false
+        openPanel.canCreateDirectories = true
+        openPanel.title = "Select Output Directory"
+        openPanel.message = "Choose where to save your images (local folder or network share)"
+        openPanel.prompt = "Select"
+        openPanel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
+        
+        // Run the panel modally
+        let response = openPanel.runModal()
+        
+        // Restore focus to window if provided
+        if let window = window {
+            DispatchQueue.main.async {
+                window.makeKeyAndOrderFront(nil)
+            }
+        }
+        
+        // Process the result
+        if response == .OK, let selectedURL = openPanel.url {
             return setSelectedDirectory(selectedURL)
         }
+        
         return false
     }
     

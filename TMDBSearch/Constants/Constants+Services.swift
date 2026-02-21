@@ -15,4 +15,9 @@ extension Constants.Services {
     enum Flip {
         static let quality = 0.6
     }
+    enum Plex {
+        static let librarySection = "/library/sections"
+        static let tokenParam = "X-Plex-Token"
+        static let pathParam = "path"
+    }
 }
