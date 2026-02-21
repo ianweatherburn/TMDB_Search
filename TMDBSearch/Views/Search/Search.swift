@@ -80,6 +80,17 @@ struct Search: View {
                 .padding()
                 .frame(minWidth: Constants.App.Window.Help.width, minHeight: Constants.App.Window.Help.height)
         }
+        .sheet(isPresented: Binding(appModel, keyPath: \.showPlexUploadProgress)) {
+            PlexUploadProgress(
+                mediaTitle: appModel.searchResults.first?.formattedTitle ?? "Media Item",
+                tasks: Binding(appModel, keyPath: \.plexUploadTasks),
+                currentTaskIndex: Binding(appModel, keyPath: \.plexCurrentTaskIndex),
+                isPresented: Binding(appModel, keyPath: \.showPlexUploadProgress),
+                onCancel: {
+                    appModel.cancelPlexUpload()
+                }
+            )
+        }
     }
 }
 

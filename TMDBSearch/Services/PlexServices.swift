@@ -139,6 +139,51 @@ final class PlexServices {
             throw URLError(.badURL)
         }
         
+        // Try search with original title first
+        if let result = try await performSearch(
+            server: server,
+            token: token,
+            sectionId: sectionId,
+            title: title,
+            year: year,
+            tmdbId: tmdbId
+        ) {
+            return result
+        }
+        
+        // If original search failed and title contains curly apostrophes, retry with straight apostrophes
+        if title.contains("'") {
+            let normalizedTitle = title
+                .replacingOccurrences(of: "'", with: "’")
+            
+            print("⚠️ Original search failed. Retrying with normalized apostrophes: \(normalizedTitle)")
+            
+            if let result = try await performSearch(
+                server: server,
+                token: token,
+                sectionId: sectionId,
+                title: normalizedTitle,
+                year: year,
+                tmdbId: tmdbId
+            ) {
+                return result
+            }
+        }
+        
+        print("❌ No matching item found after all attempts")
+        return nil
+    }
+    
+    // MARK: - Search Helper
+    
+    private func performSearch(
+        server: String,
+        token: String,
+        sectionId: String,
+        title: String,
+        year: String?,
+        tmdbId: String?
+    ) async throws -> String? {
         // Ensure server has protocol prefix
         var serverURL = server
         if !serverURL.hasPrefix("http://") && !serverURL.hasPrefix("https://") {
@@ -203,8 +248,129 @@ final class PlexServices {
             }
         }
         
-        print("❌ No matching item found")
         return nil
+    }
+    
+    // MARK: - Get Seasons
+    
+    func getSeasons(
+        server: String,
+        token: String,
+        showRatingKey: String
+    ) async throws -> [PlexSeason] {
+        guard !server.isEmpty, !token.isEmpty, !showRatingKey.isEmpty else {
+            throw URLError(.badURL)
+        }
+        
+        var serverURL = server
+        if !serverURL.hasPrefix("http://") && !serverURL.hasPrefix("https://") {
+            serverURL = "http://\(serverURL)"
+        }
+        
+        let urlString = "\(serverURL)/library/metadata/\(showRatingKey)/children?X-Plex-Token=\(token)"
+        
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let response = try JSONDecoder().decode(PlexChildrenResponse.self, from: data)
+        
+        return response.mediaContainer.metadata.map { metadata in
+            PlexSeason(
+                ratingKey: metadata.ratingKey,
+                index: metadata.index,
+                title: metadata.title
+            )
+        }
+    }
+    
+    // MARK: - Get Episodes
+    
+    func getEpisodes(
+        server: String,
+        token: String,
+        seasonRatingKey: String
+    ) async throws -> [PlexEpisode] {
+        guard !server.isEmpty, !token.isEmpty, !seasonRatingKey.isEmpty else {
+            throw URLError(.badURL)
+        }
+        
+        var serverURL = server
+        if !serverURL.hasPrefix("http://") && !serverURL.hasPrefix("https://") {
+            serverURL = "http://\(serverURL)"
+        }
+        
+        let urlString = "\(serverURL)/library/metadata/\(seasonRatingKey)/children?X-Plex-Token=\(token)"
+        
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let response = try JSONDecoder().decode(PlexChildrenResponse.self, from: data)
+        
+        return response.mediaContainer.metadata.compactMap { metadata in
+            guard let parentIndex = metadata.parentIndex else { return nil }
+            return PlexEpisode(
+                ratingKey: metadata.ratingKey,
+                index: metadata.index,
+                parentIndex: parentIndex,
+                title: metadata.title
+            )
+        }
+    }
+    
+    // MARK: - Upload Backdrop/Art
+    
+    func uploadBackdrop(
+        server: String,
+        token: String,
+        ratingKey: String,
+        backdropPath: String
+    ) async throws {
+        guard !server.isEmpty, !token.isEmpty, !ratingKey.isEmpty, !backdropPath.isEmpty else {
+            throw URLError(.badURL)
+        }
+        
+        var serverURL = server
+        if !serverURL.hasPrefix("http://") && !serverURL.hasPrefix("https://") {
+            serverURL = "http://\(serverURL)"
+        }
+        
+        guard let backdropData = try? Data(contentsOf: URL(fileURLWithPath: backdropPath)) else {
+            throw URLError(.fileDoesNotExist)
+        }
+        
+        let urlString = "\(serverURL)/library/metadata/\(ratingKey)/arts?X-Plex-Token=\(token)"
+        
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = backdropData
+        request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            guard (200...299).contains(httpResponse.statusCode) else {
+                if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                    throw URLError(.userAuthenticationRequired)
+                }
+                throw URLError(.badServerResponse)
+            }
+        }
     }
     
     // MARK: - Refresh Metadata (kept for backwards compatibility)

@@ -22,6 +22,12 @@ final class AppModel {
     var showHelp = false
     var showHistory = false
     
+    // MARK: - Plex Upload Progress
+    var showPlexUploadProgress = false
+    var plexUploadTasks: [AssetUploadTask] = []
+    var plexCurrentTaskIndex = 0
+    var plexUploadCancelled = false
+    
     // MARK: - Managers and Services
     let tmdbService = TMDBServices()
     let plexService = PlexServices()
