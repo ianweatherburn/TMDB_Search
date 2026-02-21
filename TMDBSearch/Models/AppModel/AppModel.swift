@@ -24,4 +24,9 @@ final class AppModel {
     // MARK: - Managers and Services
     let tmdbService = TMDBServices()
     private(set) var settingsManager = SettingsManager()
+    let fileManager: UnifiedFileManager
+    
+    init(fileManager: UnifiedFileManager = AppDelegate.shared.fileManager) {
+        self.fileManager = fileManager
+    }
 }

@@ -39,12 +39,13 @@ extension AppModel {
     }
 
     func downloadImage(sourcePath: String, destPath: String, filename: String, flip: Bool = false) async -> Bool {
-        // Append the folder name to the destination path
-        let path = URL(fileURLWithPath: settingsManager.downloadPath).appendingPathComponent(destPath).path
+        // Download the image data from TMDB (with optional flip)
+        guard let imageData = await tmdbService.downloadImageData(path: sourcePath, flip: flip) else {
+            print("❌ Failed to download image from TMDB")
+            return false
+        }
         
-        guard await tmdbService.downloadImage(path: sourcePath, to: path, filename: filename, flip: flip)
-            else { return false }
-
-        return true
+        // Save using UnifiedFileManager with security-scoped access
+        return await fileManager.saveImageData(imageData, filename: filename, subdirectory: destPath)
     }
 }

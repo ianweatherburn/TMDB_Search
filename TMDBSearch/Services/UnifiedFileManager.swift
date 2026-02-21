@@ -101,35 +101,7 @@ final class UnifiedFileManager {
         }
     }
     
-    private func loadSavedDirectory() {
-        guard let bookmarkData = UserDefaults.standard.data(forKey: bookmarkKey) else {
-            return
-        }
-        
-        do {
-            var isStale = false
-            let url = try URL(
-                resolvingBookmarkData: bookmarkData,
-                options: .withSecurityScope,
-                relativeTo: nil,
-                bookmarkDataIsStale: &isStale
-            )
-            
-            if isStale {
-                print("Bookmark is stale, re-requesting access...")
-                return
-            }
-            
-            self.selectedDirectory = url
-            self.hasDirectoryAccess = true
-            print("Restored directory access: \(url.path)")
-            
-        } catch {
-            print("Failed to restore bookmark: \(error)")
-            // Clear invalid bookmark
-            UserDefaults.standard.removeObject(forKey: bookmarkKey)
-        }
-    }
+
     
     // MARK: - File Operations
     func writeFile(data: Data, filename: String, subdirectory: String? = nil) async throws -> URL {
@@ -137,19 +109,25 @@ final class UnifiedFileManager {
             throw FileAccessError.noDirectorySelected
         }
         
-        guard baseDirectory.startAccessingSecurityScopedResource() else {
-            throw FileAccessError.cannotAccessSecurityScopedResource
-        }
-        defer { baseDirectory.stopAccessingSecurityScopedResource() }
+        // Security-scoped resource access is already active from setSelectedDirectory or restoreDirectoryAccess
+        // We don't need to call startAccessingSecurityScopedResource again here
         
         var targetDirectory = baseDirectory
         if let subdirectory = subdirectory {
             targetDirectory = baseDirectory.appendingPathComponent(subdirectory)
         }
         
-        try FileManager.default.createDirectory(at: targetDirectory, withIntermediateDirectories: true)
+        // Create directory with full permissions
+        try FileManager.default.createDirectory(
+            at: targetDirectory,
+            withIntermediateDirectories: true,
+            attributes: nil
+        )
+        
         let finalURL = try findUniqueFilename(in: targetDirectory, filename: filename)
-        try data.write(to: finalURL)
+        
+        // Write with explicit options for better error reporting
+        try data.write(to: finalURL, options: [.atomic])
         
         print("✅ File written: \(finalURL.path)")
         return finalURL
@@ -267,7 +245,24 @@ extension UnifiedFileManager {
             return true
             
         } catch {
-            print("Failed to download/save image: \(error)")
+            print("❌ Failed to download/save image: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    /// Saves image data directly to the security-scoped directory
+    /// - Parameters:
+    ///   - data: The image data to save
+    ///   - filename: The desired filename
+    ///   - subdirectory: Optional subdirectory path
+    /// - Returns: True if successful, false otherwise
+    func saveImageData(_ data: Data, filename: String, subdirectory: String? = nil) async -> Bool {
+        do {
+            let savedURL = try await writeFile(data: data, filename: filename, subdirectory: subdirectory)
+            print("✅ Image saved: \(savedURL.lastPathComponent)")
+            return true
+        } catch {
+            print("❌ Failed to save image: \(error.localizedDescription)")
             return false
         }
     }

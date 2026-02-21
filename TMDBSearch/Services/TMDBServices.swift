@@ -75,6 +75,40 @@ final class TMDBServices {
         }
     }
     
+    /// Downloads image data from TMDB and optionally flips it
+    /// - Parameters:
+    ///   - path: The TMDB image path
+    ///   - flip: Whether to flip the image horizontally
+    /// - Returns: The processed image data, or nil if download fails
+    func downloadImageData(path: String, flip: Bool = false) async -> Data? {
+        let urlString = "\(imageBaseURL)/original\(path)"
+        
+        guard let url = URL(string: urlString) else { 
+            print("❌ Invalid image URL: \(urlString)")
+            return nil 
+        }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            
+            // Process the image data and only flip horizontally if requested
+            if flip {
+                guard let flippedData = flipImageHorizontally(data) else {
+                    print("❌ Failed to flip image horizontally")
+                    return nil
+                }
+                return flippedData
+            } else {
+                return data
+            }
+        } catch {
+            print("❌ Failed to download image: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    /// Legacy method for backward compatibility - will be deprecated
+    @available(*, deprecated, message: "Use downloadImageData with UnifiedFileManager instead")
     func downloadImage(path: String, to directory: String, filename: String, flip: Bool = false) async -> Bool {
         let urlString = "\(imageBaseURL)/original\(path)"
         
