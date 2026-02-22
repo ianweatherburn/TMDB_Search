@@ -101,7 +101,7 @@ final class UnifiedFileManager {
             if url.startAccessingSecurityScopedResource() {
                 self.selectedDirectory = url
                 self.hasDirectoryAccess = true
-                print("✅ Directory access granted: \(url.path)")
+                DebugLogger.log("✅ Directory access granted: \(url.path)")
                 return true
             } else {
                 print("❌ Could not start accessing selected directory")
@@ -138,7 +138,7 @@ final class UnifiedFileManager {
             if url.startAccessingSecurityScopedResource() {
                 self.selectedDirectory = url
                 self.hasDirectoryAccess = true
-                print("✅ Restored RW access to: \(url.path)")
+                DebugLogger.log("✅ Restored RW access to: \(url.path)")
             } else {
                 print("❌ Failed to restore RW access to: \(url.path)")
             }
@@ -177,7 +177,7 @@ final class UnifiedFileManager {
         // Write with explicit options for better error reporting
         try data.write(to: finalURL, options: [.atomic])
         
-        print("✅ File written: \(finalURL.path)")
+        DebugLogger.log("✅ File written: \(finalURL.path)")
         return finalURL
     }
     
@@ -278,7 +278,7 @@ struct DirectoryInfo {
 extension UnifiedFileManager {
     func downloadAndSaveImage(from urlString: String, filename: String, subdirectory: String? = nil) async -> Bool {
         guard let url = URL(string: urlString) else {
-            print("âŒ Invalid URL: \(urlString)")
+            DebugLogger.log("Invalid URL: \(urlString)")
             return false
         }
         
@@ -289,7 +289,7 @@ extension UnifiedFileManager {
             // Save to selected directory
             let savedURL = try await writeFile(data: data, filename: filename, subdirectory: subdirectory)
             
-            print("Image saved: \(savedURL.lastPathComponent)")
+            DebugLogger.log("Image saved: \(savedURL.lastPathComponent)")
             return true
             
         } catch {
@@ -307,7 +307,7 @@ extension UnifiedFileManager {
     func saveImageData(_ data: Data, filename: String, subdirectory: String? = nil) async -> Bool {
         do {
             let savedURL = try await writeFile(data: data, filename: filename, subdirectory: subdirectory)
-            print("✅ Image saved: \(savedURL.lastPathComponent)")
+            DebugLogger.log("✅ Image saved: \(savedURL.lastPathComponent)")
             return true
         } catch {
             print("❌ Failed to save image: \(error.localizedDescription)")

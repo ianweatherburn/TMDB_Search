@@ -181,7 +181,7 @@ struct MediaItemRow: View {
     private func contentRow(for item: TMDBMediaItem, type: MediaType) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(item.formattedTitle.replacingColonsWithDashes)
+                Text(item.formattedTitle.toFileSystemSafe)
                     .font(.headline)
                     .lineLimit(2)
                     .textSelection(.enabled)
@@ -257,12 +257,12 @@ struct MediaItemRow: View {
                 Button(action: {
                     Task {
                         let isUHD = NSEvent.modifierFlags.contains(.option)
-                        print("=== PLEX UPDATE BUTTON CLICKED ===")
-                        print("Item: \(item.formattedTitle)")
-                        print("Type: \(type)")
-                        print("UHD Mode: \(isUHD)")
-                        print("Plex Title: \(item.plexTitle)")
-                        print("Folder Name: \(item.plexTitle.replacingColonsWithDashes)")
+                        DebugLogger.log("=== PLEX UPDATE BUTTON CLICKED ===")
+                        DebugLogger.log("Item: \(item.formattedTitle)")
+                        DebugLogger.log("Type: \(type)")
+                        DebugLogger.log("UHD Mode: \(isUHD)")
+                        DebugLogger.log("Plex Title: \(item.plexTitle)")
+                        DebugLogger.log("Folder Name: \(item.plexTitle.toFileSystemSafe)")
                         
                         if isUHD {
                             await appModel.updatePlexMetadata(for: item, type: type, uhd: true)

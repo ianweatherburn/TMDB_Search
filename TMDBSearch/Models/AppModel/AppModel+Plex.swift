@@ -62,29 +62,29 @@ extension AppModel {
         // Reset cancellation flag
         plexUploadCancelled = false
         
-        // Construct metadata path - try both apostrophe variants
-        print("\n--- Asset Folder Path Resolution ---")
+        // Construct metadata path - try apostrophe variants
+        DebugLogger.log("\n--- Asset Folder Path Resolution ---")
         let libraryPath = getLibraryPath(for: type)
-        let folderName = item.plexTitle.replacingColonsWithDashes
+        let folderName = item.plexTitle.toFileSystemSafe
         
-        print("Original folder name: \(folderName)")
-        print("  Unicode: \(folderName.unicodeScalars.map { String(format: "U+%04X", $0.value) }.joined(separator: " "))")
+        DebugLogger.log("Original folder name: \(folderName)")
+        DebugLogger.log("  Unicode: \(folderName.unicodeScalars.map { String(format: "U+%04X", $0.value) }.joined(separator: " "))")
         
         // Try multiple apostrophe variants
         let fileManager = FileManager.default
         let basePath = "\(settingsManager.plexServerAssetPath)/\(libraryPath)"
         
         // List what's actually in the directory
-        print("\nListing folders in: \(basePath)")
+        DebugLogger.log("\nListing folders in: \(basePath)")
         if let contents = try? fileManager.contentsOfDirectory(atPath: basePath) {
             let matchingFolders = contents.filter { $0.contains("Agatha") || $0.contains("Christie") }
-            print("Found \(matchingFolders.count) matching folders:")
+            DebugLogger.log("Found \(matchingFolders.count) matching folders:")
             for folder in matchingFolders.prefix(5) {
-                print("  - \(folder)")
-                print("    Unicode: \(folder.unicodeScalars.map { String(format: "U+%04X", $0.value) }.joined(separator: " "))")
+                DebugLogger.log("  - \(folder)")
+                DebugLogger.log("    Unicode: \(folder.unicodeScalars.map { String(format: "U+%04X", $0.value) }.joined(separator: " "))")
             }
         } else {
-            print("  Could not list directory contents")
+            DebugLogger.log("  Could not list directory contents")
         }
         
         // Generate all possible variants
@@ -100,15 +100,15 @@ extension AppModel {
         for (description, path) in pathsToTry {
             let pathComponents = path.split(separator: "/")
             let folderComponent = pathComponents.last ?? ""
-            print("\nTrying \(description):")
-            print("  Folder: \(folderComponent)")
-            print("  Unicode: \(folderComponent.unicodeScalars.map { String(format: "U+%04X", $0.value) }.joined(separator: " "))")
-            print("  Full path: \(path)")
+            DebugLogger.log("\nTrying \(description):")
+            DebugLogger.log("  Folder: \(folderComponent)")
+            DebugLogger.log("  Unicode: \(folderComponent.unicodeScalars.map { String(format: "U+%04X", $0.value) }.joined(separator: " "))")
+            DebugLogger.log("  Full path: \(path)")
             let exists = fileManager.fileExists(atPath: path)
-            print("  Exists: \(exists)")
+            DebugLogger.log("  Exists: \(exists)")
             
             if exists {
-                print("✅ Found using \(description)")
+                DebugLogger.log("✅ Found using \(description)")
                 metadataPath = path
                 found = true
                 break
@@ -116,11 +116,11 @@ extension AppModel {
         }
         
         if !found {
-            print("❌ No valid path found after trying all variants")
+            DebugLogger.log("❌ No valid path found after trying all variants")
         }
         
-        print("\nFinal metadata path: \(metadataPath)")
-        print("--- End Asset Folder Path Resolution ---\n")
+        DebugLogger.log("\nFinal metadata path: \(metadataPath)")
+        DebugLogger.log("--- End Asset Folder Path Resolution ---\n")
         
         do {
             // Search for item in Plex
@@ -171,6 +171,26 @@ extension AppModel {
                     filePath: backdropPath,
                     ratingKey: mainRatingKey,
                     displayName: "\(type == .movie ? "Movie" : "Show") Backdrop"
+                ))
+            }
+            
+            // Logo
+            if let logoPath = scanner.findLogo(in: assets) {
+                tasks.append(AssetUploadTask(
+                    type: .logo,
+                    filePath: logoPath,
+                    ratingKey: mainRatingKey,
+                    displayName: "\(type == .movie ? "Movie" : "Show") Logo"
+                ))
+            }
+            
+            // Square Art
+            if let squareArtPath = scanner.findSquareArt(in: assets) {
+                tasks.append(AssetUploadTask(
+                    type: .squareArt,
+                    filePath: squareArtPath,
+                    ratingKey: mainRatingKey,
+                    displayName: "\(type == .movie ? "Movie" : "Show") Square Art"
                 ))
             }
             
@@ -277,6 +297,22 @@ extension AppModel {
                         ratingKey: task.ratingKey,
                         backdropPath: task.filePath
                     )
+                    
+                case .logo:
+                    try await plexService.uploadLogo(
+                        server: settingsManager.plexServer,
+                        token: settingsManager.plexToken,
+                        ratingKey: task.ratingKey,
+                        logoPath: task.filePath
+                    )
+                    
+                case .squareArt:
+                    try await plexService.uploadSquareArt(
+                        server: settingsManager.plexServer,
+                        token: settingsManager.plexToken,
+                        ratingKey: task.ratingKey,
+                        squareArtPath: task.filePath
+                    )
                 }
                 
                 plexUploadTasks[index].status = .completed
@@ -371,12 +407,12 @@ extension AppModel {
         }
         
         // Construct metadata path - collections use movies path, try both apostrophe variants
-        print("\n--- Collection Asset Folder Path Resolution ---")
+        DebugLogger.log("\n--- Collection Asset Folder Path Resolution ---")
         let libraryPath = getLibraryPath(for: type)
-        let folderName = item.plexTitle.replacingColonsWithDashes
+        let folderName = item.plexTitle.toFileSystemSafe
         
-        print("Original folder name: \(folderName)")
-        print("  Unicode: \(folderName.unicodeScalars.map { String(format: "U+%04X", $0.value) }.joined(separator: " "))")
+        DebugLogger.log("Original folder name: \(folderName)")
+        DebugLogger.log("  Unicode: \(folderName.unicodeScalars.map { String(format: "U+%04X", $0.value) }.joined(separator: " "))")
         
         // Try multiple apostrophe variants
         let fileManager = FileManager.default
@@ -393,9 +429,9 @@ extension AppModel {
         var found = false
         
         for (description, path) in pathsToTry {
-            print("Trying \(description): \(path)")
+            DebugLogger.log("Trying \(description): \(path)")
             if fileManager.fileExists(atPath: path) {
-                print("✅ Found using \(description)")
+                DebugLogger.log("✅ Found using \(description)")
                 metadataPath = path
                 found = true
                 break
@@ -403,11 +439,11 @@ extension AppModel {
         }
         
         if !found {
-            print("❌ No valid path found after trying all variants")
+            DebugLogger.log("❌ No valid path found after trying all variants")
         }
         
-        print("Final metadata path: \(metadataPath)")
-        print("--- End Collection Asset Folder Path Resolution ---\n")
+        DebugLogger.log("Final metadata path: \(metadataPath)")
+        DebugLogger.log("--- End Collection Asset Folder Path Resolution ---\n")
         
         do {
             // Search for the collection in Plex
@@ -451,6 +487,26 @@ extension AppModel {
                     filePath: backdropPath,
                     ratingKey: ratingKey,
                     displayName: "Collection Backdrop"
+                ))
+            }
+            
+            // Logo
+            if let logoPath = scanner.findLogo(in: assets) {
+                tasks.append(AssetUploadTask(
+                    type: .logo,
+                    filePath: logoPath,
+                    ratingKey: ratingKey,
+                    displayName: "Collection Logo"
+                ))
+            }
+            
+            // Square Art
+            if let squareArtPath = scanner.findSquareArt(in: assets) {
+                tasks.append(AssetUploadTask(
+                    type: .squareArt,
+                    filePath: squareArtPath,
+                    ratingKey: ratingKey,
+                    displayName: "Collection Square Art"
                 ))
             }
             

@@ -200,14 +200,15 @@ struct ImageGallery: View {
         }
         
         // Choose title part: for collection use displayTitle, else plexTitle
-        let titlePart = mediaType == .collection ? item.displayTitle : item.plexTitle
+        // Apply filesystem-safe conversion to the title only, not the full path
+        let titlePart = (mediaType == .collection ? item.displayTitle : item.plexTitle).toFileSystemSafe
         
         // Compose the destPath as "folder/title"
-        let destPath = "\(folderPrefix)/\(titlePart)".replacingColonsWithDashes
+        let destPath = "\(folderPrefix)/\(titlePart)"
         
         let success = await appModel.downloadImage(
             sourcePath: image.filePath,
-            destPath: destPath.replacingColonsWithDashes,
+            destPath: destPath,
             filename: filename,
             flip: flip
         )

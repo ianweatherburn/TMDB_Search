@@ -16,6 +16,8 @@ enum AssetType: String {
     case movieBackdrop = "Movie Backdrop"
     case seasonPoster = "Season Poster"
     case episodeTitleCard = "Episode Title Card"
+    case logo = "Logo"
+    case squareArt = "Square Art"
 }
 
 // MARK: - Asset Upload Task
@@ -106,6 +108,56 @@ struct AssetScanner {
         for prefix in backdropPrefixes {
             if let jpgPath = assets.first(where: {
                 $0.key.hasPrefix(prefix) && ($0.key.hasSuffix(".jpg") || $0.key.hasSuffix(".jpeg"))
+            })?.value {
+                return jpgPath
+            }
+        }
+        
+        return nil
+    }
+    
+    /// Find best logo file (prefer .png over .jpg)
+    func findLogo(in assets: [String: String]) -> String? {
+        let logoPrefixes = ["logo", "clearLogo"]
+        
+        // Try PNG first for all prefixes
+        for prefix in logoPrefixes {
+            if let pngPath = assets.first(where: {
+                !$0.key.contains("/") && $0.key.hasPrefix(prefix) && $0.key.hasSuffix(".png")
+            })?.value {
+                return pngPath
+            }
+        }
+        
+        // Fall back to JPG
+        for prefix in logoPrefixes {
+            if let jpgPath = assets.first(where: {
+                !$0.key.contains("/") && $0.key.hasPrefix(prefix) && ($0.key.hasSuffix(".jpg") || $0.key.hasSuffix(".jpeg"))
+            })?.value {
+                return jpgPath
+            }
+        }
+        
+        return nil
+    }
+    
+    /// Find best square art file (prefer .png over .jpg)
+    func findSquareArt(in assets: [String: String]) -> String? {
+        let squareArtPrefixes = ["squareArt"]
+        
+        // Try PNG first
+        for prefix in squareArtPrefixes {
+            if let pngPath = assets.first(where: {
+                !$0.key.contains("/") && $0.key.hasPrefix(prefix) && $0.key.hasSuffix(".png")
+            })?.value {
+                return pngPath
+            }
+        }
+        
+        // Fall back to JPG
+        for prefix in squareArtPrefixes {
+            if let jpgPath = assets.first(where: {
+                !$0.key.contains("/") && $0.key.hasPrefix(prefix) && ($0.key.hasSuffix(".jpg") || $0.key.hasSuffix(".jpeg"))
             })?.value {
                 return jpgPath
             }

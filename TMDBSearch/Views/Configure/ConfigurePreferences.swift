@@ -11,6 +11,7 @@ struct ConfigurePreferences: View {
     @Binding var gridSize: GridSize
     @Binding var historySize: Int
     @Binding var showTMDBID: Bool
+    @Binding var plexDebugLogging: Bool
 
     var body: some View {
         Section {
@@ -50,10 +51,11 @@ struct ConfigurePreferences: View {
         
         Section {
             Toggle("Show TMDB ID", isOn: $showTMDBID)
+            Toggle("Enable Plex Debug Logging", isOn: $plexDebugLogging)
         } header: {
             Text("Display Options")
         } footer: {
-            Text("Display the TMDB ID alongside media information.")
+            Text("Display the TMDB ID alongside media information and optionally enable verbose Plex API logging.")
         }
     }
 }

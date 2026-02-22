@@ -27,7 +27,7 @@ extension AppModel {
         
         switch element {
         case .folder:
-            pasteboard.setString("\(item.plexTitle.replacingColonsWithDashes)", forType: .string)
+            pasteboard.setString("\(item.plexTitle.toFileSystemSafe)", forType: .string)
             _ = NSSound(named: NSSound.Name(Constants.App.Sounds.nameCopy))?.play()
         case .id:
             pasteboard.setString(String(item.id), forType: .string)
@@ -58,7 +58,7 @@ extension AppModel {
         }
         
         return """
-        \(Constants.Media.UpdatePoster.script) "\(item.plexTitle.replacingColonsWithDashes)" \
+        \(Constants.Media.UpdatePoster.script) "\(item.plexTitle.toFileSystemSafe)" \
         \(Constants.Media.UpdatePoster.library) \(library)\(uhd ? "4k" : "")\
         \(type == .collection ? " \(Constants.Media.UpdatePoster.collection)" : "")
         """

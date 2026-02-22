@@ -10,6 +10,18 @@ extension String {
         self.replacingOccurrences(of: ":", with: " -")
     }
     
+    /// Convert a title to a filesystem-safe name:
+    /// - Colons (:) become space-dash-space ( - )
+    /// - Forward slashes (/) become dash (-)
+    /// - Back slashes (\) become dash (-)
+    /// - Curly apostrophes become straight apostrophes
+    var toFileSystemSafe: String {
+        self.replacingOccurrences(of: ":", with: " -")
+            .replacingOccurrences(of: "/", with: "-")
+            .replacingOccurrences(of: "\\", with: "-")
+            .normalizingApostrophes
+    }
+    
     /// Convert all apostrophe variants to ASCII straight apostrophe (U+0027)
     var normalizingApostrophes: String {
         self.replacingOccurrences(of: "\u{2019}", with: "\u{0027}")  // Right single quotation mark -> ASCII apostrophe
