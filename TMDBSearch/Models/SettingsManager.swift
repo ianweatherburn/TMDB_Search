@@ -283,7 +283,7 @@ final class SettingsManager {
         let status = SecItemAdd(query as CFDictionary, nil)
         
         if status != errSecSuccess {
-            print("Error storing keychain item: \(status)")
+            DebugLogger.log("Error storing keychain item: \(status)")
         }
     }
     

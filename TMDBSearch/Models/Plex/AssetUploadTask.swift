@@ -169,26 +169,38 @@ struct AssetScanner {
     /// Find season poster files (Season01.png, Season02.jpg, etc.)
     func findSeasonPosters(in assets: [String: String]) -> [(seasonNumber: Int, filePath: String)] {
         var seasonPosters: [(Int, String)] = []
+        var seasonMap: [Int: (path: String, isPNG: Bool)] = [:]
+        let pattern = #"^season(\d{2})(?:-poster)?\.(png|jpg|jpeg)$"#
+        let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
         
         for (file, fullPath) in assets {
-            // Check if file matches Season## pattern
-            if file.hasPrefix("Season") && !file.contains("/") {
-                // Extract season number (Season01 -> 1, Season02 -> 2)
-                let afterSeason = file.dropFirst(6)
-                if let seasonNum = Int(String(afterSeason.prefix(2))) {
-                    // Prefer PNG
-                    if file.hasSuffix(".png") {
-                        // Remove any existing JPG for this season
-                        seasonPosters.removeAll { $0.0 == seasonNum }
-                        seasonPosters.append((seasonNum, fullPath))
-                    } else if (file.hasSuffix(".jpg") || file.hasSuffix(".jpeg")) &&
-                              !seasonPosters.contains(where: { $0.0 == seasonNum }) {
-                        seasonPosters.append((seasonNum, fullPath))
-                    }
+            guard !file.contains("/") else { continue }
+            let fileName = (file as NSString).lastPathComponent
+            guard let regex,
+                  let match = regex.firstMatch(in: fileName, range: NSRange(fileName.startIndex..., in: fileName)),
+                  let seasonRange = Range(match.range(at: 1), in: fileName),
+                  let extensionRange = Range(match.range(at: 2), in: fileName) else {
+                continue
+            }
+
+            let seasonNum = Int(fileName[seasonRange]) ?? 0
+            let ext = String(fileName[extensionRange]).lowercased()
+            let isPNG = ext == "png"
+
+            if let existing = seasonMap[seasonNum] {
+                // Prefer PNG over JPEG if both exist for a season.
+                if !existing.isPNG && isPNG {
+                    seasonMap[seasonNum] = (path: fullPath, isPNG: true)
                 }
+            } else {
+                seasonMap[seasonNum] = (path: fullPath, isPNG: isPNG)
             }
         }
-        
+
+        for (season, value) in seasonMap {
+            seasonPosters.append((season, value.path))
+        }
+
         return seasonPosters.sorted(by: { $0.0 < $1.0 })
     }
     

@@ -104,12 +104,12 @@ final class UnifiedFileManager {
                 DebugLogger.log("✅ Directory access granted: \(url.path)")
                 return true
             } else {
-                print("❌ Could not start accessing selected directory")
+                DebugLogger.log("❌ Could not start accessing selected directory")
                 return false
             }
             
         } catch {
-            print("❌ Failed to create bookmark: \(error)")
+            DebugLogger.log("❌ Failed to create bookmark: \(error)")
             return false
         }
     }
@@ -130,7 +130,7 @@ final class UnifiedFileManager {
             )
             
             if isStale {
-                print("⚠️ Bookmark was stale, refreshing…")
+                DebugLogger.log("⚠️ Bookmark was stale, refreshing…")
                 _ = setSelectedDirectory(url) // re-save fresh bookmark
                 return
             }
@@ -140,11 +140,11 @@ final class UnifiedFileManager {
                 self.hasDirectoryAccess = true
                 DebugLogger.log("✅ Restored RW access to: \(url.path)")
             } else {
-                print("❌ Failed to restore RW access to: \(url.path)")
+                DebugLogger.log("❌ Failed to restore RW access to: \(url.path)")
             }
             
         } catch {
-            print("❌ Failed to resolve bookmark: \(error)")
+            DebugLogger.log("❌ Failed to resolve bookmark: \(error)")
             UserDefaults.standard.removeObject(forKey: bookmarkKey)
         }
     }
@@ -293,7 +293,7 @@ extension UnifiedFileManager {
             return true
             
         } catch {
-            print("❌ Failed to download/save image: \(error.localizedDescription)")
+            DebugLogger.log("❌ Failed to download/save image: \(error.localizedDescription)")
             return false
         }
     }
@@ -310,7 +310,7 @@ extension UnifiedFileManager {
             DebugLogger.log("✅ Image saved: \(savedURL.lastPathComponent)")
             return true
         } catch {
-            print("❌ Failed to save image: \(error.localizedDescription)")
+            DebugLogger.log("❌ Failed to save image: \(error.localizedDescription)")
             return false
         }
     }

@@ -154,7 +154,7 @@ struct MediaItemRow: View {
         .sheet(isPresented: $showingPosterDialog) {
             ImageGallery(
                 item: item,
-                mediaType: appModel.selectedMediaType,
+                mediaType: type,
                 imageType: .poster
             )
             .environment(appModel)
@@ -162,7 +162,7 @@ struct MediaItemRow: View {
         .sheet(isPresented: $showingBackdropDialog) {
             ImageGallery(
                 item: item,
-                mediaType: appModel.selectedMediaType,
+                mediaType: type,
                 imageType: .backdrop
             )
             .environment(appModel)
@@ -170,7 +170,7 @@ struct MediaItemRow: View {
         .sheet(isPresented: $showingLogoDialog) {
             ImageGallery(
                 item: item,
-                mediaType: appModel.selectedMediaType,
+                mediaType: type,
                 imageType: .logo
             )
             .environment(appModel)

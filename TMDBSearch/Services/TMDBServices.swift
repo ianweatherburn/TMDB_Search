@@ -72,7 +72,7 @@ final class TMDBServices {
             let (data, _) = try await URLSession.shared.data(from: url)
             return data
         } catch {
-            print("Failed to load image: \(error)")
+            DebugLogger.log("Failed to load image: \(error)")
             return nil
         }
     }
@@ -86,7 +86,7 @@ final class TMDBServices {
         let urlString = "\(imageBaseURL)/original\(path)"
         
         guard let url = URL(string: urlString) else { 
-            print("❌ Invalid image URL: \(urlString)")
+            DebugLogger.log("❌ Invalid image URL: \(urlString)")
             return nil 
         }
 
@@ -99,7 +99,7 @@ final class TMDBServices {
             // Process the image data and only flip horizontally if requested
             if flip {
                 guard let flippedData = flipImageHorizontally(convertedData) else {
-                    print("❌ Failed to flip image horizontally")
+                    DebugLogger.log("❌ Failed to flip image horizontally")
                     return nil
                 }
                 return flippedData
@@ -107,7 +107,7 @@ final class TMDBServices {
                 return convertedData
             }
         } catch {
-            print("❌ Failed to download image: \(error.localizedDescription)")
+            DebugLogger.log("❌ Failed to download image: \(error.localizedDescription)")
             return nil
         }
     }
@@ -129,7 +129,7 @@ final class TMDBServices {
             let finalData: Data
             if flip {
                 guard let flippedData = flipImageHorizontally(data) else {
-                    print("Failed to flip image horizontally")
+                    DebugLogger.log("Failed to flip image horizontally")
                     return false
                 }
                 finalData = flippedData
@@ -154,7 +154,7 @@ final class TMDBServices {
             try finalData.write(to: fileURL)
             return true
         } catch {
-            print("Failed to download image: \(error)")
+            DebugLogger.log("Failed to download image: \(error)")
             return false
         }
     }

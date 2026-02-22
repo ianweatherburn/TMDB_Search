@@ -16,6 +16,25 @@ struct TMDBImagesResponse: Codable {
     let posters: [TMDBImage]
     let backdrops: [TMDBImage]
     let logos: [TMDBImage]
+
+    enum CodingKeys: String, CodingKey {
+        case id, posters, backdrops, logos
+    }
+
+    init(id: Int, posters: [TMDBImage], backdrops: [TMDBImage], logos: [TMDBImage]) {
+        self.id = id
+        self.posters = posters
+        self.backdrops = backdrops
+        self.logos = logos
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        posters = try container.decodeIfPresent([TMDBImage].self, forKey: .posters) ?? []
+        backdrops = try container.decodeIfPresent([TMDBImage].self, forKey: .backdrops) ?? []
+        logos = try container.decodeIfPresent([TMDBImage].self, forKey: .logos) ?? []
+    }
 }
 
 struct TMDBImage: Codable, Identifiable {

@@ -15,9 +15,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ _: Notification) {
         // File manager automatically tries to restore previous directory access
         if fileManager.hasDirectoryAccess {
-            print("✅ Restored access to: \(fileManager.selectedDirectory?.path ?? "Unknown")")
+            DebugLogger.log("✅ Restored access to: \(fileManager.selectedDirectory?.path ?? "Unknown")")
         } else {
-            print("ℹ️ No previous directory access found")
+            DebugLogger.log("ℹ️ No previous directory access found")
         }
     }
 }

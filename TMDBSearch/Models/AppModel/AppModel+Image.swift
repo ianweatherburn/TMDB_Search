@@ -54,7 +54,7 @@ extension AppModel {
                 languages: selectedLanguages,
                 apiKey: settingsManager.apiKey)
         } catch {
-            print("Failed to load images: \(error)")
+            DebugLogger.log("Failed to load images: \(error)")
             return nil
         }
     }
@@ -62,7 +62,7 @@ extension AppModel {
     func downloadImage(sourcePath: String, destPath: String, filename: String, flip: Bool = false) async -> Bool {
         // Download the image data from TMDB (with optional flip)
         guard let imageData = await tmdbService.downloadImageData(path: sourcePath, flip: flip) else {
-            print("❌ Failed to download image from TMDB")
+            DebugLogger.log("❌ Failed to download image from TMDB")
             return false
         }
         

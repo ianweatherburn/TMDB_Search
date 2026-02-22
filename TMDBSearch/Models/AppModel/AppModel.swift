@@ -27,6 +27,8 @@ final class AppModel {
     var plexUploadTasks: [AssetUploadTask] = []
     var plexCurrentTaskIndex = 0
     var plexUploadCancelled = false
+    var plexUploadTask: Task<Void, Never>?
+    var plexUploadTaskID: UUID?
     
     // MARK: - Managers and Services
     let tmdbService = TMDBServices()

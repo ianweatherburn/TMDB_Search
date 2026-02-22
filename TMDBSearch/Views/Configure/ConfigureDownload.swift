@@ -114,7 +114,7 @@ struct ConfigureDownload: View {
         })
         
         if let settingsWindow = window {
-            print("✅ Using window: \(settingsWindow.title) (sheet modal)")
+            DebugLogger.log("✅ Using window: \(settingsWindow.title) (sheet modal)")
             // Use async callback-based approach with sheet modal
             fileManager.requestDirectoryAccessAsync(from: settingsWindow) { success in
                 if success, let selectedURL = fileManager.selectedDirectory {
@@ -123,7 +123,7 @@ struct ConfigureDownload: View {
                 }
             }
         } else {
-            print("⚠️ No window found, using standalone modal")
+            DebugLogger.log("⚠️ No window found, using standalone modal")
             // Fallback to sync version with standalone modal
             if fileManager.requestDirectoryAccess() {
                 if let selectedURL = fileManager.selectedDirectory {

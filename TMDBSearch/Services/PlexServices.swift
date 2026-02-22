@@ -123,6 +123,115 @@ final class PlexServices {
         }
         debugPrint("*** End PlexService.uploadPoster ***\n")
     }
+
+    // MARK: - Label Management
+
+    func removeOverlayLabelIfPresent(
+        server: String,
+        token: String,
+        sectionId: String,
+        ratingKey: String
+    ) async throws -> Bool {
+        debugPrint("\n*** PlexService.removeOverlayLabelIfPresent ***")
+        debugPrint("Input Parameters:")
+        debugPrint("  Server: \(server)")
+        debugPrint("  Token: \(token.isEmpty ? "EMPTY" : "***\(token.suffix(4))") (length: \(token.count))")
+        debugPrint("  Section ID: \(sectionId)")
+        debugPrint("  Rating Key: \(ratingKey)")
+
+        guard !server.isEmpty, !token.isEmpty, !sectionId.isEmpty, !ratingKey.isEmpty else {
+            debugPrint("❌ ERROR: One or more required parameters are empty")
+            throw URLError(.badURL)
+        }
+
+        var serverURL = server
+        if !serverURL.hasPrefix("http://") && !serverURL.hasPrefix("https://") {
+            serverURL = "http://\(serverURL)"
+            debugPrint("Added http:// prefix. Server URL: \(serverURL)")
+        }
+
+        let metadataURLString = "\(serverURL)/library/metadata/\(ratingKey)?X-Plex-Token=\(token)"
+        guard let metadataURL = URL(string: metadataURLString) else {
+            debugPrint("❌ ERROR: Failed to create metadata URL")
+            throw URLError(.badURL)
+        }
+
+        debugPrint("🌐 Metadata URL:")
+        debugPrint("  \(metadataURLString.replacingOccurrences(of: token, with: "***TOKEN***"))")
+
+        var metadataRequest = URLRequest(url: metadataURL)
+        metadataRequest.addValue("application/xml", forHTTPHeaderField: "Accept")
+        let (metadataData, metadataResponse) = try await URLSession.shared.data(for: metadataRequest)
+
+        guard let metadataHTTPResponse = metadataResponse as? HTTPURLResponse,
+              (200...299).contains(metadataHTTPResponse.statusCode) else {
+            debugPrint("❌ ERROR: Failed to fetch metadata for label inspection")
+            throw URLError(.badServerResponse)
+        }
+
+        let metadataXML = String(decoding: metadataData, as: UTF8.self)
+        let labelTags = parseLabelTags(from: metadataXML)
+        let overlayLabels = labelTags.filter { $0.caseInsensitiveCompare("Overlay") == .orderedSame }
+        let typeRaw = parseMetadataType(from: metadataXML)
+
+        debugPrint("Found labels: \(labelTags)")
+
+        guard !overlayLabels.isEmpty else {
+            debugPrint("No 'Overlay' label found. No changes required.")
+            debugPrint("*** End PlexService.removeOverlayLabelIfPresent ***\n")
+            return false
+        }
+
+        guard let typeRaw,
+              let typeValue = plexTypeValue(for: typeRaw) else {
+            debugPrint("❌ ERROR: Could not determine metadata type for label update")
+            throw URLError(.cannotParseResponse)
+        }
+
+        var components = URLComponents(string: "\(serverURL)/library/sections/\(sectionId)/all")
+        components?.queryItems = [
+            URLQueryItem(name: "id", value: ratingKey),
+            URLQueryItem(name: "type", value: String(typeValue)),
+            URLQueryItem(name: "label.locked", value: "1"),
+            URLQueryItem(name: "label[].tag.tag-", value: "Overlay"),
+            URLQueryItem(name: "X-Plex-Token", value: token)
+        ]
+
+        guard let updateURL = components?.url else {
+            debugPrint("❌ ERROR: Failed to create label update URL")
+            throw URLError(.badURL)
+        }
+
+        let updateURLString = updateURL.absoluteString
+        debugPrint("🌐 Overlay label removal URL:")
+        debugPrint("  \(updateURLString.replacingOccurrences(of: token, with: "***TOKEN***"))")
+
+        var updateRequest = URLRequest(url: updateURL)
+        updateRequest.httpMethod = "PUT"
+        let (updateData, updateResponse) = try await URLSession.shared.data(for: updateRequest)
+
+        guard let updateHTTPResponse = updateResponse as? HTTPURLResponse else {
+            debugPrint("❌ ERROR: No HTTP response for label update")
+            throw URLError(.badServerResponse)
+        }
+
+        debugPrint("Label update status code: \(updateHTTPResponse.statusCode)")
+        if let responseBody = String(data: updateData, encoding: .utf8), !responseBody.isEmpty {
+            debugPrint("Label update response body: \(responseBody.prefix(500))")
+        }
+
+        guard (200...299).contains(updateHTTPResponse.statusCode) else {
+            debugPrint("❌ ERROR: Failed to remove 'Overlay' label")
+            if updateHTTPResponse.statusCode == 401 || updateHTTPResponse.statusCode == 403 {
+                throw URLError(.userAuthenticationRequired)
+            }
+            throw URLError(.badServerResponse)
+        }
+
+        debugPrint("✅ Removed 'Overlay' label")
+        debugPrint("*** End PlexService.removeOverlayLabelIfPresent ***\n")
+        return true
+    }
     
     // MARK: - Search for Media Item
     
@@ -132,7 +241,8 @@ final class PlexServices {
         sectionId: String,
         title: String,
         year: String?,
-        tmdbId: String?
+        tmdbId: String?,
+        searchType: MediaType? = nil
     ) async throws -> String? {
         debugPrint("\n*** PlexService.searchMedia ***")
         debugPrint("Searching for: \(title) (\(year ?? "no year"))")
@@ -186,7 +296,8 @@ final class PlexServices {
                     sectionId: sectionId,
                     title: variantTitle,
                     year: year,
-                    tmdbId: tmdbId
+                    tmdbId: tmdbId,
+                    searchType: searchType
                 ) {
                     return result
                 }
@@ -205,7 +316,8 @@ final class PlexServices {
         sectionId: String,
         title: String,
         year: String?,
-        tmdbId: String?
+        tmdbId: String?,
+        searchType: MediaType?
     ) async throws -> String? {
         // Ensure server has protocol prefix
         var serverURL = server
@@ -219,8 +331,11 @@ final class PlexServices {
         }
         
         var urlString = "\(serverURL)/library/sections/\(sectionId)/all?title=\(encodedTitle)"
-        if let year = year {
+        if let year, !year.isEmpty {
             urlString += "&year=\(year)"
+        }
+        if let searchType {
+            urlString += "&type=\(plexTypeValue(for: searchType))"
         }
         urlString += "&X-Plex-Token=\(token)"
         
@@ -272,6 +387,56 @@ final class PlexServices {
         }
         
         return nil
+    }
+
+    private func parseLabelTags(from xml: String) -> [String] {
+        let pattern = #"<Label[^>]*tag="([^"]+)""#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
+
+        let range = NSRange(xml.startIndex..<xml.endIndex, in: xml)
+        return regex.matches(in: xml, range: range).compactMap { match in
+            guard match.numberOfRanges > 1,
+                  let tagRange = Range(match.range(at: 1), in: xml) else {
+                return nil
+            }
+            return String(xml[tagRange])
+        }
+    }
+
+    private func parseMetadataType(from xml: String) -> String? {
+        let pattern = #"<(?:Video|Directory|Photo|Track)[^>]*type="([^"]+)""#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return nil }
+
+        let range = NSRange(xml.startIndex..<xml.endIndex, in: xml)
+        guard let match = regex.firstMatch(in: xml, range: range),
+              match.numberOfRanges > 1,
+              let typeRange = Range(match.range(at: 1), in: xml) else {
+            return nil
+        }
+
+        return String(xml[typeRange])
+    }
+
+    private func plexTypeValue(for type: String) -> Int? {
+        switch type {
+        case "movie": return 1
+        case "show": return 2
+        case "season": return 3
+        case "episode": return 4
+        case "collection": return 18
+        default: return nil
+        }
+    }
+
+    private func plexTypeValue(for mediaType: MediaType) -> Int {
+        switch mediaType {
+        case .movie:
+            return 1
+        case .tv:
+            return 2
+        case .collection:
+            return 18
+        }
     }
     
     // MARK: - Get Seasons

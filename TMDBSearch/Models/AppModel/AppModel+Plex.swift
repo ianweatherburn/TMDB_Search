@@ -134,11 +134,23 @@ extension AppModel {
                 sectionId: sectionId,
                 title: title,
                 year: year,
-                tmdbId: tmdbId
+                tmdbId: tmdbId,
+                searchType: type
             ) else {
                 errorMessage = "'\(item.formattedTitle)' not found in Plex library"
                 _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
                 return
+            }
+
+            do {
+                _ = try await plexService.removeOverlayLabelIfPresent(
+                    server: settingsManager.plexServer,
+                    token: settingsManager.plexToken,
+                    sectionId: sectionId,
+                    ratingKey: mainRatingKey
+                )
+            } catch {
+                DebugLogger.log("⚠️ Failed to remove Overlay label for \(mainRatingKey): \(error.localizedDescription)")
             }
             
             // Scan for all assets
@@ -258,7 +270,7 @@ extension AppModel {
             showPlexUploadProgress = true
             
             // Perform uploads
-            await performUploads()
+            await startPlexUploads()
             
         } catch {
             errorMessage = "Plex update failed: \(error.localizedDescription)"
@@ -271,7 +283,7 @@ extension AppModel {
     @MainActor
     private func performUploads() async {
         for index in 0..<plexUploadTasks.count {
-            if plexUploadCancelled {
+            if plexUploadCancelled || Task.isCancelled {
                 break
             }
             
@@ -317,10 +329,18 @@ extension AppModel {
                 
                 plexUploadTasks[index].status = .completed
                 
+            } catch is CancellationError {
+                plexUploadTasks[index].status = .failed
+                plexUploadTasks[index].error = "Cancelled"
+                break
             } catch {
                 plexUploadTasks[index].status = .failed
                 plexUploadTasks[index].error = error.localizedDescription
             }
+        }
+
+        if plexUploadCancelled || Task.isCancelled {
+            return
         }
         
         // Show summary
@@ -337,6 +357,8 @@ extension AppModel {
     @MainActor
     func cancelPlexUpload() {
         plexUploadCancelled = true
+        plexUploadTask?.cancel()
+        showPlexUploadProgress = false
     }
     
     // MARK: - Collection Handling
@@ -409,7 +431,7 @@ extension AppModel {
         // Construct metadata path - collections use movies path, try both apostrophe variants
         DebugLogger.log("\n--- Collection Asset Folder Path Resolution ---")
         let libraryPath = getLibraryPath(for: type)
-        let folderName = item.plexTitle.toFileSystemSafe
+        let folderName = item.displayTitle.toFileSystemSafe
         
         DebugLogger.log("Original folder name: \(folderName)")
         DebugLogger.log("  Unicode: \(folderName.unicodeScalars.map { String(format: "U+%04X", $0.value) }.joined(separator: " "))")
@@ -448,7 +470,7 @@ extension AppModel {
         do {
             // Search for the collection in Plex
             let title = item.displayTitle
-            let year = item.displayYear
+            let year = item.displayYear.isEmpty ? nil : item.displayYear
             let tmdbId = String(item.id)
             
             guard let ratingKey = try await plexService.searchMedia(
@@ -457,11 +479,23 @@ extension AppModel {
                 sectionId: sectionId,
                 title: title,
                 year: year,
-                tmdbId: tmdbId
+                tmdbId: tmdbId,
+                searchType: .collection
             ) else {
                 errorMessage = "Collection '\(item.formattedTitle)' not found in Plex library"
                 _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
                 return
+            }
+
+            do {
+                _ = try await plexService.removeOverlayLabelIfPresent(
+                    server: settingsManager.plexServer,
+                    token: settingsManager.plexToken,
+                    sectionId: sectionId,
+                    ratingKey: ratingKey
+                )
+            } catch {
+                DebugLogger.log("⚠️ Failed to remove Overlay label for \(ratingKey): \(error.localizedDescription)")
             }
             
             // Scan for assets
@@ -521,7 +555,7 @@ extension AppModel {
             plexCurrentTaskIndex = 0
             showPlexUploadProgress = true
             
-            await performUploads()
+            await startPlexUploads()
             
         } catch {
             errorMessage = "Plex update failed: \(error.localizedDescription)"
@@ -541,6 +575,28 @@ extension AppModel {
             return settingsManager.plexMoviesLibraryId
         case (.movie, true), (.collection, true):
             return settingsManager.plexMovies4KLibraryId
+        }
+    }
+
+    @MainActor
+    private func startPlexUploads() async {
+        plexUploadTask?.cancel()
+        plexUploadCancelled = false
+
+        let taskID = UUID()
+        plexUploadTaskID = taskID
+
+        let uploadTask = Task { [weak self] in
+            guard let self else { return }
+            await self.performUploads()
+        }
+
+        plexUploadTask = uploadTask
+        await uploadTask.value
+
+        if plexUploadTaskID == taskID {
+            plexUploadTask = nil
+            plexUploadTaskID = nil
         }
     }
     

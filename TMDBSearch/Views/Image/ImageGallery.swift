@@ -196,7 +196,7 @@ struct ImageGallery: View {
         case .movie:
             folderPrefix = Constants.Media.Types.movies
         case .collection:
-            folderPrefix = Constants.Media.Types.collections
+            folderPrefix = Constants.Media.Types.movies
         }
         
         // Choose title part: for collection use displayTitle, else plexTitle
