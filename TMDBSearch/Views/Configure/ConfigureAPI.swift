@@ -40,7 +40,7 @@ struct ConfigureAPI: View {
         } header: {
             Text("Plex Server (Optional)")
         } footer: {
-            Text("Server address should include http:// or https:// prefix (e.g., http://192.168.1.100:32400). Asset path is the server-side path where Plex can access metadata files.")
+            Text("Server address should include http:// or https:// prefix (e.g., http://192.168.1.100:32400). Asset path is the client-side path where TMDB Search can access images to upload to Plex.")
                 .font(.caption)
         }
     }

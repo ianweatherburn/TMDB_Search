@@ -30,6 +30,15 @@ final class SettingsManager {
     var plexMoviesLibraryId: String = ""
     var plexMovies4KLibrary: String = ""
     var plexMovies4KLibraryId: String = ""
+
+    var isPlexSetup: Bool {
+        !plexServer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !plexServerAssetPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !plexShowsLibraryId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !plexShows4KLibraryId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !plexMoviesLibraryId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !plexMovies4KLibraryId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
     
     // MARK: - Keychain Keys
     private enum KeychainKeys {

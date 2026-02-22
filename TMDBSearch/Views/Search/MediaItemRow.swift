@@ -254,27 +254,29 @@ struct MediaItemRow: View {
                 .buttonStyle(PlainButtonStyle())
                 .help(Constants.Media.Actions.Tooltip.updatePoster)
 
-                Button(action: {
-                    Task {
-                        let isUHD = NSEvent.modifierFlags.contains(.option)
-                        DebugLogger.log("=== PLEX UPDATE BUTTON CLICKED ===")
-                        DebugLogger.log("Item: \(item.formattedTitle)")
-                        DebugLogger.log("Type: \(type)")
-                        DebugLogger.log("UHD Mode: \(isUHD)")
-                        DebugLogger.log("Plex Title: \(item.plexTitle)")
-                        DebugLogger.log("Folder Name: \(item.plexTitle.toFileSystemSafe)")
-                        
-                        if isUHD {
-                            await appModel.updatePlexMetadata(for: item, type: type, uhd: true)
-                        } else {
-                            await appModel.updatePlexMetadata(for: item, type: type, uhd: false)
+                if appModel.settingsManager.isPlexSetup {
+                    Button(action: {
+                        Task {
+                            let isUHD = NSEvent.modifierFlags.contains(.option)
+                            DebugLogger.log("=== PLEX UPDATE BUTTON CLICKED ===")
+                            DebugLogger.log("Item: \(item.formattedTitle)")
+                            DebugLogger.log("Type: \(type)")
+                            DebugLogger.log("UHD Mode: \(isUHD)")
+                            DebugLogger.log("Plex Title: \(item.plexTitle)")
+                            DebugLogger.log("Folder Name: \(item.plexTitle.toFileSystemSafe)")
+                            
+                            if isUHD {
+                                await appModel.updatePlexMetadata(for: item, type: type, uhd: true)
+                            } else {
+                                await appModel.updatePlexMetadata(for: item, type: type, uhd: false)
+                            }
                         }
-                    }
-                }, label: {
-                    Image(symbol: SFSymbol6.Film.filmCircle)
-                })
-                .buttonStyle(PlainButtonStyle())
-                .help(Constants.Media.Actions.Tooltip.updatePlexMetadata)
+                    }, label: {
+                        Image(symbol: SFSymbol6.Film.filmCircle)
+                    })
+                    .buttonStyle(PlainButtonStyle())
+                    .help(Constants.Media.Actions.Tooltip.updatePlexMetadata)
+                }
             }
             .font(.title)
 
