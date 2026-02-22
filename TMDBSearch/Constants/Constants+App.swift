@@ -36,6 +36,10 @@ extension Constants.App {
         static let tapHelp = "Tap to copy the name or Opt+Tap to copy the ID"
     }
     
+    enum Results {
+        static let rowBackgroundOpacity: Double = 0.1
+    }
+    
     static let name = "TMDB Search"
     static let image = "tmdb"
     static let defaultMediaType = MediaType.tv

@@ -38,10 +38,14 @@ struct ImageGrid: View {
             }
             .padding(20)
         }
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.gray.opacity(0.5))
     }
     
     private var gridSpacing: CGFloat {
-        imageType == .poster ? Constants.Image.Poster.spacing : Constants.Image.Backdrop.spacing
+        switch imageType {
+        case .poster: return Constants.Image.Poster.spacing
+        case .backdrop: return Constants.Image.Backdrop.spacing
+        case .logo: return Constants.Image.Logo.spacing
+        }
     }
 }

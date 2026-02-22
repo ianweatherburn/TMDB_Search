@@ -13,10 +13,18 @@ struct AsyncImage<Content: View>: View {
     let type: ImageType
     let content: () -> Content
     var width: CGFloat {
-        type == .poster ? Constants.Image.Poster.width : Constants.Image.Backdrop.width
+        switch type {
+        case .poster: return Constants.Image.Poster.width
+        case .backdrop: return Constants.Image.Backdrop.width
+        case .logo: return Constants.Image.Logo.width
+        }
     }
     var height: CGFloat {
-        type == .poster ? Constants.Image.Poster.height : Constants.Image.Backdrop.height
+        switch type {
+        case .poster: return Constants.Image.Poster.height
+        case .backdrop: return Constants.Image.Backdrop.height
+        case .logo: return Constants.Image.Logo.height
+        }
     }
 
     var body: some View {

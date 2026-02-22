@@ -88,7 +88,7 @@ extension AppModel {
         }
         
         // Generate all possible variants
-        var pathsToTry: [(description: String, path: String)] = [
+        let pathsToTry: [(description: String, path: String)] = [
             ("Original", "\(basePath)/\(folderName)"),
             ("Curly apostrophe", "\(basePath)/\(folderName.withCurlyApostrophes)"),
             ("Normalized apostrophe", "\(basePath)/\(folderName.normalizingApostrophes)")
@@ -383,7 +383,7 @@ extension AppModel {
         let basePath = "\(settingsManager.plexServerAssetPath)/\(libraryPath)"
         
         // Generate all possible variants
-        var pathsToTry: [(description: String, path: String)] = [
+        let pathsToTry: [(description: String, path: String)] = [
             ("Original", "\(basePath)/\(folderName)"),
             ("Curly apostrophe", "\(basePath)/\(folderName.withCurlyApostrophes)"),
             ("Normalized apostrophe", "\(basePath)/\(folderName.normalizingApostrophes)")

@@ -144,7 +144,13 @@ struct ImageGallery: View {
     }
     
     private func title(_ type: ImageType, title: String) -> String {
-        return ("\(type == .poster ? "Posters" : "Backdrops") - \(title)")
+        let label: String
+        switch type {
+        case .poster: label = "Posters"
+        case .backdrop: label = "Backdrops"
+        case .logo: label = "Logos"
+        }
+        return "\(label) - \(title)"
     }
     
     private func loadImages() async {
@@ -153,7 +159,11 @@ struct ImageGallery: View {
             return
         }
         
-        images = imageType == .poster ? response.posters : response.backdrops
+        switch imageType {
+        case .poster: images = response.posters
+        case .backdrop: images = response.backdrops
+        case .logo: images = response.logos
+        }
         isLoading = false
     }
     
@@ -171,7 +181,12 @@ struct ImageGallery: View {
     }
     
     private func downloadImage(_ image: TMDBImage, flip: Bool = false) async {
-        let filename = imageType == .poster ? Constants.Image.Types.poster : Constants.Image.Types.backdrop
+        let filename: String
+        switch imageType {
+        case .poster: filename = Constants.Image.Types.poster
+        case .backdrop: filename = Constants.Image.Types.backdrop
+        case .logo: filename = Constants.Image.Types.logo
+        }
 
         // Determine folder prefix based on mediaType
         let folderPrefix: String

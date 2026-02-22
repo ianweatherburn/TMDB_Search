@@ -75,6 +75,7 @@ struct ImageGridItem: View {
         switch imageType {
         case .poster: return Constants.Image.Poster.ratio
         case .backdrop: return Constants.Image.Backdrop.ratio
+        case .logo: return Constants.Image.Logo.ratio
         }
     }
 }

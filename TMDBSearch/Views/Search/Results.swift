@@ -154,9 +154,7 @@ struct ResultRowContent: View {
     }
     
     private var rowBackgroundColor: Color {
-        Color(index.isMultiple(of: 2)
-              ? NSColor.windowBackgroundColor
-              : NSColor.controlBackgroundColor)
+        Color.gray.opacity(Constants.App.Results.rowBackgroundOpacity)
     }
 }
 

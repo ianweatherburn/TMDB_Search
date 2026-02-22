@@ -62,7 +62,7 @@ enum GridSize: String, CaseIterable, Identifiable, Equatable {
             case .medium:  return Constants.Image.Poster.Gallery.Count.large
             case .large:   return Constants.Image.Poster.Gallery.Count.huge
             }
-        case .backdrop:
+        case .backdrop, .logo:
             switch self {
             case .tiny:  return Constants.Image.Backdrop.Gallery.Count.small
             case .small: return Constants.Image.Backdrop.Gallery.Count.medium

@@ -7,6 +7,7 @@
 
 enum ImageType {
     case backdrop
+    case logo
     case poster
 }
 
@@ -14,6 +15,7 @@ struct TMDBImagesResponse: Codable {
     let id: Int
     let posters: [TMDBImage]
     let backdrops: [TMDBImage]
+    let logos: [TMDBImage]
 }
 
 struct TMDBImage: Codable, Identifiable {

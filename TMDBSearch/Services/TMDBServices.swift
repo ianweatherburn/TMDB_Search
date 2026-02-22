@@ -5,10 +5,11 @@
 //  Created by Ian Weatherburn on 2025/08/05.
 //
 
-import Foundation
-import SwiftUI
+import AppKit
 import CoreGraphics
+import Foundation
 import ImageIO
+import SwiftUI
 import UniformTypeIdentifiers
 
 // MARK: - TMDB Service
@@ -55,7 +56,8 @@ final class TMDBServices {
         response = TMDBImagesResponse(
             id: response.id,
             posters: response.posters.sorted { ($0.width * $0.height) > ($1.width * $1.height) },
-            backdrops: response.backdrops.sorted { ($0.width * $0.height) > ($1.width * $1.height) }
+            backdrops: response.backdrops.sorted { ($0.width * $0.height) > ($1.width * $1.height) },
+            logos: response.logos.sorted { ($0.width * $0.height) > ($1.width * $1.height) }
         )
         
         return response
@@ -91,15 +93,18 @@ final class TMDBServices {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             
+            // Convert SVG/WebP to PNG (preserves transparency, no-op for JPEG/PNG)
+            let convertedData = convertToPNG(data)
+            
             // Process the image data and only flip horizontally if requested
             if flip {
-                guard let flippedData = flipImageHorizontally(data) else {
+                guard let flippedData = flipImageHorizontally(convertedData) else {
                     print("❌ Failed to flip image horizontally")
                     return nil
                 }
                 return flippedData
             } else {
-                return data
+                return convertedData
             }
         } catch {
             print("❌ Failed to download image: \(error.localizedDescription)")
@@ -223,5 +228,83 @@ final class TMDBServices {
             
             return mutableData as Data
         }
+    
+    // MARK: - Image Format Conversion
+    
+    /// Converts image data from SVG or WebP to PNG, preserving transparency.
+    /// Returns the original data unchanged for JPEG/PNG formats.
+    private func convertToPNG(_ data: Data) -> Data {
+        // Check for SVG: look for XML/SVG markers in the first bytes
+        let headerSize = min(data.count, 1024)
+        if let header = String(data: data.prefix(headerSize), encoding: .utf8),
+           header.contains("<svg") || header.contains("<?xml") {
+            return convertSVGToPNG(data) ?? data
+        }
+        
+        // Check for WebP: starts with "RIFF" followed by "WEBP"
+        if data.count >= 12,
+           let riff = String(data: data.prefix(4), encoding: .ascii), riff == "RIFF",
+           let webp = String(data: data[8..<12], encoding: .ascii), webp == "WEBP" {
+            return convertWebPToPNG(data) ?? data
+        }
+        
+        return data
+    }
+    
+    /// Converts SVG data to PNG using NSImage rendering at native dimensions
+    private func convertSVGToPNG(_ data: Data) -> Data? {
+        guard let image = NSImage(data: data) else { return nil }
+        
+        let size = image.size
+        guard size.width > 0, size.height > 0 else { return nil }
+        
+        guard let bitmapRep = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: Int(size.width),
+            pixelsHigh: Int(size.height),
+            bitsPerSample: 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: .deviceRGB,
+            bytesPerRow: 0,
+            bitsPerPixel: 0
+        ) else { return nil }
+        
+        bitmapRep.size = size
+        
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmapRep)
+        image.draw(in: NSRect(origin: .zero, size: size))
+        NSGraphicsContext.restoreGraphicsState()
+        
+        return bitmapRep.representation(using: .png, properties: [:])
+    }
+    
+    /// Converts WebP data to PNG using CGImageSource
+    private func convertWebPToPNG(_ data: Data) -> Data? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+            return nil
+        }
+        
+        let mutableData = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(
+            mutableData,
+            UTType.png.identifier as CFString,
+            1,
+            nil
+        ) else {
+            return nil
+        }
+        
+        CGImageDestinationAddImage(destination, cgImage, nil)
+        
+        guard CGImageDestinationFinalize(destination) else {
+            return nil
+        }
+        
+        return mutableData as Data
+    }
 
 }

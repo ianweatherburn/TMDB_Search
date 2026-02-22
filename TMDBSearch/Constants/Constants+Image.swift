@@ -39,6 +39,20 @@ extension Constants.Image {
             }
         }
     }
+    enum Logo {
+        static let ratio: CGFloat = 16.0 / 9.0 // Wide landscape ratio for logos
+        static let height: CGFloat = 60
+        static let width: CGFloat = height * ratio
+        static let spacing: CGFloat = 12
+        enum Gallery {
+            enum Count {
+                static let small = 5
+                static let medium = 4
+                static let large = 3
+                static let huge = 2
+            }
+        }
+    }
     enum Gallery {
         static let width: CGFloat = 1_366
         static let height: CGFloat = 768
@@ -47,6 +61,7 @@ extension Constants.Image {
     enum Types {
         static let poster = "poster.jpg"
         static let backdrop = "backdrop.jpg"
+        static let logo = "logo.png"
     }
 }
 

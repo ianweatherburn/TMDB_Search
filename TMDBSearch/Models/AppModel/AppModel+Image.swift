@@ -18,11 +18,32 @@ extension AppModel {
             path = item.posterPath
         case .backdrop:
             path = item.backdropPath
+        case .logo:
+            return nil // Logos require fetching from the images endpoint; use loadLogoImage instead
         }
 
         guard let path else { return nil }
         guard let data = await tmdbService.loadImage(path: path, size: .w342) else { return nil }
         return NSImage(data: data)
+    }
+    
+    /// Loads the first available logo for a media item from the images endpoint.
+    /// Logos are not included in search results, so we must fetch them separately.
+    @MainActor
+    func loadLogoImage(for item: TMDBMediaItem, mediaType: MediaType) async -> (image: NSImage?, hasLogos: Bool) {
+        guard let response = await loadImages(for: item.id, mediaType: mediaType) else {
+            return (nil, false)
+        }
+        
+        guard let firstLogo = response.logos.first else {
+            return (nil, false)
+        }
+        
+        guard let data = await tmdbService.loadImage(path: firstLogo.filePath, size: .w342) else {
+            return (nil, true)
+        }
+        
+        return (NSImage(data: data), true)
     }
 
     func loadImages(for itemId: Int, mediaType: MediaType) async -> TMDBImagesResponse? {

@@ -15,8 +15,13 @@ struct MediaItemRow: View {
     @Environment(AppModel.self) private var appModel
     @State private var posterImage: NSImage?
     @State private var backdropImage: NSImage?
+    @State private var logoImage: NSImage?
+    @State private var hasLogos = false
+    @State private var posterLoaded = false
+    @State private var backdropLoaded = false
     @State private var showingPosterDialog = false
     @State private var showingBackdropDialog = false
+    @State private var showingLogoDialog = false
     
     private var mediaPopover: String {
         let type = String(describing: type.displayInfo.title)
@@ -31,7 +36,15 @@ struct MediaItemRow: View {
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: Constants.Image.Poster.width, height: Constants.Image.Poster.height)
                     .overlay {
-                        if posterImage == nil {
+                        if posterLoaded {
+                            VStack(spacing: 4) {
+                                Image(systemName: "photo.badge.exclamationmark")
+                                    .font(.title)
+                                Text("Missing")
+                                    .font(.caption2)
+                            }
+                            .foregroundStyle(.secondary)
+                        } else {
                             ProgressView()
                                 .scaleEffect(0.6)
                         }
@@ -42,11 +55,42 @@ struct MediaItemRow: View {
             }
             .task {
                 posterImage = await appModel.loadImage(for: item, as: .poster)
+                posterLoaded = true
             }
             .help("Show all posters for the \(mediaPopover)")
             
-            // Content
-            contentRow(for: item, type: type)
+            // Content with optional logo
+            VStack(spacing: 4) {
+                if hasLogos, let logoImage {
+                    GeometryReader { geometry in
+                        let logoWidth = geometry.size.width * 0.5
+                        let logoHeight = logoWidth / Constants.Image.Logo.ratio
+                        
+                        HStack {
+                            Spacer()
+                            Image(nsImage: logoImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(maxWidth: logoWidth, maxHeight: logoHeight)
+                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                .shadow(color: .black.opacity(0.6), radius: 8, x: 0, y: 4)
+                                .onTapGesture {
+                                    showingLogoDialog = true
+                                }
+                                .help("Show all logos for the \(mediaPopover)")
+                            Spacer()
+                        }
+                    }
+                    .frame(height: Constants.Image.Logo.height)
+                }
+                
+                contentRow(for: item, type: type)
+            }
+            .task {
+                let result = await appModel.loadLogoImage(for: item, mediaType: type)
+                logoImage = result.image
+                hasLogos = result.hasLogos
+            }
 
             Spacer()
             
@@ -58,7 +102,15 @@ struct MediaItemRow: View {
                         .fill(Color.gray.opacity(0.3))
                         .frame(width: Constants.Image.Backdrop.width, height: Constants.Image.Backdrop.height)
                         .overlay {
-                            if backdropImage == nil {
+                            if backdropLoaded {
+                                VStack(spacing: 4) {
+                                    Image(systemName: "photo.badge.exclamationmark")
+                                        .font(.title)
+                                    Text("Missing")
+                                        .font(.caption2)
+                                }
+                                .foregroundStyle(.secondary)
+                            } else {
                                 ProgressView()
                                     .scaleEffect(0.6)
                             }
@@ -69,6 +121,7 @@ struct MediaItemRow: View {
                 }
                 .task {
                     backdropImage = await appModel.loadImage(for: item, as: .backdrop)
+                    backdropLoaded = true
                 }
                 .help("Show all backdrops for the \(mediaPopover)")
                 Spacer()
@@ -111,6 +164,14 @@ struct MediaItemRow: View {
                 item: item,
                 mediaType: appModel.selectedMediaType,
                 imageType: .backdrop
+            )
+            .environment(appModel)
+        }
+        .sheet(isPresented: $showingLogoDialog) {
+            ImageGallery(
+                item: item,
+                mediaType: appModel.selectedMediaType,
+                imageType: .logo
             )
             .environment(appModel)
         }
