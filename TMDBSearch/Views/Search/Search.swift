@@ -86,6 +86,12 @@ struct Search: View {
                 settingsManager: appModel.settingsManager,
                 tasks: Binding(appModel, keyPath: \.plexPendingTasks),
                 selections: Binding(appModel, keyPath: \.plexAssetSelections),
+                includeUHD: Binding(appModel, keyPath: \.plexSelectionIsUHD),
+                onToggleUHD: {
+                    Task {
+                        await appModel.refreshPlexAssetSelectionForUHDToggle()
+                    }
+                },
                 onUpdate: {
                     Task {
                         await appModel.confirmPlexAssetSelection()

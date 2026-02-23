@@ -22,6 +22,8 @@ struct PlexAssetSelection: View {
     let settingsManager: SettingsManager
     @Binding var tasks: [AssetUploadTask]
     @Binding var selections: [UUID: Bool]
+    @Binding var includeUHD: Bool
+    let onToggleUHD: () -> Void
     let onUpdate: () -> Void
     let onCancel: () -> Void
     
@@ -60,7 +62,9 @@ struct PlexAssetSelection: View {
             HStack {
                 Button(action: toggleAll) {
                     Label(
-                        allSelected ? "Unselect All" : "Select All",
+                        allSelected
+                            ? "Unselect All (\(selectedCount) of \(tasks.count) selected)"
+                            : "Select All (\(selectedCount) of \(tasks.count) selected)",
                         systemImage: allSelected
                             ? "checkmark.circle.fill"
                             : "circle"
@@ -72,10 +76,20 @@ struct PlexAssetSelection: View {
                 
                 Spacer()
                 
-                Text("\(selectedCount) of \(tasks.count) selected")
+                Button(action: {
+                    includeUHD.toggle()
+                    onToggleUHD()
+                }) {
+                    Label(
+                        "Include 4K?",
+                        systemImage: includeUHD ? "4k.tv.fill" : "4k.tv"
+                    )
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .padding(.trailing, 8)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(includeUHD ? .primary : .secondary)
+                
+                Spacer()
                 
                 Button(action: togglePreview) {
                     Label(
@@ -117,13 +131,15 @@ struct PlexAssetSelection: View {
                         }
                     }
                 }
-                .frame(width: PreviewConfig.listWidth, alignment: .leading)
+                .frame(width: showPreview
+                       ? PreviewConfig.listWidth
+                       : PreviewConfig.listWidth + PreviewConfig.sidebarWidth + 1,
+                       alignment: .leading)
                 .frame(minHeight: 180, maxHeight: 500)
-                
-                // Preview sidebar
+
                 if showPreview {
                     Divider()
-                    
+
                     AssetPreviewPane(task: focusedTask)
                         .frame(width: PreviewConfig.sidebarWidth)
                         .frame(minHeight: 180, maxHeight: 500)
@@ -170,9 +186,7 @@ struct PlexAssetSelection: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
         }
-        .frame(width: showPreview
-               ? PreviewConfig.listWidth + PreviewConfig.sidebarWidth + 1
-               : PreviewConfig.listWidth)
+        .frame(width: PreviewConfig.listWidth + PreviewConfig.sidebarWidth + 1)
         .onAppear {
             showPreview = settingsManager.plexShowAssetPreview
             if showPreview, let firstTask = tasks.first {
@@ -513,6 +527,8 @@ enum ThumbnailGenerator {
             )
         ]),
         selections: .constant([:]),
+        includeUHD: .constant(false),
+        onToggleUHD: {},
         onUpdate: {},
         onCancel: {}
     )

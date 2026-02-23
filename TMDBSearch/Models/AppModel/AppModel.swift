@@ -28,8 +28,12 @@ final class AppModel {
     var plexAssetSelections: [UUID: Bool] = [:]
     var plexSelectionItem: TMDBMediaItem?
     var plexSelectionType: MediaType = .movie
+    var plexSelectionLibraryType: MediaType = .movie
     var plexSelectionSectionId: String = ""
     var plexSelectionRatingKey: String = ""
+    var plexSelectionTargets: [(sectionId: String, ratingKey: String)] = []
+    var plexSelectionIsUHD: Bool = false
+    var plexSelectionOriginalUHD: Bool = false
     
     // MARK: - Plex Upload Progress
     var showPlexUploadProgress = false

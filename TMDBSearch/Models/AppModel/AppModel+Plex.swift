@@ -10,6 +10,15 @@ import AppKit
 // MARK: - Plex Functionality
 extension AppModel {
     
+    private struct PlexLibraryTarget {
+        let sectionId: String
+        let isUHD: Bool
+
+        var nameSuffix: String {
+            isUHD ? " (4K)" : ""
+        }
+    }
+    
     @MainActor
     func updatePlexMetadata(for item: TMDBMediaItem, type: MediaType, uhd: Bool) async {
         // For collections, show library selection menu
@@ -37,17 +46,14 @@ extension AppModel {
             return
         }
         
-        let sectionId = getSectionId(for: type, uhd: uhd)
+        let targets = getSectionTargets(for: type, includeUHD: uhd)
         
-        guard !sectionId.isEmpty else {
-            let typeDescription = getLibraryTypeDescription(for: type, uhd: uhd)
-            errorMessage = "Plex library not configured for \(typeDescription)"
-            _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
+        guard validateTargets(targets, for: type, includeUHD: uhd) else {
             return
         }
         
         // Start upload process
-        await performAssetUpload(for: item, type: type, uhd: uhd, sectionId: sectionId)
+        await performAssetUpload(for: item, type: type, uhd: uhd, targets: targets)
     }
     
     // MARK: - Asset Scan and Selection
@@ -57,7 +63,7 @@ extension AppModel {
         for item: TMDBMediaItem,
         type: MediaType,
         uhd: Bool,
-        sectionId: String
+        targets: [PlexLibraryTarget]
     ) async {
         // Construct metadata path - try apostrophe variants
         DebugLogger.log("\n--- Asset Folder Path Resolution ---")
@@ -120,21 +126,32 @@ extension AppModel {
         DebugLogger.log("--- End Asset Folder Path Resolution ---\n")
         
         do {
-            // Search for item in Plex
+            // Search for item in each target Plex library
             let title = item.displayTitle
             let year = item.displayYear
             let tmdbId = String(item.id)
-            
-            guard let mainRatingKey = try await plexService.searchMedia(
-                server: settingsManager.plexServer,
-                token: settingsManager.plexToken,
-                sectionId: sectionId,
-                title: title,
-                year: year,
-                tmdbId: tmdbId,
-                searchType: type
-            ) else {
-                errorMessage = "'\(item.formattedTitle)' not found in Plex library"
+
+            var resolvedTargets: [(target: PlexLibraryTarget, ratingKey: String)] = []
+            var missingLibraries: [String] = []
+
+            for target in targets {
+                if let ratingKey = try await plexService.searchMedia(
+                    server: settingsManager.plexServer,
+                    token: settingsManager.plexToken,
+                    sectionId: target.sectionId,
+                    title: title,
+                    year: year,
+                    tmdbId: tmdbId,
+                    searchType: type
+                ) {
+                    resolvedTargets.append((target, ratingKey))
+                } else {
+                    missingLibraries.append(getLibraryTypeDescription(for: type, uhd: target.isUHD))
+                }
+            }
+
+            guard missingLibraries.isEmpty else {
+                errorMessage = "'\(item.formattedTitle)' not found in Plex librar\(missingLibraries.count == 1 ? "y" : "ies"): \(missingLibraries.joined(separator: ", "))"
                 _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
                 return
             }
@@ -149,97 +166,103 @@ extension AppModel {
                 return
             }
             
-            // Build task list
+            // Build task list for all target libraries
             var tasks: [AssetUploadTask] = []
-            
-            // Main poster
-            if let posterPath = scanner.findPoster(in: assets) {
-                tasks.append(AssetUploadTask(
-                    type: type == .movie ? .moviePoster : .showPoster,
-                    filePath: posterPath,
-                    ratingKey: mainRatingKey,
-                    displayName: "\(type == .movie ? "Movie" : "Show") Poster"
-                ))
-            }
-            
-            // Main backdrop
-            if let backdropPath = scanner.findBackdrop(in: assets) {
-                tasks.append(AssetUploadTask(
-                    type: type == .movie ? .movieBackdrop : .showBackdrop,
-                    filePath: backdropPath,
-                    ratingKey: mainRatingKey,
-                    displayName: "\(type == .movie ? "Movie" : "Show") Backdrop"
-                ))
-            }
-            
-            // Logo
-            if let logoPath = scanner.findLogo(in: assets) {
-                tasks.append(AssetUploadTask(
-                    type: .logo,
-                    filePath: logoPath,
-                    ratingKey: mainRatingKey,
-                    displayName: "\(type == .movie ? "Movie" : "Show") Logo"
-                ))
-            }
-            
-            // Square Art
-            if let squareArtPath = scanner.findSquareArt(in: assets) {
-                tasks.append(AssetUploadTask(
-                    type: .squareArt,
-                    filePath: squareArtPath,
-                    ratingKey: mainRatingKey,
-                    displayName: "\(type == .movie ? "Movie" : "Show") Square Art"
-                ))
-            }
-            
-            // For TV shows, add seasons and episodes
-            if type == .tv {
-                // Get seasons from Plex
-                let seasons = try await plexService.getSeasons(
-                    server: settingsManager.plexServer,
-                    token: settingsManager.plexToken,
-                    showRatingKey: mainRatingKey
-                )
-                
-                // Season posters
-                let seasonPosters = scanner.findSeasonPosters(in: assets)
-                for (seasonNum, filePath) in seasonPosters {
-                    if let season = seasons.first(where: { $0.index == seasonNum }) {
-                        tasks.append(AssetUploadTask(
-                            type: .seasonPoster,
-                            filePath: filePath,
-                            ratingKey: season.ratingKey,
-                            displayName: "Season \(String(format: "%02d", seasonNum)) Poster"
-                        ))
-                    }
+            var selectionTargets: [(sectionId: String, ratingKey: String)] = []
+
+            for resolved in resolvedTargets {
+                let target = resolved.target
+                let mainRatingKey = resolved.ratingKey
+                let nameSuffix = target.nameSuffix
+
+                selectionTargets.append((sectionId: target.sectionId, ratingKey: mainRatingKey))
+
+                // Main poster
+                if let posterPath = scanner.findPoster(in: assets) {
+                    tasks.append(AssetUploadTask(
+                        type: type == .movie ? .moviePoster : .showPoster,
+                        filePath: posterPath,
+                        ratingKey: mainRatingKey,
+                        displayName: "\(type == .movie ? "Movie" : "Show") Poster\(nameSuffix)"
+                    ))
                 }
                 
-                // Episode title cards
-                let episodeCards = scanner.findEpisodeTitleCards(in: assets)
-                
-                // Group episodes by season to minimize API calls
-                var episodesBySeason: [Int: [PlexEpisode]] = [:]
-                for season in seasons {
-                    if episodeCards.contains(where: { $0.season == season.index }) {
-                        let episodes = try await plexService.getEpisodes(
-                            server: settingsManager.plexServer,
-                            token: settingsManager.plexToken,
-                            seasonRatingKey: season.ratingKey
-                        )
-                        episodesBySeason[season.index] = episodes
-                    }
+                // Main backdrop
+                if let backdropPath = scanner.findBackdrop(in: assets) {
+                    tasks.append(AssetUploadTask(
+                        type: type == .movie ? .movieBackdrop : .showBackdrop,
+                        filePath: backdropPath,
+                        ratingKey: mainRatingKey,
+                        displayName: "\(type == .movie ? "Movie" : "Show") Backdrop\(nameSuffix)"
+                    ))
                 }
                 
-                // Create tasks for episode title cards
-                for (seasonNum, episodeNum, filePath) in episodeCards {
-                    if let episodes = episodesBySeason[seasonNum],
-                       let episode = episodes.first(where: { $0.index == episodeNum }) {
-                        tasks.append(AssetUploadTask(
-                            type: .episodeTitleCard,
-                            filePath: filePath,
-                            ratingKey: episode.ratingKey,
-                            displayName: "S\(String(format: "%02d", seasonNum))E\(String(format: "%02d", episodeNum))"
-                        ))
+                // Logo
+                if let logoPath = scanner.findLogo(in: assets) {
+                    tasks.append(AssetUploadTask(
+                        type: .logo,
+                        filePath: logoPath,
+                        ratingKey: mainRatingKey,
+                        displayName: "\(type == .movie ? "Movie" : "Show") Logo\(nameSuffix)"
+                    ))
+                }
+                
+                // Square Art
+                if let squareArtPath = scanner.findSquareArt(in: assets) {
+                    tasks.append(AssetUploadTask(
+                        type: .squareArt,
+                        filePath: squareArtPath,
+                        ratingKey: mainRatingKey,
+                        displayName: "\(type == .movie ? "Movie" : "Show") Square Art\(nameSuffix)"
+                    ))
+                }
+                
+                // For TV shows, add seasons and episodes
+                if type == .tv {
+                    let seasons = try await plexService.getSeasons(
+                        server: settingsManager.plexServer,
+                        token: settingsManager.plexToken,
+                        showRatingKey: mainRatingKey
+                    )
+                    
+                    // Season posters
+                    let seasonPosters = scanner.findSeasonPosters(in: assets)
+                    for (seasonNum, filePath) in seasonPosters {
+                        if let season = seasons.first(where: { $0.index == seasonNum }) {
+                            tasks.append(AssetUploadTask(
+                                type: .seasonPoster,
+                                filePath: filePath,
+                                ratingKey: season.ratingKey,
+                                displayName: "Season \(String(format: "%02d", seasonNum)) Poster\(nameSuffix)"
+                            ))
+                        }
+                    }
+                    
+                    // Episode title cards
+                    let episodeCards = scanner.findEpisodeTitleCards(in: assets)
+                    var episodesBySeason: [Int: [PlexEpisode]] = [:]
+
+                    for season in seasons {
+                        if episodeCards.contains(where: { $0.season == season.index }) {
+                            let episodes = try await plexService.getEpisodes(
+                                server: settingsManager.plexServer,
+                                token: settingsManager.plexToken,
+                                seasonRatingKey: season.ratingKey
+                            )
+                            episodesBySeason[season.index] = episodes
+                        }
+                    }
+
+                    for (seasonNum, episodeNum, filePath) in episodeCards {
+                        if let episodes = episodesBySeason[seasonNum],
+                           let episode = episodes.first(where: { $0.index == episodeNum }) {
+                            tasks.append(AssetUploadTask(
+                                type: .episodeTitleCard,
+                                filePath: filePath,
+                                ratingKey: episode.ratingKey,
+                                displayName: "S\(String(format: "%02d", seasonNum))E\(String(format: "%02d", episodeNum))\(nameSuffix)"
+                            ))
+                        }
                     }
                 }
             }
@@ -251,7 +274,7 @@ extension AppModel {
             }
             
             // Show asset selection dialog
-            showAssetSelectionDialog(tasks: tasks, item: item, type: type, sectionId: sectionId, ratingKey: mainRatingKey)
+            showAssetSelectionDialog(tasks: tasks, item: item, type: type, libraryType: type, targets: selectionTargets, uhd: uhd)
             
         } catch {
             errorMessage = "Plex update failed: \(error.localizedDescription)"
@@ -266,18 +289,44 @@ extension AppModel {
         tasks: [AssetUploadTask],
         item: TMDBMediaItem,
         type: MediaType,
-        sectionId: String,
-        ratingKey: String
+        libraryType: MediaType,
+        targets: [(sectionId: String, ratingKey: String)],
+        uhd: Bool
     ) {
         plexPendingTasks = tasks
         plexAssetSelections = Dictionary(uniqueKeysWithValues: tasks.map { ($0.id, true) })
         plexSelectionItem = item
         plexSelectionType = type
-        plexSelectionSectionId = sectionId
-        plexSelectionRatingKey = ratingKey
+        plexSelectionLibraryType = libraryType
+        plexSelectionTargets = targets
+        plexSelectionSectionId = targets.first?.sectionId ?? ""
+        plexSelectionRatingKey = targets.first?.ratingKey ?? ""
+        plexSelectionIsUHD = uhd
+        plexSelectionOriginalUHD = uhd
         showPlexAssetSelection = true
     }
     
+    @MainActor
+    func refreshPlexAssetSelectionForUHDToggle() async {
+        guard let item = plexSelectionItem else {
+            return
+        }
+
+        let includeUHD = plexSelectionIsUHD
+
+        if plexSelectionType == .collection {
+            await performCollectionUpdate(for: item, type: plexSelectionLibraryType, uhd: includeUHD)
+            return
+        }
+
+        let targets = getSectionTargets(for: plexSelectionType, includeUHD: includeUHD)
+        guard validateTargets(targets, for: plexSelectionType, includeUHD: includeUHD) else {
+            return
+        }
+
+        await performAssetUpload(for: item, type: plexSelectionType, uhd: includeUHD, targets: targets)
+    }
+
     @MainActor
     func confirmPlexAssetSelection() async {
         showPlexAssetSelection = false
@@ -304,15 +353,21 @@ extension AppModel {
         }
         
         if hasPosterUpload {
-            do {
-                _ = try await plexService.removeOverlayLabelIfPresent(
-                    server: settingsManager.plexServer,
-                    token: settingsManager.plexToken,
-                    sectionId: plexSelectionSectionId,
-                    ratingKey: plexSelectionRatingKey
-                )
-            } catch {
-                DebugLogger.log("⚠️ Failed to remove Overlay label for \(plexSelectionRatingKey): \(error.localizedDescription)")
+            let overlayTargets = plexSelectionTargets.isEmpty
+                ? [(sectionId: plexSelectionSectionId, ratingKey: plexSelectionRatingKey)]
+                : plexSelectionTargets
+
+            for target in overlayTargets where !target.sectionId.isEmpty && !target.ratingKey.isEmpty {
+                do {
+                    _ = try await plexService.removeOverlayLabelIfPresent(
+                        server: settingsManager.plexServer,
+                        token: settingsManager.plexToken,
+                        sectionId: target.sectionId,
+                        ratingKey: target.ratingKey
+                    )
+                } catch {
+                    DebugLogger.log("⚠️ Failed to remove Overlay label for \(target.ratingKey): \(error.localizedDescription)")
+                }
             }
         }
         
@@ -330,6 +385,8 @@ extension AppModel {
         showPlexAssetSelection = false
         plexPendingTasks = []
         plexAssetSelections = [:]
+        plexSelectionTargets = []
+        plexSelectionLibraryType = .movie
         plexSelectionItem = nil
     }
     
@@ -425,13 +482,8 @@ extension AppModel {
         alert.informativeText = "Which library contains this collection?"
         alert.alertStyle = .informational
         
-        if uhd {
-            alert.addButton(withTitle: "Movies 4K")
-            alert.addButton(withTitle: "Shows 4K")
-        } else {
-            alert.addButton(withTitle: "Movies")
-            alert.addButton(withTitle: "Shows")
-        }
+        alert.addButton(withTitle: uhd ? "Movies (+4K)" : "Movies")
+        alert.addButton(withTitle: uhd ? "Shows (+4K)" : "Shows")
         alert.addButton(withTitle: "Cancel")
         
         let response = alert.runModal()
@@ -474,12 +526,9 @@ extension AppModel {
             return
         }
         
-        let sectionId = getSectionId(for: type, uhd: uhd)
-        
-        guard !sectionId.isEmpty else {
-            let typeDescription = getLibraryTypeDescription(for: type, uhd: uhd)
-            errorMessage = "Plex library not configured for \(typeDescription)"
-            _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
+        let targets = getSectionTargets(for: type, includeUHD: uhd)
+
+        guard validateTargets(targets, for: type, includeUHD: uhd) else {
             return
         }
         
@@ -523,21 +572,32 @@ extension AppModel {
         DebugLogger.log("--- End Collection Asset Folder Path Resolution ---\n")
         
         do {
-            // Search for the collection in Plex
+            // Search for the collection in each target Plex library
             let title = item.displayTitle
             let year = item.displayYear.isEmpty ? nil : item.displayYear
             let tmdbId = String(item.id)
-            
-            guard let ratingKey = try await plexService.searchMedia(
-                server: settingsManager.plexServer,
-                token: settingsManager.plexToken,
-                sectionId: sectionId,
-                title: title,
-                year: year,
-                tmdbId: tmdbId,
-                searchType: .collection
-            ) else {
-                errorMessage = "Collection '\(item.formattedTitle)' not found in Plex library"
+
+            var resolvedTargets: [(target: PlexLibraryTarget, ratingKey: String)] = []
+            var missingLibraries: [String] = []
+
+            for target in targets {
+                if let ratingKey = try await plexService.searchMedia(
+                    server: settingsManager.plexServer,
+                    token: settingsManager.plexToken,
+                    sectionId: target.sectionId,
+                    title: title,
+                    year: year,
+                    tmdbId: tmdbId,
+                    searchType: .collection
+                ) {
+                    resolvedTargets.append((target, ratingKey))
+                } else {
+                    missingLibraries.append(getLibraryTypeDescription(for: type, uhd: target.isUHD))
+                }
+            }
+
+            guard missingLibraries.isEmpty else {
+                errorMessage = "Collection '\(item.formattedTitle)' not found in Plex librar\(missingLibraries.count == 1 ? "y" : "ies"): \(missingLibraries.joined(separator: ", "))"
                 _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
                 return
             }
@@ -547,45 +607,54 @@ extension AppModel {
             let assets = scanner.scanAssets()
             
             var tasks: [AssetUploadTask] = []
-            
-            // Poster
-            if let posterPath = scanner.findPoster(in: assets) {
-                tasks.append(AssetUploadTask(
-                    type: .moviePoster,
-                    filePath: posterPath,
-                    ratingKey: ratingKey,
-                    displayName: "Collection Poster"
-                ))
-            }
-            
-            // Backdrop
-            if let backdropPath = scanner.findBackdrop(in: assets) {
-                tasks.append(AssetUploadTask(
-                    type: .movieBackdrop,
-                    filePath: backdropPath,
-                    ratingKey: ratingKey,
-                    displayName: "Collection Backdrop"
-                ))
-            }
-            
-            // Logo
-            if let logoPath = scanner.findLogo(in: assets) {
-                tasks.append(AssetUploadTask(
-                    type: .logo,
-                    filePath: logoPath,
-                    ratingKey: ratingKey,
-                    displayName: "Collection Logo"
-                ))
-            }
-            
-            // Square Art
-            if let squareArtPath = scanner.findSquareArt(in: assets) {
-                tasks.append(AssetUploadTask(
-                    type: .squareArt,
-                    filePath: squareArtPath,
-                    ratingKey: ratingKey,
-                    displayName: "Collection Square Art"
-                ))
+            var selectionTargets: [(sectionId: String, ratingKey: String)] = []
+
+            for resolved in resolvedTargets {
+                let target = resolved.target
+                let ratingKey = resolved.ratingKey
+                let nameSuffix = target.nameSuffix
+
+                selectionTargets.append((sectionId: target.sectionId, ratingKey: ratingKey))
+
+                // Poster
+                if let posterPath = scanner.findPoster(in: assets) {
+                    tasks.append(AssetUploadTask(
+                        type: .moviePoster,
+                        filePath: posterPath,
+                        ratingKey: ratingKey,
+                        displayName: "Collection Poster\(nameSuffix)"
+                    ))
+                }
+                
+                // Backdrop
+                if let backdropPath = scanner.findBackdrop(in: assets) {
+                    tasks.append(AssetUploadTask(
+                        type: .movieBackdrop,
+                        filePath: backdropPath,
+                        ratingKey: ratingKey,
+                        displayName: "Collection Backdrop\(nameSuffix)"
+                    ))
+                }
+                
+                // Logo
+                if let logoPath = scanner.findLogo(in: assets) {
+                    tasks.append(AssetUploadTask(
+                        type: .logo,
+                        filePath: logoPath,
+                        ratingKey: ratingKey,
+                        displayName: "Collection Logo\(nameSuffix)"
+                    ))
+                }
+                
+                // Square Art
+                if let squareArtPath = scanner.findSquareArt(in: assets) {
+                    tasks.append(AssetUploadTask(
+                        type: .squareArt,
+                        filePath: squareArtPath,
+                        ratingKey: ratingKey,
+                        displayName: "Collection Square Art\(nameSuffix)"
+                    ))
+                }
             }
             
             guard !tasks.isEmpty else {
@@ -595,7 +664,7 @@ extension AppModel {
             }
             
             // Show asset selection dialog
-            showAssetSelectionDialog(tasks: tasks, item: item, type: .collection, sectionId: sectionId, ratingKey: ratingKey)
+            showAssetSelectionDialog(tasks: tasks, item: item, type: .collection, libraryType: type, targets: selectionTargets, uhd: uhd)
             
         } catch {
             errorMessage = "Plex update failed: \(error.localizedDescription)"
@@ -616,6 +685,42 @@ extension AppModel {
         case (.movie, true), (.collection, true):
             return settingsManager.plexMovies4KLibraryId
         }
+    }
+
+    private func getSectionTargets(for type: MediaType, includeUHD: Bool) -> [PlexLibraryTarget] {
+        var targets: [PlexLibraryTarget] = []
+
+        let standardSectionId = getSectionId(for: type, uhd: false)
+        if !standardSectionId.isEmpty {
+            targets.append(PlexLibraryTarget(sectionId: standardSectionId, isUHD: false))
+        }
+
+        if includeUHD {
+            let uhdSectionId = getSectionId(for: type, uhd: true)
+            if !uhdSectionId.isEmpty {
+                targets.append(PlexLibraryTarget(sectionId: uhdSectionId, isUHD: true))
+            }
+        }
+
+        return targets
+    }
+
+    @MainActor
+    private func validateTargets(_ targets: [PlexLibraryTarget], for type: MediaType, includeUHD: Bool) -> Bool {
+        let requiredTypes: [Bool] = includeUHD ? [false, true] : [false]
+        let missingDescriptions = requiredTypes.compactMap { targetIsUHD in
+            targets.contains(where: { $0.isUHD == targetIsUHD })
+                ? nil
+                : getLibraryTypeDescription(for: type, uhd: targetIsUHD)
+        }
+
+        guard missingDescriptions.isEmpty else {
+            errorMessage = "Plex librar\(missingDescriptions.count == 1 ? "y" : "ies") not configured: \(missingDescriptions.joined(separator: ", "))"
+            _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
+            return false
+        }
+
+        return true
     }
 
     @MainActor
