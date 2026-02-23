@@ -22,6 +22,15 @@ final class AppModel {
     var showHelp = false
     var showHistory = false
     
+    // MARK: - Plex Asset Selection
+    var showPlexAssetSelection = false
+    var plexPendingTasks: [AssetUploadTask] = []
+    var plexAssetSelections: [UUID: Bool] = [:]
+    var plexSelectionItem: TMDBMediaItem?
+    var plexSelectionType: MediaType = .movie
+    var plexSelectionSectionId: String = ""
+    var plexSelectionRatingKey: String = ""
+    
     // MARK: - Plex Upload Progress
     var showPlexUploadProgress = false
     var plexUploadTasks: [AssetUploadTask] = []

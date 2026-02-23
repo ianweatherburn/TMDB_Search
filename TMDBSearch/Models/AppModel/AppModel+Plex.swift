@@ -50,7 +50,7 @@ extension AppModel {
         await performAssetUpload(for: item, type: type, uhd: uhd, sectionId: sectionId)
     }
     
-    // MARK: - Asset Upload Orchestration
+    // MARK: - Asset Scan and Selection
     
     @MainActor
     private func performAssetUpload(
@@ -59,9 +59,6 @@ extension AppModel {
         uhd: Bool,
         sectionId: String
     ) async {
-        // Reset cancellation flag
-        plexUploadCancelled = false
-        
         // Construct metadata path - try apostrophe variants
         DebugLogger.log("\n--- Asset Folder Path Resolution ---")
         let libraryPath = getLibraryPath(for: type)
@@ -140,17 +137,6 @@ extension AppModel {
                 errorMessage = "'\(item.formattedTitle)' not found in Plex library"
                 _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
                 return
-            }
-
-            do {
-                _ = try await plexService.removeOverlayLabelIfPresent(
-                    server: settingsManager.plexServer,
-                    token: settingsManager.plexToken,
-                    sectionId: sectionId,
-                    ratingKey: mainRatingKey
-                )
-            } catch {
-                DebugLogger.log("⚠️ Failed to remove Overlay label for \(mainRatingKey): \(error.localizedDescription)")
             }
             
             // Scan for all assets
@@ -264,18 +250,87 @@ extension AppModel {
                 return
             }
             
-            // Show progress window and start uploads
-            plexUploadTasks = tasks
-            plexCurrentTaskIndex = 0
-            showPlexUploadProgress = true
-            
-            // Perform uploads
-            await startPlexUploads()
+            // Show asset selection dialog
+            showAssetSelectionDialog(tasks: tasks, item: item, type: type, sectionId: sectionId, ratingKey: mainRatingKey)
             
         } catch {
             errorMessage = "Plex update failed: \(error.localizedDescription)"
             _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
         }
+    }
+    
+    // MARK: - Asset Selection Dialog
+    
+    @MainActor
+    private func showAssetSelectionDialog(
+        tasks: [AssetUploadTask],
+        item: TMDBMediaItem,
+        type: MediaType,
+        sectionId: String,
+        ratingKey: String
+    ) {
+        plexPendingTasks = tasks
+        plexAssetSelections = Dictionary(uniqueKeysWithValues: tasks.map { ($0.id, true) })
+        plexSelectionItem = item
+        plexSelectionType = type
+        plexSelectionSectionId = sectionId
+        plexSelectionRatingKey = ratingKey
+        showPlexAssetSelection = true
+    }
+    
+    @MainActor
+    func confirmPlexAssetSelection() async {
+        showPlexAssetSelection = false
+        
+        // Filter to only selected tasks
+        let selectedTasks = plexPendingTasks.filter { plexAssetSelections[$0.id] == true }
+        
+        guard !selectedTasks.isEmpty else {
+            return
+        }
+        
+        // Check if any selected task is a poster type (png or jpg) and remove overlay label if needed
+        let hasPosterUpload = selectedTasks.contains { task in
+            let isPosterType: Bool
+            switch task.type {
+            case .showPoster, .moviePoster, .seasonPoster:
+                isPosterType = true
+            default:
+                isPosterType = false
+            }
+            guard isPosterType else { return false }
+            let ext = (task.filePath as NSString).pathExtension.lowercased()
+            return ext == "png" || ext == "jpg" || ext == "jpeg"
+        }
+        
+        if hasPosterUpload {
+            do {
+                _ = try await plexService.removeOverlayLabelIfPresent(
+                    server: settingsManager.plexServer,
+                    token: settingsManager.plexToken,
+                    sectionId: plexSelectionSectionId,
+                    ratingKey: plexSelectionRatingKey
+                )
+            } catch {
+                DebugLogger.log("⚠️ Failed to remove Overlay label for \(plexSelectionRatingKey): \(error.localizedDescription)")
+            }
+        }
+        
+        // Show progress window and start uploads
+        plexUploadTasks = selectedTasks
+        plexCurrentTaskIndex = 0
+        plexUploadCancelled = false
+        showPlexUploadProgress = true
+        
+        await startPlexUploads()
+    }
+    
+    @MainActor
+    func cancelPlexAssetSelection() {
+        showPlexAssetSelection = false
+        plexPendingTasks = []
+        plexAssetSelections = [:]
+        plexSelectionItem = nil
     }
     
     // MARK: - Upload Execution
@@ -486,17 +541,6 @@ extension AppModel {
                 _ = NSSound(named: NSSound.Name(Constants.App.Sounds.failure))?.play()
                 return
             }
-
-            do {
-                _ = try await plexService.removeOverlayLabelIfPresent(
-                    server: settingsManager.plexServer,
-                    token: settingsManager.plexToken,
-                    sectionId: sectionId,
-                    ratingKey: ratingKey
-                )
-            } catch {
-                DebugLogger.log("⚠️ Failed to remove Overlay label for \(ratingKey): \(error.localizedDescription)")
-            }
             
             // Scan for assets
             let scanner = AssetScanner(metadataPath: metadataPath)
@@ -550,12 +594,8 @@ extension AppModel {
                 return
             }
             
-            // Show progress and upload
-            plexUploadTasks = tasks
-            plexCurrentTaskIndex = 0
-            showPlexUploadProgress = true
-            
-            await startPlexUploads()
+            // Show asset selection dialog
+            showAssetSelectionDialog(tasks: tasks, item: item, type: .collection, sectionId: sectionId, ratingKey: ratingKey)
             
         } catch {
             errorMessage = "Plex update failed: \(error.localizedDescription)"

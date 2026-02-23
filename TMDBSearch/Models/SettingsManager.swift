@@ -20,6 +20,7 @@ final class SettingsManager {
     var searchHistory: [SearchHistoryItem] = []
     var showTMDBID: Bool = false
     var plexDebugLogging: Bool = false
+    var plexShowAssetPreview: Bool = true
     
     // Plex Library Mappings
     var plexShowsLibrary: String = ""
@@ -56,6 +57,7 @@ final class SettingsManager {
         static let searchHistory = "SearchHistory"
         static let showTMDBID = "ShowTMDBID"
         static let plexDebugLogging = DebugLogger.plexDebugLoggingKey
+        static let plexShowAssetPreview = "PlexShowAssetPreview"
         
         // Plex Library Keys
         static let plexShowsLibrary = "PlexShowsLibrary"
@@ -109,11 +111,19 @@ final class SettingsManager {
     private func loadGeneralSettings() {
         showTMDBID = UserDefaults.standard.bool(forKey: UserDefaultsKeys.showTMDBID)
         plexDebugLogging = UserDefaults.standard.bool(forKey: UserDefaultsKeys.plexDebugLogging)
+        
+        // Default to true if key has never been set
+        if UserDefaults.standard.object(forKey: UserDefaultsKeys.plexShowAssetPreview) == nil {
+            plexShowAssetPreview = true
+        } else {
+            plexShowAssetPreview = UserDefaults.standard.bool(forKey: UserDefaultsKeys.plexShowAssetPreview)
+        }
     }
     
     private func saveGeneralSettings() {
         UserDefaults.standard.set(showTMDBID, forKey: UserDefaultsKeys.showTMDBID)
         UserDefaults.standard.set(plexDebugLogging, forKey: UserDefaultsKeys.plexDebugLogging)
+        UserDefaults.standard.set(plexShowAssetPreview, forKey: UserDefaultsKeys.plexShowAssetPreview)
     }
     
     // MARK: - Download Paths

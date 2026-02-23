@@ -80,9 +80,25 @@ struct Search: View {
                 .padding()
                 .frame(minWidth: Constants.App.Window.Help.width, minHeight: Constants.App.Window.Help.height)
         }
+        .sheet(isPresented: Binding(appModel, keyPath: \.showPlexAssetSelection)) {
+            PlexAssetSelection(
+                mediaTitle: appModel.plexSelectionItem?.formattedTitle ?? "Media Item",
+                settingsManager: appModel.settingsManager,
+                tasks: Binding(appModel, keyPath: \.plexPendingTasks),
+                selections: Binding(appModel, keyPath: \.plexAssetSelections),
+                onUpdate: {
+                    Task {
+                        await appModel.confirmPlexAssetSelection()
+                    }
+                },
+                onCancel: {
+                    appModel.cancelPlexAssetSelection()
+                }
+            )
+        }
         .sheet(isPresented: Binding(appModel, keyPath: \.showPlexUploadProgress)) {
             PlexUploadProgress(
-                mediaTitle: appModel.searchResults.first?.formattedTitle ?? "Media Item",
+                mediaTitle: appModel.plexSelectionItem?.formattedTitle ?? "Media Item",
                 tasks: Binding(appModel, keyPath: \.plexUploadTasks),
                 currentTaskIndex: Binding(appModel, keyPath: \.plexCurrentTaskIndex),
                 isPresented: Binding(appModel, keyPath: \.showPlexUploadProgress),

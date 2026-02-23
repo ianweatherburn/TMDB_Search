@@ -20,6 +20,7 @@ struct Configure: View {
     @State private var tempDefaultGridSize: GridSize = Constants.Configure.Preferences.gridSize
     @State private var tempHistorySize = Constants.Configure.Preferences.History.size
     @State private var tempshowTMDBID = false
+    @State private var tempPlexShowAssetPreview = true
     @State private var tempPlexDebugLogging = false
     
     // Plex Library Settings
@@ -54,6 +55,7 @@ struct Configure: View {
                         gridSize: $tempDefaultGridSize,
                         historySize: $tempHistorySize,
                         showTMDBID: $tempshowTMDBID,
+                        plexShowAssetPreview: $tempPlexShowAssetPreview,
                         plexDebugLogging: $tempPlexDebugLogging
                     )
                 }
@@ -79,6 +81,7 @@ struct Configure: View {
         .onChange(of: tempDefaultGridSize, checkForChanges)
         .onChange(of: tempHistorySize, checkForChanges)
         .onChange(of: tempshowTMDBID, checkForChanges)
+        .onChange(of: tempPlexShowAssetPreview, checkForChanges)
         .onChange(of: tempPlexDebugLogging, checkForChanges)
         .onChange(of: tempPlexShowsLibrary, checkForChanges)
         .onChange(of: tempPlexShowsLibraryId, checkForChanges)
@@ -115,6 +118,7 @@ struct Configure: View {
         tempDefaultGridSize = appModel.settingsManager.gridSize
         tempHistorySize = appModel.settingsManager.maxHistoryItems
         tempshowTMDBID = appModel.settingsManager.showTMDBID
+        tempPlexShowAssetPreview = appModel.settingsManager.plexShowAssetPreview
         tempPlexDebugLogging = appModel.settingsManager.plexDebugLogging
         
         // Load Plex Library Settings
@@ -138,6 +142,7 @@ struct Configure: View {
         appModel.settingsManager.gridSize = tempDefaultGridSize
         appModel.settingsManager.maxHistoryItems = tempHistorySize
         appModel.settingsManager.showTMDBID = tempshowTMDBID
+        appModel.settingsManager.plexShowAssetPreview = tempPlexShowAssetPreview
         appModel.settingsManager.plexDebugLogging = tempPlexDebugLogging
         
         // Save Plex Library Settings
