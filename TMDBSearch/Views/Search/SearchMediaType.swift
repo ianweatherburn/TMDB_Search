@@ -22,6 +22,7 @@ struct MediaTypeSegmentedPicker: View {
                 } label: {
                     HStack(spacing: 2) {
                         Image(systemName: type.displayInfo.icon)
+                        .hoverEffect()
                         Text(type.displayInfo.title)
                     }
                     .font(.system(size: 14))

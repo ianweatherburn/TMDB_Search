@@ -122,6 +122,7 @@ struct PlexUploadProgress: View {
                             case .pending:
                                 Image(systemName: "circle")
                                     .foregroundColor(.gray)
+                                    .hoverEffect()
                             case .uploading:
                                 ProgressView()
                                     .controlSize(.small)
@@ -129,9 +130,11 @@ struct PlexUploadProgress: View {
                             case .completed:
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.green)
+                                    .hoverEffect()
                             case .failed:
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(.red)
+                                    .hoverEffect()
                             }
                             
                             VStack(alignment: .leading, spacing: 2) {

@@ -11,6 +11,7 @@ import SFSymbol
 // MARK: - Search Header
 struct SearchHeader: View {
     @Environment(AppModel.self) private var appModel
+    @State private var isHovering = false
     private var isSearchFieldFocused: FocusState<Bool>.Binding
 
     init(isSearchFieldFocused: FocusState<Bool>.Binding) {
@@ -24,6 +25,7 @@ struct SearchHeader: View {
                 Image(symbol: SFSymbol6.Magnifyingglass.magnifyingglass)
                     .foregroundStyle(.secondary)
                     .font(.system(size: 15))
+                    .hoverEffect()
 
                 TextField("Search TMDB for shows, movies, or collections", text: Bindable(appModel).searchText)
                     .textFieldStyle(.plain)
@@ -73,6 +75,7 @@ struct SearchHeader: View {
                         Image(symbol: SFSymbol6.Xmark.xmarkCircle)
                             .foregroundStyle(.secondary)
                             .font(.system(size: 13))
+                            .hoverEffect()
                     })
                     .buttonStyle(.plain)
                     .help("Clear search (⌘⌫)")
@@ -87,6 +90,7 @@ struct SearchHeader: View {
                         Image(systemName: "clock.arrow.circlepath")
                             .foregroundStyle(.secondary)
                             .font(.system(size: 13))
+                            .hoverEffect()
                     })
                     .buttonStyle(.plain)
                     .popover(isPresented: Bindable(appModel).showHistory, arrowEdge: .bottom) {

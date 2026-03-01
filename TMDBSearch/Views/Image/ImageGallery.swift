@@ -67,6 +67,7 @@ struct ImageGallery: View {
                                         //                                    Image(systemName: "square.grid.3x3")
                                         Image(symbol: SFSymbol6.Square.squareGrid3x3)
                                             .font(.system(size: 16))
+                                            .hoverEffect()
                                     }
                                     .menuStyle(.borderlessButton)
                                     .fixedSize()

@@ -48,6 +48,7 @@ struct ConfigureDownload: View {
                                   SFSymbol6.Network.network.rawValue : 
                                   SFSymbol6.Folder.folder.rawValue)
                                 .foregroundStyle(.secondary)
+                                .hoverEffect()
                             Text(info.displayName)
                                 .font(.body)
                         }

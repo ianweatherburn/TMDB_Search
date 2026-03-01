@@ -40,6 +40,7 @@ struct MediaItemRow: View {
                             VStack(spacing: 4) {
                                 Image(systemName: "photo.badge.exclamationmark")
                                     .font(.title)
+                                    .hoverEffect()
                                 Text("Missing")
                                     .font(.caption2)
                             }
@@ -106,6 +107,7 @@ struct MediaItemRow: View {
                                 VStack(spacing: 4) {
                                     Image(systemName: "photo.badge.exclamationmark")
                                         .font(.title)
+                                        .hoverEffect()
                                     Text("Missing")
                                         .font(.caption2)
                                 }
@@ -222,6 +224,7 @@ struct MediaItemRow: View {
                     appModel.copyToClipboard(item, element: .name, type: type)
                 }, label: {
                     Image(symbol: SFSymbol6.Pencil.pencilCircle)
+                      .hoverEffect()
                 })
                 .buttonStyle(PlainButtonStyle())
                 .help(Constants.Media.Actions.Tooltip.name)
@@ -230,6 +233,7 @@ struct MediaItemRow: View {
                     appModel.copyToClipboard(item, element: .folder)
                 }, label: {
                     Image(symbol: SFSymbol6.Folder.folderCircle)
+                      .hoverEffect()
                 })
                 .buttonStyle(PlainButtonStyle())
                 .help(Constants.Media.Actions.Tooltip.folder)
@@ -238,6 +242,7 @@ struct MediaItemRow: View {
                     appModel.copyToClipboard(item, element: .id)
                 }, label: {
                     Image(symbol: SFSymbol6.Number.numberCircle)
+                      .hoverEffect()
                 })
                 .buttonStyle(PlainButtonStyle())
                 .help(Constants.Media.Actions.Tooltip.id)
@@ -250,6 +255,7 @@ struct MediaItemRow: View {
                     }
                 }, label: {
                     Image(symbol: SFSymbol6.Figure.figureRunCircle)
+                      .hoverEffect()
                 })
                 .buttonStyle(PlainButtonStyle())
                 .help(Constants.Media.Actions.Tooltip.updatePoster)
@@ -273,6 +279,7 @@ struct MediaItemRow: View {
                         }
                     }, label: {
                         Image(symbol: SFSymbol6.Film.filmCircle)
+                          .hoverEffect()
                     })
                     .buttonStyle(PlainButtonStyle())
                     .help(Constants.Media.Actions.Tooltip.updatePlexMetadata)

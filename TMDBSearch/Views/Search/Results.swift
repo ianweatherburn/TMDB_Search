@@ -57,6 +57,7 @@ struct ResultsHeader: View {
                 Image(systemName: mediaType.displayInfo.icon)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(.secondary)
+                    .hoverEffect()
                 
                 Text(mediaType.displayInfo.title)
                     .font(.system(size: 16, weight: .semibold))

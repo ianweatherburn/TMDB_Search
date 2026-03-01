@@ -154,7 +154,8 @@ struct PlexAssetSelection: View {
                     Image(systemName: "folder.fill")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
-                    
+                        .hoverEffect()
+
                     Text(focusedTask.filePath)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -236,7 +237,8 @@ private struct AssetSelectionRow: View {
             Image(systemName: iconName(for: task.type))
                 .foregroundStyle(.secondary)
                 .frame(width: 16)
-            
+                .hoverEffect()
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(task.displayName)
                     .font(.body)
@@ -340,7 +342,8 @@ private struct AssetPreviewPane: View {
                     Image(systemName: "photo")
                         .font(.largeTitle)
                         .foregroundStyle(.quaternary)
-                    
+                        .hoverEffect()
+
                     Text("No preview")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
@@ -350,7 +353,8 @@ private struct AssetPreviewPane: View {
                 Image(systemName: "photo")
                     .font(.largeTitle)
                     .foregroundStyle(.quaternary)
-                
+                    .hoverEffect()
+
                 Text("Select an item")
                     .font(.caption)
                     .foregroundStyle(.tertiary)

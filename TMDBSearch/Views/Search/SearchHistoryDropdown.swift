@@ -77,6 +77,7 @@ struct SearchHistoryRow: View {
                 .foregroundStyle(.secondary)
                 .font(.system(size: 12))
                 .frame(width: 16)
+                .hoverEffect()
             
             // Search text
             Text(item.searchText)
@@ -93,6 +94,7 @@ struct SearchHistoryRow: View {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.secondary)
                     .font(.system(size: 12))
+                    .hoverEffect()
             })
             .buttonStyle(.plain)
             .opacity(0.6)
