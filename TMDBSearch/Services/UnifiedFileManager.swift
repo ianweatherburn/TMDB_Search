@@ -15,10 +15,14 @@ import AppKit
 final class UnifiedFileManager {
     var selectedDirectory: URL?
     var hasDirectoryAccess = false
+    var selectedAssetDirectory: URL?
+    var hasAssetDirectoryAccess = false
     private let bookmarkKey = "SelectedDirectoryBookmark"
+    private let assetBookmarkKey = "AssetDirectoryBookmark"
     
     init() {
         restoreDirectoryAccess()
+        restoreAssetDirectoryAccess()
     }
     
     // MARK: - Directory Selection
@@ -209,6 +213,146 @@ final class UnifiedFileManager {
         UserDefaults.standard.removeObject(forKey: bookmarkKey)
         selectedDirectory = nil
         hasDirectoryAccess = false
+    }
+    
+    // MARK: - Asset Directory Selection
+    
+    func requestAssetDirectoryAccessAsync(from window: NSWindow, completion: @escaping (Bool) -> Void) {
+        let openPanel = NSOpenPanel()
+        openPanel.canChooseDirectories = true
+        openPanel.canChooseFiles = false
+        openPanel.allowsMultipleSelection = false
+        openPanel.canCreateDirectories = false
+        openPanel.title = "Select Plex Asset Directory"
+        openPanel.message = "Choose the directory where Plex/Kometa asset images are stored"
+        openPanel.prompt = "Select"
+        
+        if let currentDir = selectedAssetDirectory {
+            openPanel.directoryURL = currentDir
+        } else {
+            openPanel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
+        }
+        
+        openPanel.beginSheetModal(for: window) { [weak self] response in
+            guard let self = self else {
+                completion(false)
+                return
+            }
+            
+            if response == .OK, let selectedURL = openPanel.url {
+                let success = self.setSelectedAssetDirectory(selectedURL)
+                DispatchQueue.main.async {
+                    window.makeKey()
+                }
+                completion(success)
+            } else {
+                completion(false)
+            }
+        }
+    }
+    
+    func requestAssetDirectoryAccess() -> Bool {
+        let openPanel = NSOpenPanel()
+        openPanel.canChooseDirectories = true
+        openPanel.canChooseFiles = false
+        openPanel.allowsMultipleSelection = false
+        openPanel.canCreateDirectories = false
+        openPanel.title = "Select Plex Asset Directory"
+        openPanel.message = "Choose the directory where Plex/Kometa asset images are stored"
+        openPanel.prompt = "Select"
+        
+        if let currentDir = selectedAssetDirectory {
+            openPanel.directoryURL = currentDir
+        } else {
+            openPanel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
+        }
+        
+        let response = openPanel.runModal()
+        
+        if response == .OK, let selectedURL = openPanel.url {
+            return setSelectedAssetDirectory(selectedURL)
+        }
+        
+        return false
+    }
+    
+    private func setSelectedAssetDirectory(_ url: URL) -> Bool {
+        do {
+            let bookmarkData = try url.bookmarkData(
+                options: [.withSecurityScope],
+                includingResourceValuesForKeys: nil,
+                relativeTo: nil
+            )
+            
+            UserDefaults.standard.set(bookmarkData, forKey: assetBookmarkKey)
+            
+            if url.startAccessingSecurityScopedResource() {
+                self.selectedAssetDirectory = url
+                self.hasAssetDirectoryAccess = true
+                DebugLogger.log("Asset directory access granted: \(url.path)")
+                return true
+            } else {
+                DebugLogger.log("Could not start accessing asset directory")
+                return false
+            }
+        } catch {
+            DebugLogger.log("Failed to create asset bookmark: \(error)")
+            return false
+        }
+    }
+    
+    private func restoreAssetDirectoryAccess() {
+        guard let bookmarkData = UserDefaults.standard.data(forKey: assetBookmarkKey) else {
+            return
+        }
+        
+        do {
+            var isStale = false
+            let url = try URL(
+                resolvingBookmarkData: bookmarkData,
+                options: [.withSecurityScope],
+                relativeTo: nil,
+                bookmarkDataIsStale: &isStale
+            )
+            
+            if isStale {
+                DebugLogger.log("Asset bookmark was stale, refreshing...")
+                _ = setSelectedAssetDirectory(url)
+                return
+            }
+            
+            if url.startAccessingSecurityScopedResource() {
+                self.selectedAssetDirectory = url
+                self.hasAssetDirectoryAccess = true
+                DebugLogger.log("Restored RO access to asset dir: \(url.path)")
+            } else {
+                DebugLogger.log("Failed to restore access to asset dir: \(url.path)")
+            }
+        } catch {
+            DebugLogger.log("Failed to resolve asset bookmark: \(error)")
+            UserDefaults.standard.removeObject(forKey: assetBookmarkKey)
+        }
+    }
+    
+    func clearAssetDirectoryAccess() {
+        UserDefaults.standard.removeObject(forKey: assetBookmarkKey)
+        selectedAssetDirectory = nil
+        hasAssetDirectoryAccess = false
+    }
+    
+    func getAssetDirectoryInfo() -> DirectoryInfo? {
+        guard let url = selectedAssetDirectory else { return nil }
+        
+        let isNetwork = isNetworkVolume(url: url)
+        let isWritable = FileManager.default.isWritableFile(atPath: url.path)
+        
+        return DirectoryInfo(
+            url: url,
+            path: url.path,
+            isNetwork: isNetwork,
+            isWritable: isWritable,
+            displayName: url.lastPathComponent
+        )
     }
     
     func getSelectedDirectoryInfo() -> DirectoryInfo? {

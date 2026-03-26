@@ -103,6 +103,13 @@ final class SettingsManager {
         }
     }
 
+    func updateAssetPath(from fileManager: UnifiedFileManager) {
+        if let selectedURL = fileManager.selectedAssetDirectory {
+            plexServerAssetPath = selectedURL.path
+            savePlexServer()
+        }
+    }
+
     func getCurrentDirectoryInfo(from fileManager: UnifiedFileManager) -> DirectoryInfo? {
         return fileManager.getSelectedDirectoryInfo()
     }
