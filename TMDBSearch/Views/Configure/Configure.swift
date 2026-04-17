@@ -19,6 +19,8 @@ struct Configure: View {
     @State private var tempDownloadPath = ""
     @State private var tempDefaultGridSize: GridSize = Constants.Configure.Preferences.gridSize
     @State private var tempHistorySize = Constants.Configure.Preferences.History.size
+    @State private var tempMaxCachedItems = Constants.Configure.Preferences.Cache.size
+    @State private var tempCacheMultiplier = Constants.Configure.Preferences.Cache.multiplier
     @State private var tempshowTMDBID = false
     @State private var tempPlexShowAssetPreview = true
     @State private var tempPlexDebugLogging = false
@@ -54,6 +56,8 @@ struct Configure: View {
                     ConfigurePreferences(
                         gridSize: $tempDefaultGridSize,
                         historySize: $tempHistorySize,
+                        cacheSize: $tempMaxCachedItems,
+                        cacheMultiplier: $tempCacheMultiplier,
                         showTMDBID: $tempshowTMDBID,
                         plexShowAssetPreview: $tempPlexShowAssetPreview,
                         plexDebugLogging: $tempPlexDebugLogging
@@ -80,6 +84,8 @@ struct Configure: View {
         .onChange(of: tempDownloadPath, checkForChanges)
         .onChange(of: tempDefaultGridSize, checkForChanges)
         .onChange(of: tempHistorySize, checkForChanges)
+        .onChange(of: tempMaxCachedItems, checkForChanges)
+        .onChange(of: tempCacheMultiplier, checkForChanges)
         .onChange(of: tempshowTMDBID, checkForChanges)
         .onChange(of: tempPlexShowAssetPreview, checkForChanges)
         .onChange(of: tempPlexDebugLogging, checkForChanges)
@@ -117,6 +123,8 @@ struct Configure: View {
         tempDownloadPath = appModel.settingsManager.downloadPath
         tempDefaultGridSize = appModel.settingsManager.gridSize
         tempHistorySize = appModel.settingsManager.maxHistoryItems
+        tempMaxCachedItems = appModel.settingsManager.maxCachedItems
+        tempCacheMultiplier = appModel.settingsManager.cacheMultiplier
         tempshowTMDBID = appModel.settingsManager.showTMDBID
         tempPlexShowAssetPreview = appModel.settingsManager.plexShowAssetPreview
         tempPlexDebugLogging = appModel.settingsManager.plexDebugLogging
@@ -141,6 +149,8 @@ struct Configure: View {
         appModel.settingsManager.downloadPath = tempDownloadPath
         appModel.settingsManager.gridSize = tempDefaultGridSize
         appModel.settingsManager.maxHistoryItems = tempHistorySize
+        appModel.settingsManager.maxCachedItems = tempMaxCachedItems
+        appModel.settingsManager.cacheMultiplier = tempCacheMultiplier
         appModel.settingsManager.showTMDBID = tempshowTMDBID
         appModel.settingsManager.plexShowAssetPreview = tempPlexShowAssetPreview
         appModel.settingsManager.plexDebugLogging = tempPlexDebugLogging
@@ -156,6 +166,9 @@ struct Configure: View {
         appModel.settingsManager.plexMovies4KLibraryId = tempPlexMovies4KLibraryId
         
         appModel.saveSettings()
+        
+        // Propagate cache setting changes
+        Task { await appModel.onCacheSettingsChanged() }
     }
 
     enum SettingsTab: Hashable {

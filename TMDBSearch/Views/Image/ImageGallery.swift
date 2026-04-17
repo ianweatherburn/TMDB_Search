@@ -170,7 +170,7 @@ struct ImageGallery: View {
     
     private func loadImage(_ image: TMDBImage) async {
         guard loadedImages[image.filePath] == nil else { return }
-        guard let loadedData = await TMDBServices().loadImage(
+        guard let loadedData = await appModel.tmdbService.loadImage(
             path: image.filePath,
             size: TMDBServices.ImageSize.w342
         ) else {

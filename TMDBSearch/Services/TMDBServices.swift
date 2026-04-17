@@ -21,7 +21,32 @@ final class TMDBServices {
         case w92, w154, w185, w342, w500, w780, original
     }
 
-    func searchMedia(query: String, mediaType: MediaType, apiKey: String) async throws -> [TMDBMediaItem] {
+    // MARK: - Caches
+    let searchCache: LRUCache<SearchCacheKey, [TMDBMediaItem]>
+    let imageMetadataCache: LRUCache<ImageMetadataCacheKey, TMDBImagesResponse>
+    let thumbnailCache: LRUCache<ThumbnailCacheKey, Data>
+
+    init(cacheCapacity: Int = Constants.Configure.Preferences.Cache.size,
+         thumbnailMultiplier: Int = Constants.Configure.Preferences.Cache.multiplier) {
+        searchCache = LRUCache(capacity: cacheCapacity)
+        imageMetadataCache = LRUCache(capacity: cacheCapacity)
+        thumbnailCache = LRUCache(capacity: cacheCapacity * thumbnailMultiplier)
+    }
+
+    func updateCacheCapacity(_ capacity: Int, thumbnailMultiplier: Int) async {
+        await searchCache.resize(to: capacity)
+        await imageMetadataCache.resize(to: capacity)
+        await thumbnailCache.resize(to: capacity * thumbnailMultiplier)
+    }
+
+    func searchMedia(query: String, mediaType: MediaType, apiKey: String,
+                     forceRefresh: Bool = false) async throws -> [TMDBMediaItem] {
+        let cacheKey = SearchCacheKey(query: query.lowercased(), mediaType: mediaType)
+
+        if !forceRefresh, let cached = await searchCache.get(cacheKey) {
+            return cached
+        }
+
         let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "\(baseURL)/search/\(mediaType.rawValue)?api_key=\(apiKey)&query=\(encodedQuery)"
 
@@ -31,6 +56,8 @@ final class TMDBServices {
 
         let (data, _) = try await URLSession.shared.data(from: url)
         let response = try JSONDecoder().decode(TMDBSearchResponse.self, from: data)
+
+        await searchCache.set(cacheKey, value: response.results)
         return response.results
     }
 
@@ -38,6 +65,12 @@ final class TMDBServices {
                    mediaType: MediaType,
                    languages: [String],
                    apiKey: String) async throws -> TMDBImagesResponse {
+        let cacheKey = ImageMetadataCacheKey(itemId: itemId, mediaType: mediaType, languages: languages)
+
+        if let cached = await imageMetadataCache.get(cacheKey) {
+            return cached
+        }
+
         let includeLanguages = (languages.isEmpty ? "" : languages.joined(separator: ",") + ",") + "null"
         let urlString = "\(baseURL)/" +
                         "\(mediaType.rawValue)/" +
@@ -52,24 +85,34 @@ final class TMDBServices {
         let (data, _) = try await URLSession.shared.data(from: url)
         var response = try JSONDecoder().decode(TMDBImagesResponse.self, from: data)
         
-        // Sort by area (width × height) in descending order
+        // Sort by area (width x height) in descending order
         response = TMDBImagesResponse(
             id: response.id,
             posters: response.posters.sorted { ($0.width * $0.height) > ($1.width * $1.height) },
             backdrops: response.backdrops.sorted { ($0.width * $0.height) > ($1.width * $1.height) },
             logos: response.logos.sorted { ($0.width * $0.height) > ($1.width * $1.height) }
         )
-        
+
+        await imageMetadataCache.set(cacheKey, value: response)
         return response
     }
     
     func loadImage(path: String, size: ImageSize = .w342) async -> Data? {
+        let cacheKey = ThumbnailCacheKey(path: path, size: size.rawValue)
+
+        if size == .w342, let cached = await thumbnailCache.get(cacheKey) {
+            return cached
+        }
+
         let urlString = "\(imageBaseURL)/\(size.rawValue)\(path)"
         
         guard let url = URL(string: urlString) else { return nil }
         
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
+            if size == .w342 {
+                await thumbnailCache.set(cacheKey, value: data)
+            }
             return data
         } catch {
             DebugLogger.log("Failed to load image: \(error)")
@@ -86,7 +129,7 @@ final class TMDBServices {
         let urlString = "\(imageBaseURL)/original\(path)"
         
         guard let url = URL(string: urlString) else { 
-            DebugLogger.log("❌ Invalid image URL: \(urlString)")
+            DebugLogger.log("Invalid image URL: \(urlString)")
             return nil 
         }
 
@@ -99,7 +142,7 @@ final class TMDBServices {
             // Process the image data and only flip horizontally if requested
             if flip {
                 guard let flippedData = flipImageHorizontally(convertedData) else {
-                    DebugLogger.log("❌ Failed to flip image horizontally")
+                    DebugLogger.log("Failed to flip image horizontally")
                     return nil
                 }
                 return flippedData
@@ -107,7 +150,7 @@ final class TMDBServices {
                 return convertedData
             }
         } catch {
-            DebugLogger.log("❌ Failed to download image: \(error.localizedDescription)")
+            DebugLogger.log("Failed to download image: \(error.localizedDescription)")
             return nil
         }
     }

@@ -30,4 +30,12 @@ extension AppModel {
         searchText = item.searchText
         selectedMediaType = item.mediaType
     }
+
+    // MARK: - Cache Settings
+    func onCacheSettingsChanged() async {
+        await tmdbService.updateCacheCapacity(
+            settingsManager.maxCachedItems,
+            thumbnailMultiplier: settingsManager.cacheMultiplier
+        )
+    }
 }

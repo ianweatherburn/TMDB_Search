@@ -10,6 +10,8 @@ import SwiftUI
 struct ConfigurePreferences: View {
     @Binding var gridSize: GridSize
     @Binding var historySize: Int
+    @Binding var cacheSize: Int
+    @Binding var cacheMultiplier: Int
     @Binding var showTMDBID: Bool
     @Binding var plexShowAssetPreview: Bool
     @Binding var plexDebugLogging: Bool
@@ -48,6 +50,44 @@ struct ConfigurePreferences: View {
             Text("Search History")
         } footer: {
             Text("Number of recent searches to remember (\(Int(Constants.Configure.Preferences.History.minimum))-\(Int(Constants.Configure.Preferences.History.maximum))).")
+        }
+        
+        Section {
+            HStack {
+                Text("Cache Size")
+                Spacer()
+                Text("\(cacheSize)")
+                    .foregroundStyle(.secondary)
+            }
+            
+            Slider(
+                value: Binding(
+                    get: { Double(cacheSize) },
+                    set: { cacheSize = Int($0) }
+                ),
+                in: Constants.Configure.Preferences.Cache.minimum...Constants.Configure.Preferences.Cache.maximum,
+                step: 1
+            )
+            
+            HStack {
+                Text("Thumbnail Multiplier")
+                Spacer()
+                Text("\(cacheMultiplier)")
+                    .foregroundStyle(.secondary)
+            }
+            
+            Slider(
+                value: Binding(
+                    get: { Double(cacheMultiplier) },
+                    set: { cacheMultiplier = Int($0) }
+                ),
+                in: Constants.Configure.Preferences.Cache.multiplierMinimum...Constants.Configure.Preferences.Cache.multiplierMaximum,
+                step: 1
+            )
+        } header: {
+            Text("Cache")
+        } footer: {
+            Text("Number of API responses cached in memory. Thumbnail cache = size x multiplier (currently \(cacheSize * cacheMultiplier) thumbnails).")
         }
         
         Section {

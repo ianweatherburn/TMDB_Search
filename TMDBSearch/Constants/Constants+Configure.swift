@@ -24,6 +24,14 @@ extension Constants.Configure {
             static let minimum: Double = 5
             static let maximum: Double = 50
         }
+        enum Cache {
+            static let size = 20
+            static let minimum: Double = 5
+            static let maximum: Double = 50
+            static let multiplier = 10
+            static let multiplierMinimum: Double = 5
+            static let multiplierMaximum: Double = 20
+        }
         static let gridSize: GridSize = .small
         static let downloadPath = NSHomeDirectory() + "/Downloads/TMDB"
     }

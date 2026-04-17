@@ -44,13 +44,19 @@ final class AppModel {
     var plexUploadTaskID: UUID?
     
     // MARK: - Managers and Services
-    let tmdbService = TMDBServices()
+    let tmdbService: TMDBServices
     let plexService = PlexServices()
-    private(set) var settingsManager = SettingsManager()
+    private(set) var settingsManager: SettingsManager
     let fileManager: UnifiedFileManager
     
     init(fileManager: UnifiedFileManager = AppDelegate.shared.fileManager) {
         self.fileManager = fileManager
+        let settings = SettingsManager()
+        self.settingsManager = settings
+        self.tmdbService = TMDBServices(
+            cacheCapacity: settings.maxCachedItems,
+            thumbnailMultiplier: settings.cacheMultiplier
+        )
     }
     
     // MARK: - Plex Library Fetching

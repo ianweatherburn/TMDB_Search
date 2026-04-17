@@ -10,7 +10,7 @@ import AppKit
 // MARK: - Search Functionality
 extension AppModel {
     @MainActor
-    func performSearch() async {
+    func performSearch(forceRefresh: Bool = false) async {
         // Validation checks
         guard !settingsManager.apiKey.isEmpty,
               !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -29,7 +29,8 @@ extension AppModel {
             let results = try await tmdbService.searchMedia(
                 query: searchText,
                 mediaType: selectedMediaType,
-                apiKey: settingsManager.apiKey
+                apiKey: settingsManager.apiKey,
+                forceRefresh: forceRefresh
             )
             searchResults = results
 

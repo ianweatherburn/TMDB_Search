@@ -15,6 +15,8 @@ final class SettingsManager {
     var downloadPath: String = ""
     var gridSize: GridSize = Constants.Configure.Preferences.gridSize
     var maxHistoryItems: Int = Constants.Configure.Preferences.History.size
+    var maxCachedItems: Int = Constants.Configure.Preferences.Cache.size
+    var cacheMultiplier: Int = Constants.Configure.Preferences.Cache.multiplier
     var plexServer: String = ""
     var plexServerAssetPath: String = ""
     var searchHistory: [SearchHistoryItem] = []
@@ -52,6 +54,8 @@ final class SettingsManager {
         static let downloadPath = "DownloadPath"
         static let gridSize = "GridSize"
         static let maxHistoryItems = "MaxHistoryItems"
+        static let maxCachedItems = "MaxCachedItems"
+        static let cacheMultiplier = "CacheMultiplier"
         static let plexServer = "PlexServer"
         static let plexServerAssetPath = "PlexServerAssetPath"
         static let searchHistory = "SearchHistory"
@@ -81,6 +85,7 @@ final class SettingsManager {
         loadDownloadPaths()
         loadGridSize()
         loadMaxHistoryItems()
+        loadCacheSettings()
         loadPlexServer()
         loadPlexLibrarySettings()
         loadSearchHistory()
@@ -91,6 +96,7 @@ final class SettingsManager {
         saveDownloadPaths()
         saveGridSize()
         saveMaxHistoryItems()
+        saveCacheSettings()
         savePlexServer()
         savePlexLibrarySettings()
         saveSearchHistory()
@@ -165,6 +171,20 @@ final class SettingsManager {
     
     private func saveMaxHistoryItems() {
         UserDefaults.standard.set(maxHistoryItems, forKey: UserDefaultsKeys.maxHistoryItems)
+    }
+    
+    // MARK: - Cache Settings
+    private func loadCacheSettings() {
+        let cachedItems = UserDefaults.standard.integer(forKey: UserDefaultsKeys.maxCachedItems)
+        maxCachedItems = cachedItems > 0 ? cachedItems : Constants.Configure.Preferences.Cache.size
+        
+        let multiplier = UserDefaults.standard.integer(forKey: UserDefaultsKeys.cacheMultiplier)
+        cacheMultiplier = multiplier > 0 ? multiplier : Constants.Configure.Preferences.Cache.multiplier
+    }
+    
+    private func saveCacheSettings() {
+        UserDefaults.standard.set(maxCachedItems, forKey: UserDefaultsKeys.maxCachedItems)
+        UserDefaults.standard.set(cacheMultiplier, forKey: UserDefaultsKeys.cacheMultiplier)
     }
     
     // MARK: - Plex Server

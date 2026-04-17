@@ -30,6 +30,7 @@ extension Constants.App {
     enum Menu {
         static let clearSearch = "Clear Search"
         static let showSearchHistory = "Show Search History"
+        static let refreshSearch = "Refresh Search"
         static let help = "\(name) Help"
     }
     enum Help {

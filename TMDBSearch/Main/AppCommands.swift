@@ -32,6 +32,14 @@ struct AppCommands: Commands {
             }
             .keyboardShortcut("h", modifiers: [.command, .shift])
             .disabled(appModel.settingsManager.searchHistory.isEmpty)
+
+            Button(Constants.App.Menu.refreshSearch) {
+                Task {
+                    await appModel.performSearch(forceRefresh: true)
+                }
+            }
+            .keyboardShortcut("r", modifiers: .command)
+            .disabled(appModel.searchResults.isEmpty)
         }
     }
 
